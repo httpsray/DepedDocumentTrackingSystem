@@ -1,0 +1,292 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+:root {
+    --primary-color: #0056b3;
+    --primary-gradient: linear-gradient(135deg, #0056b3 0%, #004494 100%);
+    --accent-color: #fca311;
+    --text-dark: #1b263b;
+    --text-light: #e0e1dd;
+    --white: #ffffff;
+    --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 20px 25px rgba(0, 0, 0, 0.15);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    overflow-y: scroll; /* Force scrollbar to always show to prevent layout shift */
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f0f2f5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(0, 86, 179, 0.1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(252, 163, 17, 0.1) 0px, transparent 50%);
+}
+
+/* Navigation Bar */
+.navbar {
+    width: 100%;
+    background: var(--primary-color);
+    background: var(--primary-gradient);
+    padding: 15px 5%;
+    box-shadow: var(--shadow-md);
+    color: var(--white);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-subtitle {
+    font-size: 12px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.navbar h1 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.2;
+}
+
+/* Main Container */
+.main-wrapper {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto; /* Center horizontally */
+    flex-grow: 1; /* Occupy remaining vertical space */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Vertically center content */
+    align-items: center; /* Horizontally center content inside wrapper */
+}
+
+/* Removed old .header styles inside container */
+
+/* Main Content */
+.main-content {
+    padding: 50px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 35px;
+}
+
+.greeting h2 {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text-dark);
+    line-height: 1.4;
+}
+
+.greeting p {
+    color: #64748b;
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+/* Button Group */
+.button-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+}
+
+.btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    line-height: 1.4;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary {
+    background: #ffffff;
+    color: var(--primary-color);
+    border: 2px solid #e2e8f0;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    background: #f8fafc;
+}
+
+.btn-primary .icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Login Button */
+.btn-login {
+    background: var(--primary-color);
+    color: var(--white);
+    width: 100%;
+    padding: 16px;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    margin-top: 10px;
+    box-shadow: 0 4px 6px rgba(0, 86, 179, 0.3);
+}
+
+.btn-login:hover {
+    background: #004494;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 86, 179, 0.4);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 12px 4%;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .navbar h1 {
+        font-size: 15px;
+    }
+
+    .brand-subtitle {
+        font-size: 10px;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .nav-link {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    .main-wrapper {
+        padding: 20px 15px;
+    }
+
+    .nav-actions a {
+        font-size: 12px !important;
+    }
+
+    .main-content {
+        padding: 30px 15px;
+        gap: 25px;
+    }
+
+    .greeting h2 {
+        font-size: 22px;
+    }
+
+    .greeting p {
+        font-size: 14px;
+    }
+
+    .button-group {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .btn {
+        padding: 18px 12px;
+        font-size: 13px;
+        border-radius: 10px;
+    }
+
+    .btn-primary .icon {
+        font-size: 20px;
+    }
+
+    .btn-login {
+        padding: 14px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 400px) {
+    .navbar {
+        padding: 10px 3%;
+    }
+
+    .navbar h1 {
+        font-size: 13px;
+    }
+
+    .brand-subtitle {
+        font-size: 9px;
+    }
+
+    .greeting h2 {
+        font-size: 19px;
+    }
+
+    .button-group {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 16px 8px;
+        font-size: 12px;
+    }
+
+    .btn-primary .icon {
+        font-size: 18px;
+        margin-bottom: 6px;
+    }
+}

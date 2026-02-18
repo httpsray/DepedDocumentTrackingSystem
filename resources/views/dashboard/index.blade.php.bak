@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Dashboard - DepEd DTS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    
+    <!-- SPA Script -->
+    <script src="/js/spa.js" defer></script>
+
+    <style>
+        /* Dashboard Specific Styles */
+        body {
+            background-color: #f8fafc;
+        }
+
+        .dashboard-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            width: 100%;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .welcome-text h2 {
+            font-size: 28px;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .welcome-text p {
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .date-clock {
+            background: white;
+            padding: 12px 24px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .date-clock .time {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1e293b;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -1px;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .date-clock .date {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 6px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #f1f5f9;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stat-info h3 {
+            font-size: 32px;
+            color: #0f172a;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .stat-info p {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Section Title */
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 12px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .section-line {
+            flex-grow: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+
+        .action-card {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-card:hover {
+            border-color: #0066cc;
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.08);
+        }
+
+        .action-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+
+        .action-card:hover .action-icon {
+            transform: scale(1.1);
+        }
+
+        .action-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+
+        .action-desc {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        /* Navbar Profile */
+        .nav-profile {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding-left: 20px;
+            border-left: 1px solid rgba(255,255,255,0.1);
+            margin-left: 20px;
+        }
+        
+        .profile-info {
+            text-align: right;
+        }
+        
+        .profile-name {
+            font-weight: 600;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .profile-role {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        
+        .btn-logout:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .dashboard-wrapper {
+                padding: 20px 15px;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .nav-profile {
+                margin-left: 0;
+                padding-left: 0;
+                border-left: none;
+            }
+            
+            .profile-info {
+                display: none; /* Simplify for mobile, just show logout */
+            }
+            
+            .btn-logout {
+                background: transparent;
+                width: auto;
+                height: auto;
+                font-size: 14px;
+                gap: 8px;
+            }
+            
+            .btn-logout::after {
+                content: "Logout";
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="brand-text">
+                <span class="brand-subtitle">Department of Education</span>
+                <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <div class="nav-profile">
+                <!-- User Info -->
+                <div class="profile-info">
+                    <div class="profile-name">{{ $user->name }}</div>
+                    <div class="profile-role">{{ $user->email }}</div>
+                </div>
+                
+                <!-- Logout Button -->
+                <button onclick="logout()" class="btn-logout" title="Sign Out">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="dashboard-wrapper">
+        <div class="dashboard-header">
+            <div class="welcome-text">
+                <h2>Welcome back, {{ explode(' ', $user->name)[0] }}! <span style="font-size: 24px;">👋</span></h2>
+                <p>Track, manage, and submit your documents efficiently.</p>
+            </div>
+            <div class="date-clock">
+                <div class="time" id="clock-time">--:--:--</div>
+                <div class="date">
+                    <i class="far fa-calendar-alt"></i> 
+                    <span id="clock-date">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #e0f2fe; color: #0284c7;">
+                    <i class="fas fa-folder-open"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ $stats['total'] }}</h3>
+                    <p>My Documents</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #fff7ed; color: #ea580c;">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ $stats['pending'] }}</h3>
+                    <p>Pending</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #f0fdf4; color: #16a34a;">
+                    <i class="fas fa-check-double"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ $stats['completed'] }}</h3>
+                    <p>Completed</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Documents -->
+        @if($recentDocs->count() > 0)
+        <div class="section-header">
+            <div class="section-title">Recent Documents</div>
+            <div class="section-line"></div>
+        </div>
+
+        <div style="background: white; border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 40px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f8fafc;">
+                        <th style="text-align: left; padding: 14px 24px; color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #e2e8f0;">Tracking No.</th>
+                        <th style="text-align: left; padding: 14px 24px; color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #e2e8f0;">Subject</th>
+                        <th style="text-align: left; padding: 14px 24px; color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #e2e8f0;">Status</th>
+                        <th style="text-align: left; padding: 14px 24px; color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #e2e8f0;">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($recentDocs as $doc)
+                    <tr>
+                        <td style="padding: 16px 24px; border-bottom: 1px solid #f1f5f9; font-size: 14px; font-weight: 600; color: #0056b3;">{{ $doc->tracking_number }}</td>
+                        <td style="padding: 16px 24px; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #334155;">{{ $doc->subject }}</td>
+                        <td style="padding: 16px 24px; border-bottom: 1px solid #f1f5f9;">
+                            @php
+                                $statusColor = match($doc->status) {
+                                    'received' => 'background: #fff7ed; color: #9a3412;',
+                                    'forwarded' => 'background: #eff6ff; color: #1e40af;',
+                                    'completed' => 'background: #f0fdf4; color: #166534;',
+                                    default => 'background: #f1f5f9; color: #475569;',
+                                };
+                            @endphp
+                            <span style="display: inline-flex; padding: 2px 10px; border-radius: 50px; font-size: 12px; font-weight: 600; {{ $statusColor }}">{{ ucfirst($doc->status) }}</span>
+                        </td>
+                        <td style="padding: 16px 24px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #64748b;">{{ $doc->created_at->format('M d, Y') }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @endif
+
+        <div class="section-header">
+            <div class="section-title">Quick Actions</div>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="quick-actions">
+            <!-- Submit Document -->
+            <a href="/submit" class="action-card">
+                <div class="action-icon" style="background: #eff6ff; color: #2563eb;">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="action-title">Submit Document</div>
+                <p class="action-desc">Upload a new document to the system for tracking and processing.</p>
+            </a>
+
+            <!-- Track Document -->
+            <a href="/track" class="action-card">
+                <div class="action-icon" style="background: #f5f3ff; color: #7c3aed;">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="action-title">Track Document</div>
+                <p class="action-desc">Check the real-time status and history of any document.</p>
+            </a>
+
+            <!-- Profile Settings -->
+            <a href="#" class="action-card">
+                <div class="action-icon" style="background: #fef2f2; color: #dc2626;">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="action-title">Account Settings</div>
+                <p class="action-desc">Manage your profile information and update your password.</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- Logout Script -->
+    <script>
+        async function logout() {
+            const btn = document.querySelector('.btn-logout');
+            const originalContent = btn.innerHTML;
+            
+            // Show loading state
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+            btn.disabled = true;
+            
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            try {
+                const response = await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                // Always redirect to login, even if API returned error (session might be expired anyway)
+                window.location.href = '/login';
+                
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.href = '/login';
+            }
+        }
+    </script>
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const timeElement = document.getElementById('clock-time');
+            const dateElement = document.getElementById('clock-date');
+            
+            // Format Time: 12:00:00 PM
+            const timeOptions = { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit', 
+                hour12: true 
+            };
+            timeElement.textContent = now.toLocaleTimeString('en-US', timeOptions);
+            
+            // Format Date: Monday, January 1, 2024
+            const dateOptions = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            dateElement.textContent = now.toLocaleDateString('en-US', dateOptions);
+        }
+        
+        // Update immediately and then every second
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+    "name": "deped/document-tracking",
+    "description": "DepEd Document Tracking System",
+    "type": "project",
+    "require": {
+        "laravel/framework": "^11.0",
+        "laravel/tinker": "^2.11"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Raymond",
+            "email": "your-github-email@example.com"
+        }
+    ]
+}
