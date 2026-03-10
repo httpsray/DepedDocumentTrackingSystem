@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="<?php echo e(asset('images/DOCTRAXLOGO.svg')); ?>" type="image/svg+xml">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>Dashboard - DepEd DOCTRAX</title>
@@ -9,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
 
     <style>
         :root {
@@ -35,165 +37,45 @@
             -webkit-font-smoothing: antialiased;
             color: var(--text-dark);
             min-height: 100vh;
-        }
-
-        /* ─── Navbar ─── */
-        .navbar {
-            width: 100%;
-            background: var(--primary);
-            background: var(--primary-gradient);
-            padding: 15px 5%;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-            color: var(--white);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav-content {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .brand-text {
             display: flex;
             flex-direction: column;
         }
 
-        .brand-subtitle {
-            font-size: 11px;
-            opacity: 0.85;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 400;
-        }
+        /* ─── Sidebar (matches office/admin dashboard) ─── */
+        .sidebar{position:fixed;top:0;left:0;width:240px;height:100vh;background:#0056b3;display:flex;flex-direction:column;z-index:200;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+        .sidebar.open{transform:translateX(0)}
+        .sb-brand{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,.12);text-align:center}
+        .sb-brand img{width:64px;height:64px;margin-bottom:8px}
+        .sb-brand h2{font-size:18px;font-weight:700;color:#fff;margin-bottom:2px}
+        .sb-brand small{font-size:11px;color:rgba(255,255,255,.65);display:block}
+        .sb-nav{flex:1;padding:12px 0;overflow-y:auto}
+        .sb-nav a{display:flex;align-items:center;gap:11px;padding:11px 20px;color:rgba(255,255,255,.78);text-decoration:none;font-size:13px;font-weight:500;transition:background .15s,color .15s}
+        .sb-nav a:hover,.sb-nav a.active{background:rgba(255,255,255,.14);color:#fff}
+        .sb-nav a i{width:16px;text-align:center}
+        .sb-nav .nav-section{padding:10px 20px 4px;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4);font-weight:600}
+        .sb-footer{padding:14px 20px;border-top:1px solid rgba(255,255,255,.12)}
+        .sb-user{display:flex;align-items:center;gap:10px}
+        .sb-avatar{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;flex-shrink:0}
+        .sb-user-info small{font-size:10px;color:rgba(255,255,255,.55);display:block}
+        .sb-user-info span{font-size:12px;font-weight:600;color:#fff}
+        .btn-logout{display:flex;align-items:center;gap:7px;margin-top:8px;padding:8px 14px;background:rgba(255,255,255,.1);border:none;border-radius:8px;color:rgba(255,255,255,.8);font-size:12px;cursor:pointer;font-family:Poppins,sans-serif;width:100%;justify-content:center;transition:background .2s}
+        .btn-logout:hover{background:rgba(220,38,38,.75)}
 
-        .navbar h1 {
-            font-size: 18px;
-            font-weight: 700;
-            margin: 0;
-            line-height: 1.2;
-        }
+        /* ─── Mobile top bar ─── */
+        .mob-topbar{display:flex;position:sticky;top:0;z-index:100;background:#0056b3;padding:12px 16px;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+        .mob-hamburger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;z-index:1001;user-select:none;padding:4px}
+        .mob-hamburger span{height:2px;width:24px;background:#fff;border-radius:2px;transition:all .4s ease}
+        .mob-hamburger.toggle span:nth-child(1){transform:rotate(-45deg) translate(-4px,5px)}
+        .mob-hamburger.toggle span:nth-child(2){opacity:0}
+        .mob-hamburger.toggle span:nth-child(3){transform:rotate(45deg) translate(-4px,-5px)}
+        .mob-brand{flex:1;display:flex;flex-direction:column;color:#fff}
+        .mob-brand .brand-subtitle{font-size:clamp(9px,2vw,11px);opacity:.85;text-transform:uppercase;letter-spacing:1px}
+        .mob-brand h1{font-size:clamp(13px,3.5vw,18px);font-weight:700;margin:0;line-height:1.2}
+        .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:199}
+        .mob-overlay.open{display:block}
 
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .nav-link {
-            color: rgba(255,255,255,0.85);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 7px 14px;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-
-        .nav-link:hover {
-            background: rgba(255,255,255,0.15);
-            color: #fff;
-        }
-
-        .nav-link.active {
-            background: rgba(255,255,255,0.2);
-            color: #fff;
-        }
-
-        .nav-user {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-left: 8px;
-            padding-left: 16px;
-            border-left: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .nav-avatar {
-            width: 34px; height: 34px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 13px;
-        }
-
-        .nav-user-info {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.2;
-        }
-
-        .nav-user-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: #fff;
-        }
-
-        .nav-user-role {
-            font-size: 10px;
-            color: rgba(255,255,255,0.7);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-logout {
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: rgba(255,255,255,0.9);
-            cursor: pointer;
-            padding: 7px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-family: inherit;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s;
-        }
-
-        .btn-logout:hover {
-            background: rgba(220, 38, 38, 0.85);
-            border-color: rgba(220, 38, 38, 0.9);
-            color: #fff;
-        }
-
-        /* Mobile Nav Toggle */
-        .nav-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 4px;
-        }
-
-        .nav-menu-mobile {
-            display: none;
-            width: 100%;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255,255,255,0.15);
-            margin-top: 12px;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .nav-menu-mobile.open {
-            display: flex;
-        }
+        /* ─── Main Content Area ─── */
+        .main{margin-left:0;flex:1;display:flex;flex-direction:column}
 
         /* ─── Main Content ─── */
         .dash-wrapper {
@@ -241,12 +123,22 @@
             color: var(--text-dark);
             font-variant-numeric: tabular-nums;
             line-height: 1;
+            white-space: nowrap;
+        }
+
+        #c-h, #c-m {
+            display: inline-block;
+            width: 2ch;
+            text-align: center;
         }
 
         .clock-time-display .seconds {
             font-size: 14px;
             color: #9ca3af;
             font-weight: 600;
+            display: inline-block;
+            width: 2ch;
+            text-align: center;
         }
 
         .clock-time-display .period {
@@ -343,8 +235,8 @@
         }
 
         .panel-title {
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 17px;
+            font-weight: 700;
             color: var(--text-dark);
         }
 
@@ -457,7 +349,7 @@
             align-items: center;
             font-size: 12px;
             color: #94a3b8;
-            margin-top: 40px;
+            margin-top: auto;
         }
 
         .footer-left {
@@ -500,55 +392,6 @@
         }
 
         @media (max-width: 768px) {
-            .navbar {
-                padding: 12px 4%;
-                flex-wrap: wrap;
-            }
-
-            .navbar h1 { font-size: 15px; }
-            .brand-subtitle { font-size: 10px; }
-
-            .nav-actions .nav-link,
-            .nav-user,
-            .btn-logout { display: none; }
-
-            .nav-toggle { display: block; }
-
-            .nav-menu-mobile .nav-link {
-                display: flex;
-                width: 100%;
-                padding: 10px 12px;
-                font-size: 14px;
-            }
-
-            .nav-menu-mobile .mobile-user-section {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 10px 12px;
-                margin-top: 4px;
-                border-top: 1px solid rgba(255,255,255,0.1);
-            }
-
-            .nav-menu-mobile .mobile-user-section .nav-avatar {
-                width: 30px; height: 30px;
-                font-size: 12px;
-            }
-
-            .nav-menu-mobile .mobile-user-section span {
-                color: rgba(255,255,255,0.9);
-                font-size: 13px;
-                font-weight: 500;
-            }
-
-            .nav-menu-mobile .btn-logout {
-                display: flex;
-                background: rgba(220,38,38,0.7);
-                border-color: transparent;
-                padding: 6px 12px;
-                font-size: 12px;
-            }
-
             .dash-wrapper { padding: 20px 16px 40px; }
 
             .top-bar {
@@ -562,71 +405,113 @@
             .live-clock { width: 100%; }
 
             .stats { grid-template-columns: 1fr; }
+
+            .dtable-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .dtable th, .dtable td { white-space: nowrap; padding: 10px 14px; font-size: 12px; }
+            .dtable th:first-child, .dtable td:first-child { position: sticky; left: 0; background: #fff; z-index: 1; }
+            .dtable thead th:first-child { background: #fafbfc; }
+            .t-num { font-size: 11px; }
+            .pill { font-size: 11px; padding: 2px 8px; }
+            .t-date { font-size: 11px; }
+            .panel-head { padding: 14px 16px; }
+            .panel-title { font-size: 14px; }
+            .panel-link { font-size: 12px; }
         }
 
         @media (max-width: 400px) {
-            .navbar { padding: 10px 3%; }
-            .navbar h1 { font-size: 13px; }
-            .brand-subtitle { font-size: 9px; }
             .greeting-section h1 { font-size: 18px; }
         }
+        /* ─── Pickup notification ─── */
+        @keyframes blink-pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.35}}
+        .blink-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ea580c;animation:blink-pulse 1.2s ease-in-out infinite;vertical-align:middle;flex-shrink:0}
+        .pill.for_pickup{background:#fff7ed;color:#c2410c;font-weight:700}
+        .pickup-alert strong{color:#9a3412}
+
+        /* ─── Pickup banner ─── */
+        .pickup-banner{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+        .pickup-banner-title{font-size:17px;font-weight:700;color:var(--text-dark);margin-bottom:14px;display:flex;align-items:center;gap:9px}
+        .pickup-banner-title i{color:#16a34a;font-size:18px}
+        .pickup-banner-title .pickup-count{background:#dcfce7;color:#15803d;font-size:12px;font-weight:700;padding:2px 9px;border-radius:20px;margin-left:2px}
+        .pickup-doc-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:#f8fafc;border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px;transition:border-color .15s,box-shadow .15s}
+        .pickup-doc-item:last-child{margin-bottom:0}
+        .pickup-doc-item:hover{border-color:#bbf7d0;box-shadow:0 2px 8px rgba(22,163,74,.08)}
+        .pickup-doc-ref{font-size:12px;font-weight:700;color:var(--primary);font-family:monospace;letter-spacing:.5px}
+        .pickup-doc-subject{font-size:13px;color:var(--text-dark);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+        .btn-confirm-sm{padding:8px 16px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;white-space:nowrap;transition:all .2s;flex-shrink:0;box-shadow:0 2px 6px rgba(22,163,74,.2)}
+        .btn-confirm-sm:hover{background:linear-gradient(135deg,#15803d,#166534);box-shadow:0 3px 10px rgba(22,163,74,.3)}
+        .btn-confirm-sm:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+
+        /* ─── Pickup modal ─── */
+        .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center;padding:16px}
+        .modal-backdrop.show{display:flex}
+        .modal-box{background:#fff;border-radius:16px;max-width:420px;width:100%;padding:28px 24px;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;animation:modalIn .18s ease}
+        @keyframes modalIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+        .modal-icon-wrap{display:none}
+        .modal-box h3{font-size:17px;font-weight:700;color:var(--text-dark);margin-bottom:8px}
+        .modal-box p{font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:22px;text-align:left}
+        .modal-actions{display:flex;gap:10px;justify-content:center}
+        .modal-actions button{padding:9px 20px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;border:1.5px solid var(--border);background:#fff;color:var(--text-dark);transition:all .2s}
+        .modal-actions button:hover{background:#f1f5f9}
+        .modal-actions .modal-confirm{background:#ea580c;color:#fff;border-color:#ea580c}
+        .modal-actions .modal-confirm:hover{background:#c2410c}
+        .modal-actions .modal-confirm:disabled{opacity:.6;cursor:not-allowed}
     </style>
+    <script src="/js/spa.js" defer></script>
+    <script src="/js/form-utils.js" defer></script>
+    <script src="/js/request-utils.js" defer></script>
 </head>
 <body>
 
     <?php
         $isRep       = ($user->account_type ?? '') === 'representative';
-        $navOfficeName = '';
-        $navRepName    = '';
-        if ($isRep && str_contains($user->name, ' - ')) {
-            [$navOfficeName, $navRepName] = explode(' - ', $user->name, 2);
-        }
+        $navOfficeName = $isRep ? ($user->office?->name ?? '') : '';
+        $navRepName    = $user->name;
         $navDisplayName = $isRep ? $navOfficeName : explode(' ', $user->name)[0];
-        $navDisplayRole = $isRep ? 'Representative' : ucfirst($user->role ?? 'User');
+        $navDisplayRole = $isRep ? ($user->office_id ? 'Office' : 'Representative') : ucfirst($user->role ?? 'User');
+        $pickupCount = $stats['for_pickup'] ?? 0;
     ?>
-    <!-- ─── Navigation Bar ─── -->
-    <nav class="navbar">
-        <div class="nav-content">
-            <div class="brand-text">
-                <span class="brand-subtitle">Department of Education</span>
-                <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
-            </div>
-        </div>
 
-        <div class="nav-actions">
-            <a href="/dashboard" class="nav-link active"><i class="fas fa-th-large"></i> Dashboard</a>
+<!-- Mobile top bar -->
+<div class="mob-topbar">
+    <button class="mob-hamburger" id="mobHamBtn" type="button" onclick="toggleSidebar()" aria-label="Menu"><span></span><span></span><span></span></button>
+    <div class="mob-brand">
+        <span class="brand-subtitle">Department of Education</span>
+        <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
+    </div>
+</div>
+<div class="mob-overlay" id="mobOverlay" onclick="closeSidebar()"></div>
 
-            <div class="nav-user">
-                <div class="nav-avatar"><?php echo e(strtoupper(substr($navDisplayName, 0, 1))); ?></div>
-                <div class="nav-user-info">
-                    <span class="nav-user-name" title="<?php echo e($isRep ? $user->name : ''); ?>"><?php echo e($navDisplayName); ?></span>
-                    <span class="nav-user-role"><?php echo e($navDisplayRole); ?></span>
-                </div>
-            </div>
-
-            <button onclick="logout()" class="btn-logout" title="Sign Out">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
-        </div>
-
-        <button class="nav-toggle" onclick="toggleMobileNav()"><i class="fas fa-bars"></i></button>
-
-        <div class="nav-menu-mobile" id="mobileNav">
-            <a href="/dashboard" class="nav-link active"><i class="fas fa-th-large"></i> Dashboard</a>
-            <div class="mobile-user-section">
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <div class="nav-avatar"><?php echo e(strtoupper(substr($navDisplayName, 0, 1))); ?></div>
-                    <div style="display:flex;flex-direction:column;line-height:1.2;">
-                        <span style="color:#fff;font-size:13px;font-weight:600;"><?php echo e($navDisplayName); ?></span>
-                        <?php if($isRep && $navRepName): ?>
-                            <span style="color:rgba(255,255,255,0.65);font-size:10px;"><?php echo e($navRepName); ?></span>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <button onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
-            </div>
-        </div>
+<!-- ─── Sidebar ─── -->
+<div class="sidebar" id="mainSidebar">
+    <div class="sb-brand">
+        <img src="<?php echo e(asset('images/DOCTRAXLOGO.svg')); ?>" alt="DOCTRAX Logo">
+        <h2>DOCTRAX</h2>
+        <small>DepEd Document Tracking System</small>
+    </div>
+    <nav class="sb-nav">
+        <span class="nav-section">Overview</span>
+        <a href="/dashboard" class="active"><i class="fas fa-th-large"></i> Dashboard</a>
+        <span class="nav-section">Documents</span>
+        <a href="/submit"><i class="fas fa-paper-plane"></i> Submit Document</a>
+        <a href="/my-documents"><i class="fas fa-folder-open"></i> My Documents</a>
+        <a href="/track"><i class="fas fa-search"></i> Track Document</a>
+        <span class="nav-section">Account</span>
+        <a href="/profile"><i class="fas fa-user-cog"></i> My Profile</a>
     </nav>
+    <div class="sb-footer">
+        <div class="sb-user">
+            <div class="sb-avatar"><?php echo e(strtoupper(substr($navDisplayName, 0, 1))); ?></div>
+            <div class="sb-user-info">
+                <small><?php echo e(($isRep && $navRepName) ? $navRepName : $navDisplayRole); ?></small>
+                <span><?php echo e($navDisplayName); ?></span>
+            </div>
+        </div>
+        <button onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+</div>
+
+<!-- ─── Main Content ─── -->
+<div class="main">
 
     <!-- ─── Dashboard Content ─── -->
     <div class="dash-wrapper">
@@ -634,8 +519,8 @@
         <!-- Top Bar -->
         <div class="top-bar anim">
             <div class="greeting-section">
-                <h1><?php echo e($navDisplayName); ?>'s Dashboard</h1>
-                <p><?php echo e(now()->format('l, F j, Y')); ?></p>
+                <h1><?php echo e($navDisplayName); ?></h1>
+                <p>Welcome back &mdash; here's your document overview.</p>
             </div>
 
             <div class="live-clock">
@@ -656,26 +541,47 @@
             <div class="stat-card blue anim">
                 <div class="s-icon blue"><i class="fas fa-folder-open"></i></div>
                 <div class="s-data">
-                    <div class="s-num"><?php echo e($stats['total']); ?></div>
+                    <div class="s-num" id="stat-total"><?php echo e($stats['total']); ?></div>
                     <div class="s-label">Total Documents</div>
                 </div>
             </div>
             <div class="stat-card orange anim">
                 <div class="s-icon orange"><i class="fas fa-clock"></i></div>
                 <div class="s-data">
-                    <div class="s-num"><?php echo e($stats['pending']); ?></div>
+                    <div class="s-num" id="stat-pending"><?php echo e($stats['pending']); ?></div>
                     <div class="s-label">Pending</div>
                 </div>
             </div>
             <div class="stat-card green anim">
                 <div class="s-icon green"><i class="fas fa-check-circle"></i></div>
                 <div class="s-data">
-                    <div class="s-num"><?php echo e($stats['completed']); ?></div>
+                    <div class="s-num" id="stat-completed"><?php echo e($stats['completed']); ?></div>
                     <div class="s-label">Completed</div>
                 </div>
             </div>
         </div>
-
+        
+        <?php if(!empty($pickupDocs) && $pickupDocs->isNotEmpty()): ?>
+        <div class="pickup-banner anim">
+            <div class="pickup-banner-title">
+                Ready for Pickup <span class="pickup-count"><?php echo e($pickupDocs->count()); ?></span>
+            </div>
+            <div class="pickup-doc-list">
+                <?php $__currentLoopData = $pickupDocs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pDoc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <div class="pickup-doc-item">
+                    <div class="pickup-doc-info">
+                        <div class="pickup-doc-ref"><?php echo e($pDoc->reference_number); ?></div>
+                        <div class="pickup-doc-subject"><?php echo e($pDoc->subject); ?></div>
+                    </div>
+                    <button class="btn-confirm-sm"
+                            onclick="openPickupConfirm('<?php echo e($pDoc->reference_number); ?>', this)">
+                        Confirm Receipt
+                    </button>
+                </div>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </div>
+        </div>
+        <?php endif; ?>
         <!-- Grid -->
         <div class="grid">
 
@@ -683,10 +589,11 @@
             <div class="panel anim">
                 <div class="panel-head">
                     <div class="panel-title">Recent Documents</div>
-                    <a href="/track" class="panel-link">View all <i class="fas fa-arrow-right" style="font-size:11px"></i></a>
+                    <a href="/my-documents" class="panel-link">View all <i class="fas fa-arrow-right" style="font-size:11px"></i></a>
                 </div>
 
                 <?php if($recentDocs->count() > 0): ?>
+                <div class="dtable-wrap">
                 <table class="dtable">
                     <thead>
                         <tr>
@@ -699,20 +606,21 @@
                     <tbody>
                         <?php $__currentLoopData = $recentDocs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $doc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
-                            <td><span class="t-num"><?php echo e($doc->tracking_number); ?></span></td>
-                            <td><?php echo e($doc->subject); ?></td>
+                            <td><span class="t-num"><?php echo e($doc->reference_number); ?></span></td>
+                            <td style="max-width:200px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="<?php echo e($doc->subject); ?>"><?php echo e($doc->subject); ?></div></td>
                             <td>
                                 <?php
                                     $sc = match($doc->status) {
-                                        'received' => 'pending',
-                                        'forwarded' => 'forwarded',
-                                        'completed' => 'completed',
+                                        'received'  => 'pending',
+                                        'completed', 'for_pickup' => 'completed',
                                         default => 'other',
                                     };
                                 ?>
-                                <span class="pill <?php echo e($sc); ?>">
-                                    <?php echo e(ucfirst($doc->status)); ?>
-
+                                <span style="display:inline-flex;align-items:center;gap:5px">
+                                    <span class="pill <?php echo e($sc); ?>"><?php echo e($doc->statusLabel()); ?></span>
+                                    <?php if($doc->status === 'for_pickup'): ?>
+                                        <span class="blink-dot"></span>
+                                    <?php endif; ?>
                                 </span>
                             </td>
                             <td class="t-date"><?php echo e($doc->created_at->format('M d, Y')); ?></td>
@@ -720,6 +628,7 @@
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </tbody>
                 </table>
+                </div>
                 <?php else: ?>
                 <div class="empty-state">
                     <i class="fas fa-inbox"></i>
@@ -750,7 +659,7 @@
                         </div>
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
-                    <a href="#" class="act">
+                    <a href="/profile" class="act">
                         <div class="act-icon" style="background:#f1f5f9;color:#475569;"><i class="fas fa-user-cog"></i></div>
                         <div class="act-body">
                             <div class="act-title">Account Settings</div>
@@ -758,7 +667,7 @@
                         </div>
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
-                    <a href="#" class="act">
+                    <a href="/help" class="act">
                         <div class="act-icon" style="background:#f1f5f9;color:#475569;"><i class="fas fa-question-circle"></i></div>
                         <div class="act-body">
                             <div class="act-title">Help</div>
@@ -782,6 +691,22 @@
         </div>
     </footer>
 
+</div><!-- /.main -->
+
+    
+    <div class="modal-backdrop" id="pickupModal">
+        <div class="modal-box">
+            <h3>Confirm Document Receipt</h3>
+            <p>Are you sure you have physically received this document? This action cannot be undone and will mark it as <strong>Completed</strong>.</p>
+            <div class="modal-actions">
+                <button onclick="closePickupModal()">Cancel</button>
+                <button class="modal-confirm" id="pickupModalConfirmBtn" onclick="submitPickupConfirm()">
+                    <i class="fas fa-check"></i> Yes, I Received It
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
     (function() {
         // ─── Clock ───
@@ -790,8 +715,9 @@
             var h = n.getHours(), m = n.getMinutes(), s = n.getSeconds();
             var p = h >= 12 ? 'PM' : 'AM';
             var h12 = h % 12 || 12;
+            var el = document.getElementById('c-h'); if (!el) { clearInterval(clockInterval); return; }
 
-            document.getElementById('c-h').textContent = String(h12).padStart(2, '0');
+            el.textContent = String(h12).padStart(2, '0');
             document.getElementById('c-m').textContent = String(m).padStart(2, '0');
             document.getElementById('c-s').textContent = String(s).padStart(2, '0');
             document.getElementById('c-p').textContent = p;
@@ -801,11 +727,22 @@
             document.getElementById('c-day').textContent = days[n.getDay()];
             document.getElementById('c-date').textContent = mos[n.getMonth()] + ' ' + n.getDate() + ', ' + n.getFullYear();
         }
-        tick(); setInterval(tick, 1000);
+        tick(); var clockInterval = setInterval(tick, 1000);
 
-        // ─── Mobile Nav ───
-        window.toggleMobileNav = function() {
-            document.getElementById('mobileNav').classList.toggle('open');
+        // ─── Sidebar Toggle ───
+        window.toggleSidebar = function() {
+            var s = document.getElementById('mainSidebar');
+            var o = document.getElementById('mobOverlay');
+            var open = s.classList.toggle('open');
+            o.classList.toggle('open', open);
+            document.body.style.overflow = open ? 'hidden' : '';
+            document.getElementById('mobHamBtn').classList.toggle('toggle', open);
+        };
+        window.closeSidebar = function() {
+            document.getElementById('mainSidebar').classList.remove('open');
+            document.getElementById('mobOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+            var btn = document.getElementById('mobHamBtn'); if (btn) btn.classList.remove('toggle');
         };
 
         // ─── Logout ───
@@ -820,6 +757,64 @@
                 window.location.href = '/login';
             });
         };
+
+        // ─── Live stats (refresh every 30s, silent update) ───
+        function refreshStats() {
+            fetch('/api/my-stats', { headers: { 'Accept': 'application/json' } })
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(function(d) {
+                    if (!d) return;
+                    document.getElementById('stat-total').textContent     = d.total;
+                    document.getElementById('stat-pending').textContent   = d.pending;
+                    document.getElementById('stat-completed').textContent = d.completed;
+                })
+                .catch(function() {});
+        }
+        if (window.smartInterval) { window.smartInterval(refreshStats, 30000); }
+        else { setInterval(refreshStats, 30000); }
+
+        // ─── Pickup confirmation ───
+        var _pickupRef = null;
+        var _pickupTriggerBtn = null;
+
+        window.openPickupConfirm = function(ref, btn) {
+            _pickupRef = ref;
+            _pickupTriggerBtn = btn;
+            document.getElementById('pickupModal').classList.add('show');
+        };
+        window.closePickupModal = function() {
+            document.getElementById('pickupModal').classList.remove('show');
+            document.getElementById('pickupModalConfirmBtn').disabled = false;
+        };
+        window.submitPickupConfirm = function() {
+            if (!_pickupRef) return;
+            var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            var confirmBtn = document.getElementById('pickupModalConfirmBtn');
+            confirmBtn.disabled = true;
+            if (_pickupTriggerBtn) _pickupTriggerBtn.disabled = true;
+            fetch('/api/documents/' + encodeURIComponent(_pickupRef) + '/confirm-pickup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+                body: '{}'
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.success) {
+                    closePickupModal();
+                    window.location.reload();
+                } else {
+                    alert(d.message || 'Failed. Please try again.');
+                    closePickupModal();
+                    if (_pickupTriggerBtn) _pickupTriggerBtn.disabled = false;
+                }
+            })
+            .catch(function() {
+                alert('Something went wrong. Please try again.');
+                closePickupModal();
+                if (_pickupTriggerBtn) _pickupTriggerBtn.disabled = false;
+            });
+        };
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePickupModal(); });
     })();
     </script>
 </body>

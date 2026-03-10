@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="{{ asset('images/DOCTRAXLOGO.svg') }}" type="image/svg+xml">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo csrf_token(); ?>">
     <title>Create Account - DepEd DTS</title>
@@ -13,6 +14,8 @@
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="/css/auth.css">
     <script src="/js/spa.js" defer></script>
+    <script src="/js/form-utils.js" defer></script>
+    <script src="/js/request-utils.js" defer></script>
     <style>
         .container { background: transparent; box-shadow: none; animation: none; }
         
@@ -105,6 +108,10 @@
                 justify-content: flex-start !important;
             }
         }
+        .dash-footer{width:100%;background:#fff;border-top:1px solid #e2e8f0;padding:20px 5%;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#94a3b8;margin-top:40px}
+        .footer-left{display:flex;align-items:center;gap:6px}
+        .footer-right{font-size:11px;color:#b0b8c4}
+        @media(max-width:768px){.dash-footer{flex-direction:column;gap:6px;text-align:center;padding:16px 5%}}
     </style>
 </head>
 <body>
@@ -116,10 +123,13 @@
                 <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
             </div>
         </div>
-        <div class="nav-actions">
-           <a href="/" class="btn-text" style="color: white; text-decoration: none; font-size: 14px; opacity: 0.9;">
-               <i class="fas fa-home"></i> Home
-           </a>
+        <button class="nav-hamburger" id="navHamburger" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')" aria-label="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-links" id="navLinks">
+            <a href="/" class="nav-link"><i class="fas fa-home"></i> Home</a>
+            <a href="/about-us" class="nav-link"><i class="fas fa-info-circle"></i> About Us</a>
+            <a href="/contact-us" class="nav-link"><i class="fas fa-envelope"></i> Contact Us</a>
         </div>
     </nav>
 
@@ -147,38 +157,10 @@
                 </div>
             </div>
 
-            <form id="registerForm" novalidate autocomplete="off">
+            <form id="registerForm"yung trac novalidate autocomplete="off">
                 <input type="hidden" id="accountType" value="individual">
 
                 <div class="form-grid">
-                    <!-- Representative Fields (Initially Hidden) -->
-                    <div id="representativeFields" class="hidden full-width" style="display: contents;">
-                        <div class="form-group full-width">
-                            <label class="form-label">Registered Office / Institution Name</label>
-                            <input type="text" class="form-control" id="officeName" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly');">
-                            <div class="error-alert" id="officeNameError"><i class="fas fa-exclamation-circle"></i><span>Required</span></div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Representative First Name</label>
-                            <input type="text" class="form-control" id="repFirstName" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly');">
-                            <div class="error-alert" id="repFirstNameError"><i class="fas fa-exclamation-circle"></i><span>Required</span></div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Representative Last Name</label>
-                            <input type="text" class="form-control" id="repLastName" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly');">
-                            <div class="error-alert" id="repLastNameError"><i class="fas fa-exclamation-circle"></i><span>Required</span></div>
-                        </div>
-                        <div class="form-group full-width">
-                            <label class="form-label">Representative Middle Name</label>
-                            <input type="text" class="form-control" id="repMiddleName" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly');">
-                            <div class="error-alert" id="repMiddleNameError"><i class="fas fa-exclamation-circle"></i><span>Required</span></div>
-                            <label style="display: flex; align-items: center; gap: 6px; margin-top: 6px; cursor: pointer; font-size: 13px; color: #64748b; font-weight: 400; user-select: none;">
-                                <input type="checkbox" id="repNoMiddleName" onchange="toggleRepMiddleName()" style="width: 16px; height: 16px; accent-color: #0056b3; cursor: pointer;">
-                                I don't have a middle name
-                            </label>
-                        </div>
-                    </div>
-
                     <!-- Individual Fields -->
                     <div id="individualFields" class="full-width" style="display: contents;">
                         <div class="form-group">
@@ -197,6 +179,34 @@
                             <div class="error-alert" id="middleNameError"><i class="fas fa-exclamation-circle"></i><span>Required</span></div>
                             <label style="display: flex; align-items: center; gap: 6px; margin-top: 6px; cursor: pointer; font-size: 13px; color: #64748b; font-weight: 400; user-select: none;">
                                 <input type="checkbox" id="noMiddleName" onchange="toggleMiddleName()" style="width: 16px; height: 16px; accent-color: #0056b3; cursor: pointer;">
+                                I don't have a middle name
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Representative Fields -->
+                    <div id="representativeFields" class="full-width" style="display: none;">
+                        <div class="form-group full-width">
+                            <label class="form-label">Office / School Name</label>
+                            <input type="text" class="form-control" id="officeName" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly');">
+                            <div class="error-alert" id="officeNameError"><i class="fas fa-exclamation-circle"></i><span>Required</span></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="repFirstName" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly');">
+                            <div class="error-alert" id="repFirstNameError"><i class="fas fa-exclamation-circle"></i><span>Required</span></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="repLastName" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly');">
+                            <div class="error-alert" id="repLastNameError"><i class="fas fa-exclamation-circle"></i><span>Required</span></div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="form-label">Middle Name</label>
+                            <input type="text" class="form-control" id="repMiddleName" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly');">
+                            <div class="error-alert" id="repMiddleNameError"><i class="fas fa-exclamation-circle"></i><span>Required</span></div>
+                            <label style="display: flex; align-items: center; gap: 6px; margin-top: 6px; cursor: pointer; font-size: 13px; color: #64748b; font-weight: 400; user-select: none;">
+                                <input type="checkbox" id="noRepMiddleName" onchange="toggleRepMiddleName()" style="width: 16px; height: 16px; accent-color: #0056b3; cursor: pointer;">
                                 I don't have a middle name
                             </label>
                         </div>
@@ -315,10 +325,10 @@
                     <h4><span class="section-number">7</span> Contact Information</h4>
                     <p>For questions, concerns, or requests regarding personal data, please contact:</p>
                     <div class="contact-card">
-                        <strong>Data Protection Officer (DPO)</strong><br>
+                        <strong>Information Technology Officer I (ITO)</strong><br>
                         CSJDM &ndash; Division Office<br>
-                        <span class="contact-placeholder">[Official Email Address]</span><br>
-                        <span class="contact-placeholder">[Contact Number]</span>
+                        <span class="contact-placeholder">arthur.francisco@deped.gov.ph</span><br>
+                        <span class="contact-placeholder">0999999999999</span>
                     </div>
                 </div>
 
@@ -351,7 +361,7 @@
         // Restrict Input Fields
         document.addEventListener('DOMContentLoaded', () => {
              // Name Fields: Letters, spaces, dots, and hyphens only
-             ['firstName', 'middleName', 'lastName', 'repFirstName', 'repMiddleName', 'repLastName'].forEach(id => {
+             ['firstName', 'middleName', 'lastName', 'repFirstName', 'repMiddleName', 'repLastName', 'officeName'].forEach(id => {
                  const el = document.getElementById(id);
                  if(el) {
                     el.addEventListener('input', function(e) {
@@ -381,6 +391,22 @@
             document.getElementById('regEmail').value = emailParam;
         }
 
+        function toggleRepMiddleName() {
+            const checkbox = document.getElementById('noRepMiddleName');
+            const input    = document.getElementById('repMiddleName');
+            if (checkbox.checked) {
+                input.value = '';
+                input.disabled = true;
+                input.style.opacity = '0.5';
+                input.classList.remove('error');
+                const errEl = document.getElementById('repMiddleNameError');
+                if (errEl) errEl.classList.remove('show');
+            } else {
+                input.disabled = false;
+                input.style.opacity = '1';
+            }
+        }
+
         function toggleMiddleName() {
             const checkbox = document.getElementById('noMiddleName');
             const input = document.getElementById('middleName');
@@ -398,46 +424,20 @@
             }
         }
 
-        function toggleRepMiddleName() {
-            const checkbox = document.getElementById('repNoMiddleName');
-            const input = document.getElementById('repMiddleName');
-            if (checkbox.checked) {
-                input.value = '';
-                input.disabled = true;
-                input.style.opacity = '0.5';
-                input.classList.remove('error');
-                const errEl = document.getElementById('repMiddleNameError');
-                if (errEl) errEl.classList.remove('show');
-            } else {
-                input.disabled = false;
-                input.style.opacity = '1';
-            }
-        }
-
         function setAccountType(type) {
             const options = document.querySelectorAll('.type-option');
             options.forEach(opt => opt.classList.remove('active'));
             document.querySelector(`[data-type="${type}"]`).classList.add('active');
-            
             document.getElementById('accountType').value = type;
-            
-            const indFields = document.getElementById('individualFields');
-            const repFields = document.getElementById('representativeFields');
-            const indInputs = indFields.querySelectorAll('input');
-            const repInputs = repFields.querySelectorAll('input');
 
-            if (type === 'individual') {
-                indFields.classList.remove('hidden');
-                repFields.classList.add('hidden');
-                indInputs.forEach(i => i.required = true);
-                repInputs.forEach(i => i.required = false);
+            const indiv = document.getElementById('individualFields');
+            const rep   = document.getElementById('representativeFields');
+            if (type === 'representative') {
+                indiv.style.display = 'none';
+                rep.style.display   = 'contents';
             } else {
-                indFields.classList.add('hidden');
-                repFields.classList.remove('hidden');
-                indInputs.forEach(i => i.required = false);
-                document.getElementById('officeName').required = true;
-                document.getElementById('repFirstName').required = true;
-                document.getElementById('repLastName').required = true;
+                indiv.style.display = 'contents';
+                rep.style.display   = 'none';
             }
         }
         
@@ -458,20 +458,20 @@
                 }
             };
 
-            if (type === 'individual') {
+            if (type === 'representative') {
+                check('officeName');
+                check('repFirstName');
+                check('repLastName');
+                const noRepMid = document.getElementById('noRepMiddleName').checked;
+                if (!noRepMid) {
+                    check('repMiddleName');
+                }
+            } else {
                 check('firstName');
                 check('lastName');
                 const noMid = document.getElementById('noMiddleName').checked;
                 if (!noMid) {
                     check('middleName');
-                }
-            } else {
-                check('officeName');
-                check('repFirstName');
-                check('repLastName');
-                const repNoMid = document.getElementById('repNoMiddleName').checked;
-                if (!repNoMid) {
-                    check('repMiddleName');
                 }
             }
 
@@ -535,30 +535,21 @@
             btn.disabled = true;
 
             const type = document.getElementById('accountType').value;
-            let name = '';
-            
-            if (type === 'individual') {
-                const first = document.getElementById('firstName').value.trim();
-                const middle = document.getElementById('middleName').value.trim();
-                const last = document.getElementById('lastName').value.trim();
-                const noMid = document.getElementById('noMiddleName').checked;
-                if (noMid || !middle) {
-                    name = first + ' ' + last;
-                } else {
-                    name = first + ' ' + middle + ' ' + last;
-                }
-            } else {
+            let name;
+            if (type === 'representative') {
+                const office   = document.getElementById('officeName').value.trim();
                 const repFirst = document.getElementById('repFirstName').value.trim();
-                const repMiddle = document.getElementById('repMiddleName').value.trim();
-                const repLast = document.getElementById('repLastName').value.trim();
-                const repNoMid = document.getElementById('repNoMiddleName').checked;
-                let repFullName;
-                if (repNoMid || !repMiddle) {
-                    repFullName = repFirst + ' ' + repLast;
-                } else {
-                    repFullName = repFirst + ' ' + repMiddle + ' ' + repLast;
-                }
-                name = document.getElementById('officeName').value.trim() + ' - ' + repFullName;
+                const repMid   = document.getElementById('repMiddleName').value.trim();
+                const repLast  = document.getElementById('repLastName').value.trim();
+                const noRepMid = document.getElementById('noRepMiddleName').checked;
+                const repName  = (noRepMid || !repMid) ? (repFirst + ' ' + repLast) : (repFirst + ' ' + repMid + ' ' + repLast);
+                name = office + ' - ' + repName;
+            } else {
+                const first  = document.getElementById('firstName').value.trim();
+                const middle = document.getElementById('middleName').value.trim();
+                const last   = document.getElementById('lastName').value.trim();
+                const noMid  = document.getElementById('noMiddleName').checked;
+                name = (noMid || !middle) ? (first + ' ' + last) : (first + ' ' + middle + ' ' + last);
             }
 
             const formData = {
@@ -654,8 +645,8 @@
                 document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
                 document.getElementById('middleName').disabled = false;
                 document.getElementById('middleName').style.opacity = '1';
-                const repMid = document.getElementById('repMiddleName');
-                if (repMid) { repMid.disabled = false; repMid.style.opacity = '1'; }
+                document.getElementById('repMiddleName').disabled = false;
+                document.getElementById('repMiddleName').style.opacity = '1';
                 setAccountType('individual');
                 const btn = document.querySelector('button[onclick="validateAndOpenModal()"]');
                 if (btn) { btn.innerHTML = 'Create Account'; btn.disabled = false; }
@@ -717,5 +708,13 @@
             }
         }
     </script>
+    <footer class="dash-footer">
+        <div class="footer-left">
+            <span>&copy; {{ date('Y') }} DepEd Document Tracking System</span>
+        </div>
+        <div class="footer-right">
+            Developed by Raymond Bautista
+        </div>
+    </footer>
 </body>
 </html>

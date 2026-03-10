@@ -4,11 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Document;
+use App\Models\Office;
+use App\Mail\ActivationMail;
+use App\Services\ActivationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
+    public function __construct(
+        private ActivationService $activationService
+    ) {}
+
     /**
      * Ensure the current user is an admin.
      */
@@ -32,23 +44,29 @@ class AdminController extends Controller
 
         // Search filter
         if ($search = $request->get('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'ilike', "%{$search}%")
-                  ->orWhere('email', 'ilike', "%{$search}%")
-                  ->orWhere('mobile', 'ilike', "%{$search}%");
+            $escaped = str_replace(['%', '_'], ['\\%', '\\_'], $search);
+            $query->where(function ($q) use ($escaped) {
+                $q->where('name', 'like', "%{$escaped}%")
+                  ->orWhere('email', 'like', "%{$escaped}%")
+                  ->orWhere('mobile', 'like', "%{$escaped}%");
             });
         }
 
         // Status filter
         if ($status = $request->get('status')) {
-            $query->where('status', $status);
+            if (in_array($status, ['active', 'pending', 'suspended'], true)) {
+                $query->where('status', $status);
+            }
         }
 
         $users = $query->withCount('documents')->latest()->paginate(15);
 
+        $offices = Office::where('is_active', true)->orderBy('name')->get();
+
         return view('admin.users', [
-            'user'  => Auth::user(),
-            'users' => $users,
+            'user'    => Auth::user(),
+            'users'   => $users,
+            'offices' => $offices,
             'filters' => [
                 'search' => $search ?? '',
                 'status' => $status ?? '',
@@ -70,11 +88,20 @@ class AdminController extends Controller
             return response()->json(['success' => false, 'message' => 'Cannot modify your own account.'], 403);
         }
 
+        // Prevent regular admin from modifying admin/superadmin accounts
+        if ($target->isAdmin() && !Auth::user()->isSuperAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Cannot modify admin accounts.'], 403);
+        }
+        if ($target->isSuperAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Cannot modify superadmin accounts.'], 403);
+        }
+
         $request->validate([
-            'status' => 'sometimes|in:active,pending,suspended',
-            'name'   => 'sometimes|string|max:255',
-            'email'  => 'sometimes|email|max:255|unique:users,email,' . $id,
-            'mobile' => 'sometimes|nullable|string|max:20',
+            'status'    => 'sometimes|in:active,pending,suspended',
+            'name'      => 'sometimes|string|max:255',
+            'email'     => 'sometimes|email|max:255|unique:users,email,' . $id,
+            'mobile'    => 'sometimes|nullable|string|max:20',
+            'office_id' => 'sometimes|nullable|exists:offices,id',
         ]);
 
         if ($request->has('status')) {
@@ -84,9 +111,17 @@ class AdminController extends Controller
             }
         }
 
-        if ($request->has('name'))   $target->name   = $request->name;
-        if ($request->has('email'))  $target->email  = $request->email;
-        if ($request->has('mobile')) $target->mobile = $request->mobile ?: null;
+        if ($request->has('name'))      $target->name      = $request->name;
+        if ($request->has('email'))     $target->email     = $request->email;
+        if ($request->has('mobile'))    $target->mobile    = $request->mobile ?: null;
+        if ($request->has('office_id')) $target->office_id = $request->office_id ?: null;
+
+        if (!$target->isDirty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No changes were made.',
+            ]);
+        }
 
         $target->save();
 
@@ -103,6 +138,11 @@ class AdminController extends Controller
     public function deleteUser($id)
     {
         $this->authorize();
+
+        // Superadmins may only deactivate accounts, not permanently delete them.
+        if (Auth::user()->isSuperAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Super admins cannot delete accounts. Use deactivation instead.'], 403);
+        }
 
         $target = User::findOrFail($id);
 
@@ -135,24 +175,28 @@ class AdminController extends Controller
 
         // Search filter
         if ($search = $request->get('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('tracking_number', 'ilike', "%{$search}%")
-                  ->orWhere('subject', 'ilike', "%{$search}%")
-                  ->orWhere('sender_name', 'ilike', "%{$search}%");
+            $search = strip_tags($search);
+            $escaped = str_replace(['%', '_'], ['\\%', '\\_'], $search);
+            $query->where(function ($q) use ($escaped) {
+                $q->where('reference_number', 'like', "%{$escaped}%")
+                  ->orWhere('tracking_number', 'like', "%{$escaped}%")
+                  ->orWhere('subject', 'like', "%{$escaped}%")
+                  ->orWhere('sender_name', 'like', "%{$escaped}%");
             });
         }
 
         // Status filter
         if ($status = $request->get('status')) {
-            $query->where('status', $status);
+            if (array_key_exists($status, Document::STATUSES)) {
+                $query->where('status', $status);
+            }
         }
 
         $documents = $query->latest()->paginate(15);
 
         $stats = [
             'total'     => Document::count(),
-            'received'  => Document::where('status', 'received')->count(),
-            'forwarded' => Document::where('status', 'forwarded')->count(),
+            'processing' => Document::whereIn('status', ['received', 'in_review'])->count(),
             'completed' => Document::where('status', 'completed')->count(),
         ];
 
@@ -177,7 +221,7 @@ class AdminController extends Controller
         $document = Document::findOrFail($id);
 
         $request->validate([
-            'status' => 'required|in:received,forwarded,completed',
+            'status' => 'required|in:submitted,received,in_review,completed,for_pickup,returned,archived',
         ]);
 
         $document->status = $request->status;
@@ -204,5 +248,362 @@ class AdminController extends Controller
             'success' => true,
             'message' => 'Document deleted.',
         ]);
+    }
+
+    // ─── OFFICE ACCOUNTS ───
+
+    /**
+     * List all office accounts.
+     */
+    public function officeAccounts(Request $request)
+    {
+        $this->authorize();
+
+        $accounts = User::where('role', 'user')
+            ->where('account_type', 'representative')
+            ->whereNotNull('office_id')
+            ->with('office')
+            ->latest()
+            ->get();
+
+        $offices = Office::where('is_active', true)->orderBy('name')->get();
+
+        return view('admin.offices', [
+            'user'     => Auth::user(),
+            'accounts' => $accounts,
+            'offices'  => $offices,
+        ]);
+    }
+
+    /**
+     * Create a new office account.
+     */
+    public function createOfficeAccount(Request $request)
+    {
+        $this->authorize();
+
+        $request->validate([
+            'name'             => 'required|string|max:255',
+            'email'            => 'required|email|max:255|unique:users,email',
+            'mobile'           => 'nullable|string|max:20',
+            'office_id'        => 'required_without:new_office_name|nullable|exists:offices,id',
+            'new_office_name'  => 'required_without:office_id|nullable|string|max:255',
+        ]);
+
+        $user = DB::transaction(function () use ($request) {
+            // If a custom office name was provided, create or find the office
+            $officeId = $request->office_id;
+            if ($request->filled('new_office_name') && !$officeId) {
+                $office = Office::firstOrCreate(
+                    ['name' => trim($request->new_office_name)],
+                    ['code' => strtoupper(Str::slug(trim($request->new_office_name), '_')), 'is_active' => true]
+                );
+                $officeId = $office->id;
+            }
+
+            $user = new User([
+                'name'         => $request->name,
+                'email'        => $request->email,
+                'mobile'       => $request->mobile ?: null,
+                'account_type' => 'representative',
+                'office_id'    => $officeId,
+                'password'     => Hash::make(Str::random(64)),
+            ]);
+            $user->status = 'pending';
+            $user->role   = 'user';
+            $user->save();
+            return $user;
+        });
+
+        $rawToken = $this->activationService->createToken($user);
+
+        try {
+            Mail::to($user->email)->send(new ActivationMail($user, $rawToken));
+        } catch (\Exception $e) {
+            \Log::warning('Activation email failed for office account ' . $user->email . ': ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Office account created. Activation email sent to ' . $user->email . '.',
+            'user'    => $user->load('office'),
+        ]);
+    }
+
+    /**
+     * Delete an office account.
+     */
+    public function deleteOfficeAccount($id)
+    {
+        $this->authorize();
+
+        $target = User::findOrFail($id);
+
+        if ($target->account_type !== 'representative' || !$target->office_id) {
+            return response()->json(['success' => false, 'message' => 'Not a valid office account.'], 422);
+        }
+
+        $target->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Office account deleted.',
+        ]);
+    }
+
+    /**
+     * Toggle reports dashboard access for an office account.
+     */
+    public function toggleReportsAccess($id)
+    {
+        $this->authorize();
+
+        $target = User::findOrFail($id);
+
+        if ($target->account_type !== 'representative' || !$target->office_id) {
+            return response()->json(['success' => false, 'message' => 'Not a valid office account.'], 422);
+        }
+
+        $target->has_reports_access = !$target->has_reports_access;
+        $target->save();
+
+        $action = $target->has_reports_access ? 'granted' : 'revoked';
+
+        return response()->json([
+            'success' => true,
+            'message' => "Reports access {$action} for {$target->name}.",
+            'has_reports_access' => $target->has_reports_access,
+        ]);
+    }
+
+    /**
+     * Transfer an office account to a different office.
+     */
+    public function transferOfficeAccount(Request $request, $id)
+    {
+        $this->authorize();
+
+        $request->validate([
+            'office_id' => 'required|exists:offices,id',
+        ]);
+
+        $target = User::findOrFail($id);
+
+        if ($target->account_type !== 'representative' || !$target->office_id) {
+            return response()->json(['success' => false, 'message' => 'Not a valid office account.'], 422);
+        }
+
+        $newOfficeId = (int) $request->office_id;
+
+        if ((int) $target->office_id === $newOfficeId) {
+            return response()->json(['success' => false, 'message' => 'User is already assigned to this office.'], 422);
+        }
+
+        $oldOffice = $target->office;
+        $newOffice = Office::findOrFail($newOfficeId);
+
+        // Unassign this user from any in-progress documents at the old office.
+        // The documents stay at the old office so another staff member can pick them up.
+        $untagged = Document::where('current_handler_id', $target->id)
+            ->where('current_office_id', $oldOffice->id)
+            ->whereNotIn('status', ['completed', 'returned', 'cancelled', 'archived'])
+            ->update(['current_handler_id' => null]);
+
+        $target->office_id = $newOfficeId;
+        $target->save();
+
+        $extra = $untagged > 0
+            ? " {$untagged} in-progress document(s) were untagged and returned to the {$oldOffice->name} queue."
+            : '';
+
+        return response()->json([
+            'success' => true,
+            'message' => "{$target->name} transferred from {$oldOffice->name} to {$newOffice->name}.{$extra}",
+            'new_office_id' => $newOfficeId,
+            'new_office_name' => $newOffice->name,
+        ]);
+    }
+
+    // ─── ICT UNIT ───
+
+    /**
+     * ICT Unit — documents currently tagged to the superadmin (Sir Arthur).
+     */
+    public function ictDocuments(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user || !$user->isSuperAdmin()) {
+            abort(403, 'Access restricted to Super Admin.');
+        }
+
+        $query = Document::with(['user', 'submittedToOffice', 'currentOffice'])
+            ->where('current_handler_id', $user->id)
+            ->whereNotIn('status', ['completed', 'returned', 'cancelled', 'archived']);
+
+        $search = trim((string) $request->get('search', ''));
+        $search = strip_tags($search);
+        if ($search !== '') {
+            $escaped = str_replace(['%', '_'], ['\\%', '\\_'], $search);
+            $query->where(function ($q) use ($escaped) {
+                $q->where('reference_number', 'like', "%{$escaped}%")
+                  ->orWhere('tracking_number', 'like', "%{$escaped}%")
+                  ->orWhere('subject', 'like', "%{$escaped}%")
+                  ->orWhere('sender_name', 'like', "%{$escaped}%")
+                  ->orWhere('type', 'like', "%{$escaped}%");
+            });
+        }
+
+        $status = trim((string) $request->get('status', ''));
+        if ($status !== '' && array_key_exists($status, Document::STATUSES)) {
+            $query->where('status', $status);
+        }
+
+        $documents = $query->latest('last_action_at')->paginate(20)->withQueryString();
+
+        $handlerBase = Document::where('current_handler_id', $user->id);
+        $stats = [
+            'active'    => (clone $handlerBase)->whereNotIn('status', ['completed', 'for_pickup', 'archived', 'cancelled', 'returned'])->count(),
+            'in_review' => (clone $handlerBase)->whereIn('status', ['received', 'in_review'])->count(),
+            'completed' => (clone $handlerBase)->whereIn('status', ['completed', 'for_pickup'])->count(),
+        ];
+
+        return view('ict.index', compact('user', 'documents', 'stats', 'search', 'status'));
+    }
+
+    /**
+     * ICT Unit — receive a document by reference number.
+     */
+    public function ictReceiveByReference(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user || !$user->isSuperAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+
+        $request->validate([
+            'reference_number' => 'nullable|string|max:100',
+            'tracking_number'  => 'nullable|string|max:100',
+        ]);
+
+        $lookupInput = strtoupper(trim(strip_tags((string)($request->reference_number ?: $request->tracking_number))));
+        if ($lookupInput === '') {
+            return response()->json(['success' => false, 'message' => 'Reference number is required.'], 422);
+        }
+
+        $document = Document::where(function ($q) use ($lookupInput) {
+            $q->whereRaw('UPPER(reference_number) = ?', [$lookupInput])
+              ->orWhereRaw('UPPER(tracking_number) = ?', [$lookupInput]);
+        })->first();
+
+        if (!$document) {
+            return response()->json(['success' => false, 'message' => 'Reference number not found.'], 404);
+        }
+
+        if (in_array($document->status, ['completed', 'returned', 'cancelled'], true)) {
+            return response()->json(['success' => false, 'message' => 'This document is already closed and cannot be received.'], 422);
+        }
+
+        if ($document->current_handler_id && (int) $document->current_handler_id === (int) $user->id
+            && in_array($document->status, ['received', 'in_review', 'for_pickup'], true)) {
+            return response()->json(['success' => false, 'message' => 'This document is already tagged to you (' . $document->statusLabel() . ').'], 422);
+        }
+
+        $fromOfficeId = $document->current_office_id;
+        $toOfficeId   = $user->office_id ?: $document->current_office_id;
+
+        $document->current_handler_id = $user->id;
+        if ($user->office_id) {
+            $document->current_office_id = $user->office_id;
+        }
+        $document->status = 'in_review';
+        $document->last_action_at = now();
+        if (!$document->submitted_to_office_id && $user->office_id) {
+            $document->submitted_to_office_id = $user->office_id;
+        }
+        $document->save();
+
+        RoutingLog::create([
+            'document_id'   => $document->id,
+            'performed_by'  => $user->id,
+            'from_office_id'=> $fromOfficeId,
+            'to_office_id'  => $toOfficeId,
+            'action'        => 'processing',
+            'status_after'  => 'in_review',
+            'remarks'       => 'Document is now being processed by ICT Unit (Super Admin).',
+        ]);
+
+        return response()->json([
+            'success'          => true,
+            'message'          => 'Document is now being processed.',
+            'status'           => 'in_review',
+            'reference_number' => $document->reference_number ?: $document->tracking_number,
+            'tracking_number'  => $document->tracking_number,
+            'current_handler'  => $user->name,
+        ]);
+    }
+
+    /**
+     * ICT Unit — accept a submitted document.
+     */
+    public function ictAccept(Request $request, $id)
+    {
+        $user = Auth::user();
+        if (!$user || !$user->isSuperAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+        }
+
+        $document = Document::findOrFail($id);
+
+        if ($document->status !== 'submitted') {
+            return response()->json(['success' => false, 'message' => 'Document cannot be accepted at its current status.'], 422);
+        }
+
+        $fromOfficeId = $document->current_office_id;
+        $toOfficeId   = $user->office_id ?: $document->current_office_id;
+
+        $document->current_handler_id = $user->id;
+        if ($user->office_id) {
+            $document->current_office_id = $user->office_id;
+        }
+        $document->status = 'in_review';
+        $document->last_action_at = now();
+        $document->save();
+
+        RoutingLog::create([
+            'document_id'   => $document->id,
+            'performed_by'  => $user->id,
+            'from_office_id'=> $fromOfficeId,
+            'to_office_id'  => $toOfficeId,
+            'action'        => 'processing',
+            'status_after'  => 'in_review',
+            'remarks'       => 'Document accepted by ICT Unit (Super Admin).',
+        ]);
+
+        return response()->json([
+            'success'         => true,
+            'message'         => 'Document accepted successfully.',
+            'status'          => 'in_review',
+            'current_handler' => $user->name,
+        ]);
+    }
+
+    /**
+     * ICT Unit — live stats JSON.
+     */
+    public function ictStatsJson()
+    {
+        $user = Auth::user();
+        if (!$user || !$user->isSuperAdmin()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        $stats = Cache::remember('ict_stats_' . $user->id, 15, function () use ($user) {
+            $base = Document::where('current_handler_id', $user->id);
+            return [
+                'active'    => (clone $base)->whereNotIn('status', ['completed', 'for_pickup', 'archived', 'cancelled', 'returned'])->count(),
+                'in_review' => (clone $base)->whereIn('status', ['received', 'in_review'])->count(),
+                'completed' => (clone $base)->whereIn('status', ['completed', 'for_pickup'])->count(),
+            ];
+        });
+        return response()->json($stats);
     }
 }

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="<?php echo e(asset('images/DOCTRAXLOGO.svg')); ?>" type="image/svg+xml">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>DepEd Document Tracking System</title>
@@ -12,6 +13,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
     <script src="/js/spa.js" defer></script>
+    <script src="/js/form-utils.js" defer></script>
+    <script src="/js/request-utils.js" defer></script>
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -22,8 +25,13 @@
                 <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
             </div>
         </div>
-        <div class="nav-actions">
-           <!-- Placeholder for login or user profile in future -->
+        <button class="nav-hamburger" id="navHamburger" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')" aria-label="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-links" id="navLinks">
+            <a href="/" class="nav-link active"><i class="fas fa-home"></i> Home</a>
+            <a href="/about-us" class="nav-link"><i class="fas fa-info-circle"></i> About Us</a>
+            <a href="/contact-us" class="nav-link"><i class="fas fa-envelope"></i> Contact Us</a>
         </div>
     </nav>
 
@@ -31,7 +39,16 @@
         <!-- Main Content -->
         <main class="main-content">
             <div class="greeting">
+                <img src="<?php echo e(asset('images/sdologo.svg')); ?>" alt="SDO Logo" class="greeting-logo">
+                <?php if(auth()->guard()->check()): ?>
+                <?php
+                    $u = auth()->user();
+                    $gName = explode(' ', trim($u->name))[0];
+                ?>
+                <h2>Hello, <?php echo e($gName); ?>!<br>Choose your transaction.</h2>
+                <?php else: ?>
                 <h2>Hello, Guest!<br>Choose your transaction.</h2>
+                <?php endif; ?>
                 <p>Welcome to the official document portal.</p>
             </div>
 
@@ -59,6 +76,14 @@
             <?php endif; ?>
         </main>
     </div>
+    <footer class="dash-footer">
+        <div class="footer-left">
+            <span>&copy; <?php echo e(date('Y')); ?> DepEd Document Tracking System</span>
+        </div>
+        <div class="footer-right">
+            Developed by Raymond Bautista
+        </div>
+    </footer>
 </body>
 </html>
 <?php /**PATH C:\Users\iamra\Desktop\DepedDocumentTrackingSystem\resources\views/welcome.blade.php ENDPATH**/ ?>

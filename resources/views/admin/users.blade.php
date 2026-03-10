@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="{{ asset('images/DOCTRAXLOGO.svg') }}" type="image/svg+xml">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Manage Users - DepEd DOCTRAX</title>
@@ -9,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
 
     <style>
         :root {
@@ -36,86 +38,42 @@
             min-height: 100vh;
         }
 
-        /* ─── Navbar ─── */
-        .navbar {
-            width: 100%;
-            background: var(--primary-gradient);
-            padding: 15px 5%;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-            color: var(--white);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav-content { display: flex; align-items: center; gap: 15px; }
-        .brand-text { display: flex; flex-direction: column; }
-        .brand-subtitle { font-size: 11px; opacity: 0.85; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 400; }
-        .navbar h1 { font-size: 18px; font-weight: 700; margin: 0; line-height: 1.2; }
-
-        .nav-actions { display: flex; align-items: center; gap: 16px; }
-
-        .nav-link {
-            color: rgba(255,255,255,0.85);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 7px 14px;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-        .nav-link:hover { background: rgba(255,255,255,0.15); color: #fff; }
-        .nav-link.active { background: rgba(255,255,255,0.2); color: #fff; }
-
-        .nav-user {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-left: 8px;
-            padding-left: 16px;
-            border-left: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .nav-avatar {
-            width: 34px; height: 34px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            color: #fff;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 13px;
-        }
-
-        .nav-user-info { display: flex; flex-direction: column; line-height: 1.2; }
-        .nav-user-name { font-size: 13px; font-weight: 600; color: #fff; }
-        .nav-user-role { font-size: 10px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.5px; }
-
-        .btn-logout {
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: rgba(255,255,255,0.9);
-            cursor: pointer;
-            padding: 7px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-family: inherit;
-            font-weight: 500;
-            display: flex; align-items: center; gap: 6px;
-            transition: all 0.2s;
-        }
-        .btn-logout:hover { background: rgba(220, 38, 38, 0.85); border-color: rgba(220, 38, 38, 0.9); color: #fff; }
-
-        .nav-toggle { display: none; background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; padding: 4px; }
-        .nav-menu-mobile { display: none; width: 100%; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.15); margin-top: 12px; flex-direction: column; gap: 4px; }
-        .nav-menu-mobile.open { display: flex; }
+        /* ─── Sidebar ─── */
+        .sidebar{position:fixed;top:0;left:0;width:240px;height:100vh;background:#0056b3;display:flex;flex-direction:column;z-index:200;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+        .sidebar.open{transform:translateX(0)}
+        .sb-brand{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,.12);text-align:center}
+        .sb-brand img{width:64px;height:64px;margin-bottom:8px}
+        .sb-brand h2{font-size:18px;font-weight:700;color:#fff;margin-bottom:2px}
+        .sb-brand small{font-size:11px;color:rgba(255,255,255,.65);display:block}
+        .sb-nav{flex:1;padding:12px 0;overflow-y:auto}
+        .sb-nav a{display:flex;align-items:center;gap:11px;padding:11px 20px;color:rgba(255,255,255,.78);text-decoration:none;font-size:13px;font-weight:500;transition:background .15s,color .15s}
+        .sb-nav a:hover,.sb-nav a.active{background:rgba(255,255,255,.14);color:#fff}
+        .sb-nav a i{width:16px;text-align:center}
+        .sb-nav .nav-section{padding:10px 20px 4px;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4);font-weight:600}
+        .sb-footer{padding:14px 20px;border-top:1px solid rgba(255,255,255,.12)}
+        .sb-user{display:flex;align-items:center;gap:10px}
+        .sb-avatar{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;flex-shrink:0}
+        .sb-user-info small{font-size:10px;color:rgba(255,255,255,.55);display:block}
+        .sb-user-info span{font-size:12px;font-weight:600;color:#fff}
+        .btn-logout{display:flex;align-items:center;gap:7px;margin-top:8px;padding:8px 14px;background:rgba(255,255,255,.1);border:none;border-radius:8px;color:rgba(255,255,255,.8);font-size:12px;cursor:pointer;font-family:Poppins,sans-serif;width:100%;justify-content:center;transition:background .2s}
+        .btn-logout:hover{background:rgba(220,38,38,.75)}
+        /* ─── Mobile top bar ─── */
+        .mob-topbar{display:flex;position:sticky;top:0;z-index:100;background:#0056b3;padding:12px 16px;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+        .mob-hamburger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;z-index:1001;user-select:none;padding:4px}
+        .mob-hamburger span{height:2px;width:24px;background:#fff;border-radius:2px;transition:all .4s ease}
+        .mob-hamburger.toggle span:nth-child(1){transform:rotate(-45deg) translate(-4px,5px)}
+        .mob-hamburger.toggle span:nth-child(2){opacity:0}
+        .mob-hamburger.toggle span:nth-child(3){transform:rotate(45deg) translate(-4px,-5px)}
+        .mob-brand{flex:1;display:flex;flex-direction:column;color:#fff}
+        .mob-brand .brand-subtitle{font-size:clamp(9px,2vw,11px);opacity:.85;text-transform:uppercase;letter-spacing:1px}
+        .mob-brand h1{font-size:clamp(13px,3.5vw,18px);font-weight:700;margin:0;line-height:1.2}
+        .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:199}
+        .mob-overlay.open{display:block}
+        /* ─── Main ─── */
+        .main{margin-left:0;flex:1;display:flex;flex-direction:column;}
 
         /* ─── Main Content ─── */
-        .dash-wrapper { max-width: 1200px; width: 100%; margin: 0 auto; padding: 28px 24px 48px; }
+        .dash-wrapper { max-width: 1200px; width: 100%; margin: 0 auto; padding: 28px 24px 48px; flex:1; }
 
         .page-header {
             display: flex;
@@ -148,7 +106,8 @@
             display: flex;
             gap: 12px;
             margin-bottom: 20px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            align-items: center;
         }
 
         .filter-input {
@@ -159,7 +118,8 @@
             font-size: 13px;
             background: var(--white);
             color: var(--text-dark);
-            min-width: 240px;
+            flex: 1;
+            min-width: 0;
             outline: none;
             transition: border-color 0.15s;
         }
@@ -226,7 +186,7 @@
             border-bottom: 1px solid #f1f5f9;
         }
 
-        .panel-title { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+        .panel-title { font-size: 17px; font-weight: 700; color: var(--text-dark); }
         .panel-badge {
             background: rgba(0, 86, 179, 0.08);
             color: var(--primary);
@@ -399,6 +359,12 @@
         .modal-btn.danger { background: #dc2626; color: #fff; border-color: #dc2626; }
         .modal-btn.danger:hover { background: #b91c1c; }
 
+        .modal-btn.warning { background: #d97706; color: #fff; border-color: #d97706; }
+        .modal-btn.warning:hover { background: #b45309; }
+
+        .modal-btn.success { background: #16a34a; color: #fff; border-color: #16a34a; }
+        .modal-btn.success:hover { background: #15803d; }
+
         .modal-btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
         .modal-btn.primary:hover { background: var(--primary-dark); }
 
@@ -418,6 +384,8 @@
             outline: none;
         }
         .modal-input:focus { border-color: var(--primary); background: #fff; }
+        .modal-err { font-size: 12px; color: #dc2626; margin-top: 4px; display: none; }
+        .modal-err.show { display: block; }
         .btn-sm.edit { color: #1d4ed8; border-color: #bfdbfe; }
         .btn-sm.edit:hover { background: #eff6ff; }
 
@@ -462,7 +430,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            transform: translateX(120%);
+            transform: translateX(calc(100% + 60px));
             transition: transform 0.3s ease;
         }
         .toast.show { transform: translateX(0); }
@@ -489,81 +457,108 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .anim { animation: fadeIn 0.25s ease forwards; }
 
+        /* ─── Mobile cards (hidden on desktop) ─── */
+        .mob-cards { display:none; }
+        .mob-card {
+            background:#fff;
+            border-radius:12px;
+            border:1px solid var(--border);
+            padding:16px;
+            margin-bottom:12px;
+        }
+        .mob-card-head { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:10px; }
+        .mob-card-name { font-size:14px; font-weight:700; color:var(--text-dark); }
+        .mob-card-sub { font-size:11px; color:var(--text-muted); margin-top:2px; }
+        .mob-card-sub i { margin-right:3px; }
+        .mob-card-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; font-size:12px; color:var(--text-muted); }
+        .mob-card-row .label { font-weight:600; text-transform:uppercase; font-size:10px; letter-spacing:.3px; }
+        .mob-card-row .value { font-weight:500; color:var(--text-dark); text-align:right; word-break:break-all; }
+        .mob-card-actions { display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); flex-wrap:wrap; }
+        .mob-card-actions .btn-sm { width:auto; padding:6px 12px; font-size:11px; font-weight:600; gap:5px; height:auto; border-radius:8px; }
+        .mob-card-actions .btn-sm i { font-size:11px; }
+
         /* ─── Responsive ─── */
-        @media (max-width: 768px) {
-            .navbar { padding: 12px 4%; flex-wrap: wrap; }
-            .navbar h1 { font-size: 15px; }
-            .brand-subtitle { font-size: 10px; }
-            .nav-actions .nav-link, .nav-user, .btn-logout { display: none; }
-            .nav-toggle { display: block; }
-            .nav-menu-mobile .nav-link { display: flex; width: 100%; padding: 10px 12px; font-size: 14px; }
-            .nav-menu-mobile .mobile-user-section {
-                display: flex; align-items: center; justify-content: space-between;
-                padding: 10px 12px; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.1);
-            }
-            .nav-menu-mobile .mobile-user-section .nav-avatar { width: 30px; height: 30px; font-size: 12px; }
-            .nav-menu-mobile .mobile-user-section span { color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 500; }
-            .nav-menu-mobile .btn-logout { display: flex; background: rgba(220,38,38,0.7); border-color: transparent; padding: 6px 12px; font-size: 12px; }
+        @media (max-width: 900px) {
             .dash-wrapper { padding: 20px 16px 40px; }
             .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-            .filters { flex-direction: column; }
-            .filter-input { min-width: 100%; }
-            .dtable th:nth-child(4), .dtable td:nth-child(4) { display: none; }
-            .dash-footer { flex-direction: column; gap: 6px; text-align: center; padding: 16px 5%; }
-        }
-
-        @media (max-width: 400px) {
-            .navbar { padding: 10px 3%; }
-            .navbar h1 { font-size: 13px; }
-            .brand-subtitle { font-size: 9px; }
+            .page-header h1 { font-size:18px; }
+            .page-header p { font-size:12px; }
+            .back-link { font-size:12px; padding:6px 12px; }
+            .filters { gap: 8px; }
+            .filter-input { font-size: 12px; padding: 8px 10px; }
+            .filter-select { font-size: 12px; padding: 8px 6px; }
+            .filter-btn { font-size: 12px; padding: 8px 12px; }
+            .filter-clear { font-size: 12px; padding: 8px 10px; }
+            .panel .dtable-wrap { display:none; }
+            .mob-cards { display:block; padding:12px; }
+            .modal { max-width:95vw; }
+            .modal-body { padding:16px; }
+            .modal-head { padding:16px 16px 0; }
+            .modal-foot { padding:12px 16px; }
+            .pagination-bar { flex-direction:column; gap:10px; text-align:center; padding:12px 16px; }
+            .dash-footer { flex-direction:column; gap:6px; text-align:center; padding:16px 5%; }
+            .toast { right:12px; left:12px; max-width:none; }
         }
     </style>
+    <script src="/js/spa.js" defer></script>
+    <script src="/js/form-utils.js" defer></script>
+    <script src="/js/request-utils.js" defer></script>
 </head>
 <body>
 
-    <!-- ─── Navigation Bar ─── -->
-    <nav class="navbar">
-        <div class="nav-content">
-            <div class="brand-text">
-                <span class="brand-subtitle">Department of Education</span>
-                <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
-            </div>
-        </div>
+<!-- Mobile top bar -->
+<div class="mob-topbar">
+    <button class="mob-hamburger" id="mobHamBtn" type="button" onclick="toggleSidebar()" aria-label="Menu"><span></span><span></span><span></span></button>
+    <div class="mob-brand">
+        <span class="brand-subtitle">Department of Education</span>
+        <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
+    </div>
+</div>
+<div class="mob-overlay" id="mobOverlay" onclick="closeSidebar()"></div>
 
-        <div class="nav-actions">
-            <a href="/dashboard" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a>
-            <a href="/admin/users" class="nav-link active"><i class="fas fa-users"></i> Users</a>
-            <a href="/admin/documents" class="nav-link"><i class="fas fa-folder-open"></i> Documents</a>
-
-            <div class="nav-user">
-                <div class="nav-avatar">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
-                <div class="nav-user-info">
-                    <span class="nav-user-name">{{ explode(' ', $user->name)[0] }}</span>
-                    <span class="nav-user-role">Admin</span>
-                </div>
-            </div>
-
-            <button onclick="logout()" class="btn-logout" title="Sign Out">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
-        </div>
-
-        <button class="nav-toggle" onclick="toggleMobileNav()"><i class="fas fa-bars"></i></button>
-
-        <div class="nav-menu-mobile" id="mobileNav">
-            <a href="/dashboard" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a>
-            <a href="/admin/users" class="nav-link active"><i class="fas fa-users"></i> Users</a>
-            <a href="/admin/documents" class="nav-link"><i class="fas fa-folder-open"></i> Documents</a>
-            <div class="mobile-user-section">
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <div class="nav-avatar">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
-                    <span>{{ explode(' ', $user->name)[0] }}</span>
-                </div>
-                <button onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
-            </div>
-        </div>
+<!-- ─── Sidebar ─── -->
+<div class="sidebar" id="mainSidebar">
+    <div class="sb-brand">
+        <img src="{{ asset('images/DOCTRAXLOGO.svg') }}" alt="DOCTRAX Logo">
+        <h2>DOCTRAX</h2>
+        <small>DepEd Document Tracking System</small>
+    </div>
+    <nav class="sb-nav">
+        <span class="nav-section">Overview</span>
+        <a href="/dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <span class="nav-section">Management</span>
+        <a href="/admin/users" class="active"><i class="fas fa-users"></i> Users</a>
+        <a href="/admin/offices"><i class="fas fa-building"></i> Offices</a>
+        <a href="/admin/documents"><i class="fas fa-folder-open"></i> Documents</a>
+        @if($user->isSuperAdmin())
+        <a href="/records/documents"><i class="fas fa-eye"></i> Records View</a>
+        <span class="nav-section">ICT Unit</span>
+        <a href="/ict/documents"><i class="fas fa-network-wired"></i> ICT Documents</a>
+        @endif
+        @if($user->isSuperAdmin())
+        <span class="nav-section">Reports</span>
+        <a href="/office/search"><i class="fas fa-chart-line"></i> Reports Dashboard</a>
+        @endif
+        <span class="nav-section">My Documents</span>
+        <a href="/submit"><i class="fas fa-paper-plane"></i> Submit Document</a>
+        <a href="/my-documents"><i class="fas fa-folder"></i> My Documents</a>
+        <a href="/track"><i class="fas fa-search"></i> Track Document</a>
+        <span class="nav-section">Account</span>
+        <a href="/profile"><i class="fas fa-user-cog"></i> My Profile</a>
     </nav>
+    <div class="sb-footer">
+        <div class="sb-user">
+            <div class="sb-avatar">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+            <div class="sb-user-info">
+                <small>{{ $user->isSuperAdmin() ? 'Super Admin' : 'Admin' }}</small>
+                <span>{{ explode(' ', $user->name)[0] }}</span>
+            </div>
+        </div>
+        <button onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+</div>
 
+<div class="main">
     <!-- ─── Content ─── -->
     <div class="dash-wrapper">
 
@@ -576,7 +571,7 @@
         </div>
 
         <!-- Filters -->
-        <form class="filters anim" method="GET" action="/admin/users">
+        <form class="filters anim" method="GET" action="/admin/users" id="searchForm">
             <input type="text" name="search" class="filter-input" placeholder="Search name, email, or mobile..." value="{{ $filters['search'] }}">
             <select name="status" class="filter-select">
                 <option value="">All Status</option>
@@ -584,7 +579,7 @@
                 <option value="pending" {{ $filters['status'] === 'pending' ? 'selected' : '' }}>Pending</option>
                 <option value="suspended" {{ $filters['status'] === 'suspended' ? 'selected' : '' }}>Suspended</option>
             </select>
-            <button type="submit" class="filter-btn"><i class="fas fa-search"></i> Search</button>
+            <button type="submit" class="filter-btn" id="searchBtn" data-no-auto-loading><i class="fas fa-search"></i> Search</button>
             @if($filters['search'] || $filters['status'])
                 <a href="/admin/users" class="filter-clear">Clear</a>
             @endif
@@ -598,10 +593,11 @@
             </div>
 
             @if($users->count() > 0)
+            <div class="dtable-wrap">
             <table class="dtable">
                 <thead>
                     <tr>
-                        <th>Name / Office</th>
+                        <th>Name</th>
                         <th>Type</th>
                         <th>Email</th>
                         <th>Mobile</th>
@@ -615,30 +611,32 @@
                     @foreach($users as $u)
                     @php
                         $isRep = $u->account_type === 'representative';
-                        $officeName = '';
-                        $repName = '';
                         if ($isRep && str_contains($u->name, ' - ')) {
                             [$officeName, $repName] = explode(' - ', $u->name, 2);
+                        } elseif ($isRep) {
+                            $officeName = $u->office->name ?? 'No office assigned';
+                            $repName = $u->name;
                         } else {
                             $officeName = $u->name;
+                            $repName = '';
                         }
                     @endphp
                     <tr id="user-row-{{ $u->id }}">
                         <td>
                             <div class="name-cell">
-                                <span class="name-office">{{ $officeName }}</span>
-                                @if($isRep && $repName)
-                                    <span class="name-rep"><i class="fas fa-user"></i>{{ $repName }}</span>
+                                <span class="name-office">{{ $isRep ? $repName : $officeName }}</span>
+                                @if($isRep)
+                                    <span class="name-rep"><i class="fas fa-building" style="margin-right:3px;"></i>{{ $officeName }}</span>
                                 @endif
                             </div>
                         </td>
                         <td>
                             <span class="type-badge {{ $u->account_type ?? 'individual' }}">
-                                {{ $isRep ? 'Representative' : 'Individual' }}
+                                {{ ($isRep && $u->office_id) ? 'Office' : ($isRep ? 'Representative' : 'Individual') }}
                             </span>
                         </td>
                         <td>{{ $u->email }}</td>
-                        <td>{{ $u->mobile ?? '—' }}</td>
+                        <td>{{ $u->mobile ?? 'No number provided' }}</td>
                         <td class="t-docs">{{ $u->documents_count }}</td>
                         <td>
                             <span class="pill {{ $u->status }}" id="user-status-{{ $u->id }}">{{ ucfirst($u->status) }}</span>
@@ -647,27 +645,103 @@
                         <td>
                             <div class="action-btns">
                                 @if($u->status !== 'active')
-                                    <button class="btn-sm activate" onclick="updateStatus({{ $u->id }}, 'active', '{{ $u->name }}')" title="Activate">
+                                    <button class="btn-sm activate" onclick="updateStatus({{ $u->id }}, 'active', '{{ addslashes($u->name) }}')" title="Activate">
                                         <i class="fas fa-check"></i>
                                     </button>
                                 @endif
                                 @if($u->status !== 'suspended')
-                                    <button class="btn-sm suspend" onclick="updateStatus({{ $u->id }}, 'suspended', '{{ $u->name }}')" title="Suspend">
+                                    <button class="btn-sm suspend" onclick="updateStatus({{ $u->id }}, 'suspended', '{{ addslashes($u->name) }}')" title="Suspend">
                                         <i class="fas fa-ban"></i>
                                     </button>
                                 @endif
                                 <button class="btn-sm edit" onclick="openEditModal({{ $u->id }}, '{{ addslashes($officeName) }}', '{{ addslashes($repName) }}', '{{ $u->email }}', '{{ $u->mobile ?? '' }}', '{{ $u->account_type ?? 'individual' }}')" title="Edit">
                                     <i class="fas fa-pencil-alt"></i>
                                 </button>
-                                <button class="btn-sm delete" onclick="confirmDelete({{ $u->id }}, '{{ $u->name }}')" title="Delete">
+                                @if(!$user->isSuperAdmin())
+                                <button class="btn-sm delete" onclick="confirmDelete({{ $u->id }}, '{{ addslashes($u->name) }}')" title="Delete">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
+                                @endif
                             </div>
                         </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
+            </div>
+
+            {{-- Mobile card layout --}}
+            <div class="mob-cards">
+                @foreach($users as $u)
+                @php
+                    $isRep = $u->account_type === 'representative';
+                    if ($isRep && str_contains($u->name, ' - ')) {
+                        [$officeName, $repName] = explode(' - ', $u->name, 2);
+                    } elseif ($isRep) {
+                        $officeName = $u->office->name ?? 'No office assigned';
+                        $repName = $u->name;
+                    } else {
+                        $officeName = $u->name;
+                        $repName = '';
+                    }
+                @endphp
+                <div class="mob-card" id="mob-user-row-{{ $u->id }}">
+                    <div class="mob-card-head">
+                        <div>
+                            <div class="mob-card-name">{{ $isRep ? $repName : $officeName }}</div>
+                            @if($isRep)
+                                <div class="mob-card-sub"><i class="fas fa-building" style="margin-right:3px;"></i>{{ $officeName }}</div>
+                            @endif
+                        </div>
+                        <span class="pill {{ $u->status }}" id="mob-user-status-{{ $u->id }}">{{ ucfirst($u->status) }}</span>
+                    </div>
+                    <div class="mob-card-row">
+                        <span class="label">Type</span>
+                        <span class="value">
+                            <span class="type-badge {{ $u->account_type ?? 'individual' }}">
+                                {{ ($isRep && $u->office_id) ? 'Office' : ($isRep ? 'Representative' : 'Individual') }}
+                            </span>
+                        </span>
+                    </div>
+                    <div class="mob-card-row">
+                        <span class="label">Email</span>
+                        <span class="value">{{ $u->email }}</span>
+                    </div>
+                    <div class="mob-card-row">
+                        <span class="label">Mobile</span>
+                        <span class="value">{{ $u->mobile ?? 'No number provided' }}</span>
+                    </div>
+                    <div class="mob-card-row">
+                        <span class="label">Documents</span>
+                        <span class="value">{{ $u->documents_count }}</span>
+                    </div>
+                    <div class="mob-card-row">
+                        <span class="label">Joined</span>
+                        <span class="value">{{ $u->created_at->format('M d, Y') }}</span>
+                    </div>
+                    <div class="mob-card-actions">
+                        @if($u->status !== 'active')
+                            <button class="btn-sm activate" onclick="updateStatus({{ $u->id }}, 'active', '{{ addslashes($u->name) }}')" title="Activate">
+                                <i class="fas fa-check"></i> Activate
+                            </button>
+                        @endif
+                        @if($u->status !== 'suspended')
+                            <button class="btn-sm suspend" onclick="updateStatus({{ $u->id }}, 'suspended', '{{ addslashes($u->name) }}')" title="Suspend">
+                                <i class="fas fa-ban"></i> Suspend
+                            </button>
+                        @endif
+                        <button class="btn-sm edit" onclick="openEditModal({{ $u->id }}, '{{ addslashes($officeName) }}', '{{ addslashes($repName) }}', '{{ $u->email }}', '{{ $u->mobile ?? '' }}', '{{ $u->account_type ?? 'individual' }}')" title="Edit">
+                            <i class="fas fa-pencil-alt"></i> Edit
+                        </button>
+                        @if(!$user->isSuperAdmin())
+                        <button class="btn-sm delete" onclick="confirmDelete({{ $u->id }}, '{{ addslashes($u->name) }}')" title="Delete">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </button>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
 
             @if($users->hasPages())
             <div class="pagination-bar">
@@ -723,7 +797,7 @@
                         <input type="text" class="modal-input" id="editOfficeName" placeholder="e.g. City Hall Office" maxlength="255">
                     </div>
                     <div class="modal-field">
-                        <label class="modal-label">Representative Name</label>
+                        <label class="modal-label">Contact Person</label>
                         <input type="text" class="modal-input" id="editRepName" placeholder="e.g. Juan dela Cruz" maxlength="255">
                     </div>
                 </div>
@@ -733,8 +807,10 @@
                     <input type="email" class="modal-input" id="editEmail" placeholder="Email address" maxlength="255">
                 </div>
                 <div class="modal-field">
-                    <label class="modal-label">Mobile Number</label>
-                    <input type="text" class="modal-input" id="editMobile" placeholder="Mobile number (optional)" maxlength="20">
+                    <label class="modal-label">Mobile Number <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+                    <input type="text" class="modal-input" id="editMobile" placeholder="09XXXXXXXXX" maxlength="11" inputmode="numeric"
+                        oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,11)">
+                    <div class="modal-err" id="editMobileErr"></div>
                 </div>
             </div>
             <div class="modal-foot">
@@ -761,6 +837,28 @@
         </div>
     </div>
 
+    <!-- Suspend / Activate Confirmation Modal -->
+    <div class="modal-overlay" id="statusModal">
+        <div class="modal">
+            <div class="modal-head" id="statusModalHead">
+                <h3 id="statusModalTitle">Suspend User</h3>
+            </div>
+            <div class="modal-body">
+                <div style="display:flex;align-items:flex-start;gap:14px;">
+                    <div id="statusModalIcon" style="flex-shrink:0;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;"></div>
+                    <div>
+                        <p id="statusModalMsg" style="margin-bottom:0;"></p>
+                        <p id="statusModalSub" style="font-size:12px;color:#94a3b8;margin-top:6px;"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-foot">
+                <button class="modal-btn" onclick="closeStatusModal()">Cancel</button>
+                <button class="modal-btn" id="confirmStatusBtn"></button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
@@ -777,6 +875,11 @@
     (function() {
         var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+        }
+
         // ─── Toast ───
         function showToast(msg, type) {
             var t = document.getElementById('toast');
@@ -786,9 +889,57 @@
         }
 
         // ─── Update Status ───
+        var statusTargetId   = null;
+        var statusTargetVal  = null;
+
         window.updateStatus = function(id, status, name) {
-            var label = status === 'active' ? 'activate' : 'suspend';
-            if (!confirm('Are you sure you want to ' + label + ' ' + name + '?')) return;
+            statusTargetId  = id;
+            statusTargetVal = status;
+
+            var isSuspend = status === 'suspended';
+            var title     = isSuspend ? 'Suspend User' : 'Activate User';
+            var iconBg    = isSuspend ? '#fef2f2' : '#f0fdf4';
+            var iconColor = isSuspend ? '#dc2626' : '#16a34a';
+            var iconClass = isSuspend ? 'fas fa-ban' : 'fas fa-check-circle';
+            var btnClass  = isSuspend ? 'danger'  : 'success';
+            var btnLabel  = isSuspend ? 'Suspend' : 'Activate';
+            var msg       = isSuspend
+                ? 'Are you sure you want to suspend <strong>' + escapeHtml(name) + '</strong>?'
+                : 'Are you sure you want to activate <strong>' + escapeHtml(name) + '</strong>?';
+            var sub       = isSuspend
+                ? 'This user will no longer be able to log in until reactivated.'
+                : 'This user will regain access to the system.';
+
+            document.getElementById('statusModalTitle').textContent = title;
+            document.getElementById('statusModalMsg').innerHTML     = msg;
+            document.getElementById('statusModalSub').textContent   = sub;
+
+            var iconEl = document.getElementById('statusModalIcon');
+            iconEl.style.background = iconBg;
+            iconEl.innerHTML = '<i class="' + iconClass + '" style="color:' + iconColor + ';"></i>';
+
+            var btn = document.getElementById('confirmStatusBtn');
+            btn.textContent = btnLabel;
+            btn.className   = 'modal-btn ' + btnClass;
+
+            document.getElementById('statusModal').classList.add('show');
+        };
+
+        window.closeStatusModal = function() {
+            document.getElementById('statusModal').classList.remove('show');
+            statusTargetId  = null;
+            statusTargetVal = null;
+        };
+
+        document.getElementById('statusModal').addEventListener('click', function(e) {
+            if (e.target === this) closeStatusModal();
+        });
+
+        document.getElementById('confirmStatusBtn').addEventListener('click', function() {
+            if (!statusTargetId) return;
+            var id     = statusTargetId;
+            var status = statusTargetVal;
+            closeStatusModal();
 
             fetch('/api/admin/users/' + id, {
                 method: 'PUT',
@@ -805,7 +956,7 @@
                 }
             })
             .catch(function() { showToast('Something went wrong.', 'error'); });
-        };
+        });
 
         // ─── Delete ───
         var deleteId = null;
@@ -834,6 +985,8 @@
                     showToast(data.message, 'success');
                     var row = document.getElementById('user-row-' + deleteId);
                     if (row) row.style.display = 'none';
+                    var mobCard = document.getElementById('mob-user-row-' + deleteId);
+                    if (mobCard) mobCard.style.display = 'none';
                 } else {
                     showToast(data.message || 'Failed to delete.', 'error');
                 }
@@ -849,10 +1002,12 @@
         // ─── Edit User ───
         var editId = null;
         var editAccountType = 'individual';
+        var editOriginal = {};
 
         window.openEditModal = function(id, officeName, repName, email, mobile, accountType) {
             editId = id;
             editAccountType = accountType || 'individual';
+            editOriginal = { officeName: officeName, repName: repName, email: email, mobile: mobile };
 
             var isRep = editAccountType === 'representative';
             document.getElementById('editFieldIndividual').style.display = isRep ? 'none' : 'block';
@@ -862,7 +1017,7 @@
                 document.getElementById('editOfficeName').value = officeName;
                 document.getElementById('editRepName').value   = repName;
             } else {
-                document.getElementById('editName').value = officeName; // officeName holds the full name for individuals
+                document.getElementById('editName').value = officeName;
             }
             document.getElementById('editEmail').value  = email;
             document.getElementById('editMobile').value = mobile;
@@ -884,7 +1039,7 @@
                 var office = document.getElementById('editOfficeName').value.trim();
                 var rep    = document.getElementById('editRepName').value.trim();
                 if (!office) { showToast('Office name is required.', 'error'); return; }
-                if (!rep)    { showToast('Representative name is required.', 'error'); return; }
+                if (!rep)    { showToast('Contact person name is required.', 'error'); return; }
                 name = office + ' - ' + rep;
             } else {
                 name = document.getElementById('editName').value.trim();
@@ -893,19 +1048,32 @@
 
             if (!email) { showToast('Email is required.', 'error'); return; }
 
+            if (mobile) {
+                if (mobile.length !== 11) { showToast('Mobile number must be exactly 11 digits.', 'error'); return; }
+                if (!mobile.startsWith('09')) { showToast('Mobile number must start with 09.', 'error'); return; }
+            }
+            // Check if anything actually changed
+            var origName = editAccountType === 'representative'
+                ? (editOriginal.officeName + ' - ' + editOriginal.repName)
+                : editOriginal.officeName;
+            if (name === origName && email === editOriginal.email && mobile === editOriginal.mobile) {
+                showToast('No changes were made.', 'error');
+                return;
+            }
+
             var btn = document.getElementById('saveEditBtn');
             btn.disabled = true;
-            btn.textContent = 'Saving...';
+
+            var payload = { name: name, email: email, mobile: mobile };
 
             fetch('/api/admin/users/' + editId, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
-                body: JSON.stringify({ name: name, email: email, mobile: mobile })
+                body: JSON.stringify(payload)
             })
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
                 closeEditModal();
                 if (data.success) {
                     showToast(data.message, 'success');
@@ -916,7 +1084,6 @@
             })
             .catch(function() {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
                 showToast('Something went wrong.', 'error');
             });
         });
@@ -925,10 +1092,22 @@
             if (e.target === this) closeEditModal();
         });
 
-        // ─── Mobile Nav ───
-        window.toggleMobileNav = function() {
-            document.getElementById('mobileNav').classList.toggle('open');
+        // ─── Sidebar ───
+        window.toggleSidebar = function() {
+            var s = document.getElementById('mainSidebar');
+            var o = document.getElementById('mobOverlay');
+            var open = s.classList.toggle('open');
+            o.classList.toggle('open', open);
+            document.body.style.overflow = open ? 'hidden' : '';
+            document.getElementById('mobHamBtn').classList.toggle('toggle', open);
         };
+        window.closeSidebar = function() {
+            document.getElementById('mainSidebar').classList.remove('open');
+            document.getElementById('mobOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+            var btn = document.getElementById('mobHamBtn'); if (btn) btn.classList.remove('toggle');
+        };
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeSidebar(); });
 
         // ─── Logout ───
         window.logout = function() {
@@ -938,7 +1117,27 @@
             }).then(function() { window.location.href = '/login'; })
               .catch(function() { window.location.href = '/login'; });
         };
+
+        // ─── Search Rate Limit ───
+        (function() {
+            var form = document.getElementById('searchForm');
+            var btn = document.getElementById('searchBtn');
+            if (!form || !btn) return;
+            var lastSubmit = 0;
+            var cooldown = 2000; // 2 seconds between searches
+            form.addEventListener('submit', function(e) {
+                var now = Date.now();
+                if (now - lastSubmit < cooldown) {
+                    e.preventDefault();
+                    return;
+                }
+                lastSubmit = now;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+            });
+        })();
     })();
     </script>
+</div><!-- end .main -->
 </body>
 </html>

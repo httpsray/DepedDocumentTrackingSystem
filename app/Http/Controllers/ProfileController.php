@@ -11,12 +11,29 @@ class ProfileController extends Controller
 {
     /**
      * Show the profile page.
+     * Routes office/representative users to sidebar-layout views.
      */
     public function show()
     {
-        return view('dashboard.profile', [
-            'user' => Auth::user(),
-        ]);
+        $user = Auth::user();
+
+        // Admin account
+        if ($user->isAdmin()) {
+            return view('admin.profile', compact('user'));
+        }
+
+        // Admin-created office account (has office_id)
+        if ($user->account_type === 'representative' && $user->office_id) {
+            return view('office.profile', compact('user'));
+        }
+
+        // Self-registered representative (no office_id)
+        if ($user->account_type === 'representative') {
+            return view('representative.profile', compact('user'));
+        }
+
+        // Default: individual / admin
+        return view('dashboard.profile', compact('user'));
     }
 
     /**
@@ -32,7 +49,25 @@ class ProfileController extends Controller
             'mobile' => 'nullable|string|max:20',
         ]);
 
-        $user->name   = $request->name;
+        $newName = $request->name;
+
+        $hasChanges = $user->name  !== $newName
+                   || $user->email !== $request->email
+                   || $user->mobile !== ($request->mobile ?: null);
+
+        if (!$hasChanges) {
+            return response()->json([
+                'success' => true,
+                'message' => 'No changes were made.',
+                'user'    => [
+                    'name'   => $user->name,
+                    'email'  => $user->email,
+                    'mobile' => $user->mobile,
+                ],
+            ]);
+        }
+
+        $user->name   = $newName;
         $user->email  = $request->email;
         $user->mobile = $request->mobile;
         $user->save();

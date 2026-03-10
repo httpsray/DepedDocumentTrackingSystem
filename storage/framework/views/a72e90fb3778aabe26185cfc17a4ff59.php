@@ -2,378 +2,405 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="csrf-token" content="<?php echo csrf_token(); ?>">
+    <link rel="icon" href="<?php echo e(asset('images/DOCTRAXLOGO.svg')); ?>" type="image/svg+xml">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>Track Document - DepEd DTS</title>
-    <!-- Preconnect for faster font loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="/css/auth.css"> <!-- Reusing form styles -->
-    <script src="/js/spa.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        .container { background: transparent; box-shadow: none; animation: none; }
-        
-        .main-wrapper {
-            justify-content: center; /* Center horizontally */
-            padding-top: 40px;
-            width: 100%;
+        :root{--primary:#0056b3;--primary-dark:#004494;--bg:#f0f2f5;--border:#e2e8f0;--text-dark:#1b263b;--text-muted:#64748b}
+        *{margin:0;padding:0;box-sizing:border-box}
+        html{overflow-y:scroll}
+        body{background:var(--bg);font-family:Poppins,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+        .navbar{background:linear-gradient(135deg,#0056b3,#004494);padding:14px 5%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.12);position:sticky;top:0;z-index:100;flex-shrink:0}
+        .brand-text{display:flex;flex-direction:column}
+        .brand-subtitle{font-size:clamp(8px,2vw,10px);color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:1.5px}
+        .navbar h1{font-size:clamp(12px,3.2vw,17px);font-weight:700;color:#fff}
+        .nav-links{display:flex;align-items:center;gap:4px}
+        .nav-link{color:rgba(255,255,255,.85);text-decoration:none;font-size:13px;font-weight:500;padding:7px 14px;border-radius:8px;transition:background .2s,color .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+        .nav-link:hover{background:rgba(255,255,255,.15);color:#fff}
+        .nav-link.active{background:rgba(255,255,255,.18);color:#fff}
+        .nav-hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;color:#fff;font-size:20px;z-index:101;align-items:center;justify-content:center;transition:transform .2s}
+        .nav-hamburger.open{transform:rotate(90deg)}
+        .page{max-width:700px;margin:0 auto;padding:32px 16px 60px;flex:1;width:100%;display:flex;flex-direction:column;justify-content:center;transition:justify-content .3s}
+        .page.has-result{justify-content:flex-start}
+        .search-card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.07);padding:28px;margin-bottom:22px;text-align:center}
+        .search-card h2{font-size:17px;font-weight:700;color:var(--text-dark);margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:8px}
+        .search-card p{font-size:12px;color:var(--text-muted);margin-bottom:20px}
+        .ref-boxes-row{display:flex;align-items:center;gap:7px;flex:1;min-width:0;flex-wrap:nowrap}
+        .ref-box{flex:1;min-width:0;height:clamp(42px,10vw,60px);text-align:center;font-size:clamp(16px,4vw,24px);font-weight:700;font-family:'Poppins',sans-serif;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;text-transform:uppercase;background:#f8fafc;transition:border-color .2s,box-shadow .2s,background .2s;color:#1e293b;padding:0;caret-color:var(--primary)}
+        .ref-box:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,86,179,.13);background:#fff}
+        .ref-box.filled{background:#fff;border-color:#94a3b8}
+        .ref-sep{font-size:18px;color:#cbd5e1;user-select:none;padding:0 2px}
+        .search-main{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:0}
+        .search-center{width:100%;margin:0 auto}
+        .btn-clear-x{width:36px;height:36px;border:1.5px solid #e2e8f0;border-radius:50%;background:#f8fafc;color:#94a3b8;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;padding:0}
+        .btn-clear-x:hover{background:#fee2e2;color:#dc2626;border-color:#fca5a5}
+        .search-btn-wrap{display:flex;justify-content:center;margin-top:18px}
+        .btn-track{width:100%;height:clamp(44px,10vw,60px);padding:0 32px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-family:Poppins,sans-serif;font-size:clamp(13px,2.5vw,14px);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s}
+        .btn-track:hover{background:var(--primary-dark)}
+        .btn-track:disabled{opacity:.7;cursor:not-allowed}
+        .search-alert{margin-top:12px;padding:8px 12px;border-radius:7px;font-size:12px;display:none;align-items:center;gap:8px;animation:rcvFadeIn .2s ease-out;width:100%}
+        .search-alert.show{display:flex}
+        .search-alert.err{background:#fef2f2;border-left:3px solid #dc2626;color:#b91c1c}
+        .search-alert i{font-size:13px;flex-shrink:0}
+        .search-alert span{line-height:1.4}
+        @keyframes rcvFadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+        .result-card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.07);overflow:hidden;display:none}
+        .result-card.show{display:block}
+        .doc-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+        .doc-header>div:first-child{min-width:0;flex:1}
+        .doc-title{font-size:15px;font-weight:700;color:var(--text-dark);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .doc-ref{font-size:11px;color:var(--text-muted);font-family:monospace;letter-spacing:.5px}
+        .status-badge{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+        .meta-grid{display:grid;grid-template-columns:1fr 1fr}
+        .meta-item{padding:14px 22px;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+        .meta-item:nth-child(2n){border-right:none}
+        .meta-label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);font-weight:600;margin-bottom:4px}
+        .meta-value{font-size:13px;color:var(--text-dark);font-weight:500}
+        .timeline-section{padding:22px 24px}
+        .timeline-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:18px;display:flex;align-items:center;gap:6px}
+        .timeline{position:relative}
+        .timeline::before{content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:var(--border);z-index:-1}
+        .tl-item{position:relative;margin-bottom:22px;padding-left:24px}
+        .tl-item:last-child{margin-bottom:0}
+        .tl-dot{width:16px;height:16px;border-radius:50%;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+        .tl-dot.active{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
+        .tl-dot.done{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
+        .tl-dot.warn{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
+        .tl-dot.danger{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
+        .tl-dot.latest{background:#f59e0b;box-shadow:0 0 0 2px #f59e0b}
+        .tl-action{font-size:12px;font-weight:500;color:#64748b}
+        .tl-meta{font-size:12px;color:#64748b;margin:2px 0}
+        .tl-remarks{font-size:12px;color:#64748b;background:#f8fafc;border-left:3px solid var(--border);padding:5px 9px;border-radius:4px;margin-top:5px}
+        .tl-office-hdr{display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--text-dark);text-transform:none;letter-spacing:0;margin:18px 0 8px -7px;padding-left:7px;padding-bottom:6px;position:relative}
+        .tl-office-hdr::after{content:'';position:absolute;left:21px;right:0;bottom:0;height:1.5px;background:var(--border)}
+        .tl-office-hdr:first-child{margin-top:0}
+        .msg-box{text-align:center;padding:40px 20px}
+        .msg-box i{font-size:38px;color:#cbd5e1;margin-bottom:12px;display:block}
+        .msg-box h3{font-size:16px;color:var(--text-dark);font-weight:700;margin-bottom:6px}
+        .msg-box p{font-size:12px;color:var(--text-muted)}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+        @media(max-width:640px){
+            .navbar{padding:12px 4%;position:relative;flex-wrap:wrap}
+            .nav-hamburger{display:flex;order:-1}
+            .brand-text{flex:1;min-width:0}
+            .navbar h1{font-size:13px;line-height:1.3}
+            .brand-subtitle{font-size:8px}
+            .nav-links{display:none;position:absolute;top:100%;right:0;left:0;background:linear-gradient(135deg,#004494,#003378);flex-direction:column;padding:6px 0;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:100}
+            .nav-links.open{display:flex}
+            .nav-link{width:100%;padding:13px 20px;border-radius:0;font-size:13px;border-bottom:1px solid rgba(255,255,255,.08)}
+            .nav-link:last-child{border-bottom:none}
+            .nav-link:hover{background:rgba(255,255,255,.1)}
+            .meta-grid{grid-template-columns:1fr}
+            .meta-item{border-right:none}
+            .page{padding:16px 10px 40px}
+            .search-card{padding:18px 14px}
+            .search-card h2{font-size:15px}
+            .search-card p{font-size:11px;margin-bottom:14px}
+            .ref-boxes-row{gap:4px}
+            .ref-sep{font-size:14px;padding:0 1px}
+            .btn-clear-x{width:30px;height:30px;font-size:12px}
+            .search-btn-wrap{margin-top:14px}
+            .btn-track{height:48px;font-size:13px}
+            .my-docs-head{padding:12px 14px}
+            .my-doc-row{padding:10px 14px;gap:10px}
+            .my-doc-badge{font-size:9px;padding:2px 8px}
+            .doc-header{padding:16px 14px}
+            .doc-title{font-size:13px}
+            .doc-ref{font-size:10px}
+            .meta-item{padding:10px 14px}
+            .meta-label{font-size:9px}
+            .meta-value{font-size:12px}
+            .timeline-section{padding:16px 14px}
+            .timeline-title{font-size:11px}
+            .tl-action{font-size:11px}
+            .tl-meta{font-size:11px}
+            .tl-remarks{font-size:11px}
+            .msg-box{padding:28px 14px}
+            .msg-box i{font-size:30px}
+            .msg-box h3{font-size:14px}
         }
-
-        /* Tracking Card */
-        .tracking-container {
-             width: 100%;
-             max-width: 600px;
-             background: white;
-             padding: 40px;
-             border-radius: 12px;
-             box-shadow: var(--shadow-lg);
-             animation: fadeIn 0.5s ease-out;
-             font-family: 'Poppins', sans-serif;
-        }
-
-        /* Search Box */
-        .search-box {
-            position: relative;
-            margin-bottom: 30px;
-            margin-top: 30px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 16px 60px 16px 24px;
-            font-size: 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 50px;
-            transition: all 0.3s;
-            font-family: 'Poppins', sans-serif;
-            background: #f8fafc;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            background: #fff;
-            box-shadow: 0 4px 12px rgba(0, 86, 179, 0.1);
-        }
-
-        .search-btn {
-            position: absolute;
-            right: 6px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .search-btn:hover {
-            background: #004494;
-            transform: translateY(-50%) scale(1.05);
-        }
-
-        /* Timeline / Results */
-        .tracker-result {
-            margin-top: 40px;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 30px;
-            display: none; /* Hidden by default */
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            background: #dbeafe;
-            color: #1e40af;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-
-        .timeline {
-             position: relative;
-             padding-left: 30px;
-        }
-
-        .timeline-item {
-            position: relative;
-            padding-bottom: 35px;
-        }
-
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -30px;
-            top: 5px;
-            width: 14px;
-            height: 14px;
-            background: #cbd5e1;
-            border: 3px solid #fff;
-            border-radius: 50%;
-            z-index: 2;
-            box-shadow: 0 0 0 1px #cbd5e1;
-        }
-
-        .timeline-item::after {
-            content: '';
-            position: absolute;
-            left: -24px;
-            top: 22px;
-            width: 2px;
-            height: calc(100% - 15px);
-            background: #e2e8f0;
-            z-index: 1;
-        }
-
-        .timeline-item:last-child::after {
-            display: none;
-        }
-
-        .timeline-item.active::before {
-             background: var(--primary-color);
-             box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.2);
-             border-color: #fff;
-        }
-        
-        .timeline-item.active h4 {
-            color: var(--primary-color);
-        }
-
-        .timeline-content h4 {
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: var(--text-dark);
-        }
-
-        .timeline-content .time {
-            font-size: 12px;
-            color: #64748b;
-            margin-bottom: 4px;
-            display: block;
-        }
-
-        .timeline-content .details {
-            font-size: 13px;
-            color: #334155;
-            background: #f8fafc;
-            padding: 8px 12px;
-            border-radius: 6px;
-            display: inline-block;
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 600px) {
-            .tracking-container {
-                padding: 20px 16px;
-                border-radius: 10px;
-            }
-            .search-input {
-                padding: 12px 50px 12px 16px;
-                font-size: 14px;
-            }
-            .search-btn {
-                width: 38px;
-                height: 38px;
-                font-size: 16px;
-            }
-            .main-wrapper {
-                padding-top: 20px;
-                padding-left: 10px;
-                padding-right: 10px;
-            }
-            .timeline-content h4 {
-                font-size: 14px;
-            }
-            .timeline-content .details {
-                font-size: 12px;
-            }
-        }
+        /* my docs section */
+        .my-docs-card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.07);overflow:hidden;margin-bottom:22px}
+        .my-docs-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+        .my-docs-head h3{font-size:14px;font-weight:700;color:var(--text-dark);display:flex;align-items:center;gap:8px}
+        .my-docs-head span{font-size:11px;color:var(--text-muted)}
+        .my-doc-row{display:flex;align-items:center;gap:14px;padding:12px 22px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;text-decoration:none}
+        .my-doc-row:last-child{border-bottom:none}
+        .my-doc-row:hover{background:#f8fafc}
+        .my-doc-icon{width:34px;height:34px;border-radius:8px;background:#eff6ff;color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+        .my-doc-info{flex:1;min-width:0}
+        .my-doc-subject{font-size:13px;font-weight:600;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .my-doc-ref{font-size:11px;color:var(--text-muted);font-family:monospace;letter-spacing:.3px;margin-top:1px}
+        .my-doc-badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;flex-shrink:0}
+        .my-doc-arr{color:#cbd5e1;font-size:12px;flex-shrink:0}
+        .my-docs-empty{padding:28px;text-align:center;color:var(--text-muted);font-size:13px}
+        .dash-footer{width:100%;background:#fff;border-top:1px solid #e2e8f0;padding:20px 5%;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#94a3b8;margin-top:40px}
+        .footer-left{display:flex;align-items:center;gap:6px}
+        .footer-right{font-size:11px;color:#b0b8c4}
+        @media(max-width:768px){.dash-footer{flex-direction:column;gap:6px;text-align:center;padding:16px 5%}}
     </style>
+    <script src="/js/spa.js" defer></script>
+    <script src="/js/form-utils.js" defer></script>
+    <script src="/js/request-utils.js" defer></script>
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <div class="nav-content">
-            <div class="brand-text">
-                <span class="brand-subtitle">Department of Education</span>
-                <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
-            </div>
-        </div>
-        <div class="nav-actions">
-        </div>
-    </nav>
-    
-    <div class="main-wrapper">
-        <div class="tracking-container">
-            <a href="<?php echo e(auth()->check() ? '/dashboard' : '/'); ?>" style="display: inline-flex; align-items: center; gap: 6px; color: #64748b; text-decoration: none; font-size: 13px; font-weight: 500; margin-bottom: 16px; transition: color 0.2s;" onmouseover="this.style.color='#0056b3'" onmouseout="this.style.color='#64748b'">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M5 12l6 6" /><path d="M5 12l6 -6" /></svg>
-                <?php echo e(auth()->check() ? 'Back to Dashboard' : 'Back to Home'); ?>
-
-            </a>
-            <div class="auth-header" style="text-align: center; margin-bottom: 20px;">
-                 <div style="background: #eff6ff; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: var(--primary-color);">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor" class="icon icon-tabler icons-tabler-filled icon-tabler-file-description"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 2l.117 .007a1 1 0 0 1 .876 .876l.007 .117v4l.005 .15a2 2 0 0 0 1.838 1.844l.157 .006h4l.117 .007a1 1 0 0 1 .876 .876l.007 .117v9a3 3 0 0 1 -2.824 2.995l-.176 .005h-10a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-14a3 3 0 0 1 2.824 -2.995l.176 -.005zm3 14h-6a1 1 0 0 0 0 2h6a1 1 0 0 0 0 -2m0 -4h-6a1 1 0 0 0 0 2h6a1 1 0 0 0 0 -2" /><path d="M19 7h-4l-.001 -4.001z" /></svg>
-                 </div>
-                 <h2>Track Document</h2>
-                 <p>Enter your tracking number to check status.</p>
-            </div>
-            
-            <div class="search-box">
-                <div style="position: relative;">
-                    <input type="text" class="search-input" placeholder="Enter Tracking Number (e.g., CSJDM-2026-000001)" id="trackingInput" autocomplete="off">
-                    <button class="search-btn" onclick="searchDocument()">
-                        <i class="fas fa-search"></i>
-                    </button>
+<nav class="navbar">
+    <div class="brand-text">
+        <span class="brand-subtitle">Department of Education</span>
+        <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
+    </div>
+    <button class="nav-hamburger" id="navHamburger" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')" aria-label="Menu">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div class="nav-links" id="navLinks">
+        <a href="/" class="nav-link"><i class="fas fa-home"></i> Home</a>
+        <a href="/about-us" class="nav-link"><i class="fas fa-info-circle"></i> About Us</a>
+        <a href="/contact-us" class="nav-link"><i class="fas fa-envelope"></i> Contact Us</a>
+    </div>
+</nav>
+<div class="page">
+    <div class="search-card">
+        <h2><i class="fas fa-search" style="color:var(--primary)"></i> Track Your Document</h2>
+        <p>Enter your 8-character Tracking Number to view the current status and full routing history.</p>
+        <div class="search-center">
+            <div class="search-main">
+                <div class="ref-boxes-row" id="refBoxes">
+                    <input type="text" maxlength="1" class="ref-box" data-idx="0" data-no-clearable data-no-capitalize autocomplete="off">
+                    <input type="text" maxlength="1" class="ref-box" data-idx="1" data-no-clearable data-no-capitalize autocomplete="off">
+                    <input type="text" maxlength="1" class="ref-box" data-idx="2" data-no-clearable data-no-capitalize autocomplete="off">
+                    <input type="text" maxlength="1" class="ref-box" data-idx="3" data-no-clearable data-no-capitalize autocomplete="off">
+                    <span class="ref-sep">&mdash;</span>
+                    <input type="text" maxlength="1" class="ref-box" data-idx="4" data-no-clearable data-no-capitalize autocomplete="off">
+                    <input type="text" maxlength="1" class="ref-box" data-idx="5" data-no-clearable data-no-capitalize autocomplete="off">
+                    <input type="text" maxlength="1" class="ref-box" data-idx="6" data-no-clearable data-no-capitalize autocomplete="off">
+                    <input type="text" maxlength="1" class="ref-box" data-idx="7" data-no-clearable data-no-capitalize autocomplete="off">
                 </div>
-                <div id="errorMsg" style="color: #dc2626; font-size: 13px; margin-top: 8px; margin-left: 12px; display: none; font-weight: 500;">
-                    <i class="fas fa-exclamation-circle" style="margin-right: 4px;"></i> <span></span>
-                </div>
+                <button type="button" class="btn-clear-x" onclick="clearRefBoxes()" title="Clear">&#10005;</button>
             </div>
-
-            <!-- Empty State -->
-            <div id="initialState" style="text-align: center; opacity: 0.5; margin-top: 40px; margin-bottom: 20px;">
-                <p style="font-size: 13px; font-style: italic;">Enter a valid tracking ID to see results</p>
-            </div>
-            
-             <!-- Result Area (Sample Design) -->
-            <div id="resultsArea" class="tracker-result">
-                 <div style="margin-bottom: 25px;">
-                     <span class="status-badge">In Progress</span>
-                     <h3 style="font-size: 20px; margin-bottom: 5px;">Tracking #: <span style="font-family: monospace; color: var(--text-dark);">2024-ABC-123</span></h3>
-                     <p style="font-size: 14px; color: #64748b;">Subject: Request for CCTV Installation</p>
-                 </div>
-                 
-                 <div class="timeline">
-                    <!-- Step 1 (Latest) -->
-                    <div class="timeline-item active">
-                        <div class="timeline-content">
-                            <h4>Received at Division Office</h4>
-                            <span class="time">Oct 24, 2023 &bull; 10:30 AM</span>
-                            <div class="details">
-                                <i class="fas fa-user-circle" style="margin-right: 5px;"></i>
-                                Received by: Juan Dela Cruz (Records)
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Step 2 -->
-                     <div class="timeline-item">
-                        <div class="timeline-content">
-                            <h4 style="color: #64748b;">Forwarded to ASDS Office</h4>
-                            <span class="time">Oct 23, 2023 &bull; 04:15 PM</span>
-                            <div class="details">
-                                Action: For Approval
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Step 3 (Initial) -->
-                     <div class="timeline-item">
-                        <div class="timeline-content">
-                            <h4 style="color: #64748b;">Document Submitted</h4>
-                            <span class="time">Oct 23, 2023 &bull; 02:00 PM</span>
-                            <div class="details">
-                                Origin: School ID 123456
-                            </div>
-                        </div>
-                    </div>
-                 </div>
-            </div>
-
+            <div class="search-alert" id="searchAlert"><i class="fas fa-exclamation-circle"></i><span></span></div>
+        </div>
+        <div class="search-btn-wrap">
+            <button class="btn-track" id="trackBtn" onclick="trackDoc()">
+                <i class="fas fa-search"></i> Track
+            </button>
         </div>
     </div>
+    <?php if(!is_null($myDocs)): ?>
+    <div class="my-docs-card">
+        <div class="my-docs-head">
+            <h3><i class="fas fa-folder-open" style="color:var(--primary)"></i> My Submitted Documents</h3>
+            <span>Click a row to track it</span>
+        </div>
+        <?php if($myDocs->isEmpty()): ?>
+            <div class="my-docs-empty"><i class="fas fa-inbox" style="font-size:24px;color:#cbd5e1;display:block;margin-bottom:8px"></i>You have no submitted documents yet.</div>
+        <?php else: ?>
+            <?php $__currentLoopData = $myDocs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $doc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <a class="my-doc-row" href="#" data-tracking="<?php echo e($doc->reference_number); ?>">
+                <div class="my-doc-icon"><i class="fas fa-file-alt"></i></div>
+                <div class="my-doc-info">
+                    <div class="my-doc-subject"><?php echo e($doc->subject); ?></div>
+                    <div class="my-doc-ref"><?php echo e($doc->reference_number); ?></div>
+                </div>
+                <div class="my-doc-badge" style="background:<?php echo e($doc->statusColor()); ?>1a;color:<?php echo e($doc->statusColor()); ?>;border:1.5px solid <?php echo e($doc->statusColor()); ?>55"><?php echo e($doc->statusLabel()); ?></div>
+                <i class="fas fa-chevron-right my-doc-arr"></i>
+            </a>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+    <div class="result-card" id="notFoundCard">
+        <div class="msg-box">
+            <i class="fas fa-file-circle-question"></i>
+            <h3>Tracking Number Not Found</h3>
+            <p>The tracking number you entered does not match any document in our records.<br>Please double-check and try again.</p>
+        </div>
+    </div>
+    <div class="result-card" id="resultCard">
+        <div class="doc-header">
+            <div>
+                <div class="doc-title" id="rDocTitle"></div>
+                <div class="doc-ref"   id="rDocRef"></div>
+            </div>
+            <div class="status-badge" id="rStatusBadge"></div>
+        </div>
 
-    <script>
-        async function searchDocument() {
-            const inputEl = document.getElementById('trackingInput');
-            const results = document.getElementById('resultsArea');
-            const initial = document.getElementById('initialState');
-            const errorMsg = document.getElementById('errorMsg');
-            
-            const val = inputEl.value.trim();
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        <div class="timeline-section">
+            <div class="timeline-title"><i class="fas fa-history"></i> Routing History</div>
+            <div class="timeline" id="rTimeline"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function(){
+    var csrf=document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    var boxes=document.querySelectorAll('.ref-box');
+    var alertEl=document.getElementById('searchAlert');
 
-            // Reset States
-            inputEl.style.borderColor = '#e2e8f0';
-            errorMsg.style.display = 'none';
-            results.style.display = 'none';
-
-            if (val === '') {
-                inputEl.style.borderColor = '#dc2626';
-                errorMsg.querySelector('span').innerText = 'Please enter a tracking number';
-                errorMsg.style.display = 'block';
-                inputEl.focus();
-                initial.style.display = 'block';
-                return;
+    /* ── ref-box logic (type, paste, backspace, arrow keys) ── */
+    boxes.forEach(function(box,i){
+        box.addEventListener('input',function(){
+            var v=box.value.replace(/[^A-Za-z0-9]/g,'');
+            box.value=v.toUpperCase();
+            if(v) box.classList.add('filled'); else box.classList.remove('filled');
+            if(v&&i<boxes.length-1) boxes[i+1].focus();
+            if(getRef().length===8) setTimeout(function(){ trackDoc(); },100);
+        });
+        box.addEventListener('keydown',function(e){
+            if(e.key==='Backspace'&&!box.value&&i>0){e.preventDefault();boxes[i-1].focus();boxes[i-1].value='';boxes[i-1].classList.remove('filled');}
+            if(e.key==='ArrowLeft'&&i>0){e.preventDefault();boxes[i-1].focus();}
+            if(e.key==='ArrowRight'&&i<boxes.length-1){e.preventDefault();boxes[i+1].focus();}
+            if(e.key==='Enter') trackDoc();
+        });
+        box.addEventListener('paste',function(e){
+            e.preventDefault();
+            var txt=(e.clipboardData||window.clipboardData).getData('text').replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+            for(var j=0;j<boxes.length;j++){
+                boxes[j].value=txt[j]||'';
+                if(boxes[j].value) boxes[j].classList.add('filled'); else boxes[j].classList.remove('filled');
             }
+            if(txt.length>=8){boxes[boxes.length-1].focus();setTimeout(function(){ trackDoc(); },100);}
+            else if(txt.length>0) boxes[Math.min(txt.length,boxes.length-1)].focus();
+        });
+        box.addEventListener('focus',function(){box.select();});
+    });
 
-            try {
-                // Call Backend API
-                const response = await fetch('/api/track-document', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    body: JSON.stringify({ tracking_number: val })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    // Success: Show Data
-                    initial.style.display = 'none';
-                    results.style.display = 'block';
-                    results.style.animation = 'fadeIn 0.5s ease-out';
-                    
-                    // Update DOM with Real Data
-                    results.querySelector('h3 span').innerText = data.data.tracking_number;
-                    results.querySelector('p').innerText = 'Subject: ' + data.data.subject;
-                    results.querySelector('.status-badge').innerText = data.data.status.toUpperCase();
-                    
-                    // You can also dynamically populate the timeline here based on data.data.created_at etc.
-
-                } else {
-                    // Not Found / Error
-                    inputEl.style.borderColor = '#dc2626';
-                    errorMsg.querySelector('span').innerText = data.message || 'Reference number not found';
-                    errorMsg.style.display = 'block';
-                    initial.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                inputEl.style.borderColor = '#dc2626';
-                errorMsg.querySelector('span').innerText = 'System error occurred. Please try again.';
-                errorMsg.style.display = 'block';
-            }
+    function getRef(){
+        var r='';boxes.forEach(function(b){r+=b.value;});return r.toUpperCase();
+    }
+    function setRef(val){
+        val=val.replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+        for(var j=0;j<boxes.length;j++){
+            boxes[j].value=val[j]||'';
+            if(boxes[j].value) boxes[j].classList.add('filled'); else boxes[j].classList.remove('filled');
         }
-        
-        // Allow Enter key to search
-        document.getElementById('trackingInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                searchDocument();
-            }
+    }
+    window.clearRefBoxes=function(){
+        boxes.forEach(function(b){b.value='';b.classList.remove('filled');});
+        boxes[0].focus();
+        alertEl.classList.remove('show');
+        document.getElementById('notFoundCard').classList.remove('show');
+        document.getElementById('resultCard').classList.remove('show');
+        document.querySelector('.page').classList.remove('has-result');
+    };
+
+    function showAlert(msg){
+        alertEl.querySelector('span').textContent=msg;
+        alertEl.classList.add('show','err');
+    }
+
+    function dotClass(s){
+        if(s==='cancelled'||s==='returned')return 'danger';
+        if(s==='completed')return 'done';
+        if(s==='forwarded')return 'warn';
+        return 'active';
+    }
+    function esc(value){
+        return String(value === null || value === undefined ? '' : value)
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;')
+            .replace(/'/g,'&#39;');
+    }
+    window.trackDoc=async function(){
+        alertEl.classList.remove('show');
+        var ref=getRef();
+        if(ref.length<8){showAlert('Please enter the full 8-character tracking number.');return;}
+        var btn=document.getElementById('trackBtn');
+        btn.disabled = true;
+        document.getElementById('notFoundCard').classList.remove('show');
+        document.getElementById('resultCard').classList.remove('show');
+        try{
+            var res=await fetch('/api/track-document',{
+                method:'POST',
+                headers:{'Content-Type':'application/json','X-CSRF-TOKEN':csrf},
+                body:JSON.stringify({
+                    reference_number:ref,
+                    tracking_number:ref
+                })
+            });
+            var data=await res.json();
+            if(!data.success||!data.document){document.getElementById('notFoundCard').classList.add('show');document.querySelector('.page').classList.add('has-result');}
+            else{renderResult(data.document);}
+        }catch(e){document.getElementById('notFoundCard').classList.add('show');}
+        finally{btn.disabled = false;}
+    };
+    function renderResult(doc){
+        document.getElementById('rDocTitle').textContent=doc.subject;
+        document.getElementById('rDocRef').textContent=doc.reference_number || doc.tracking_number || '-';
+        var badge=document.getElementById('rStatusBadge');
+        badge.textContent=doc.status_label;
+        badge.style.background=(doc.status_color||'#6b7280')+'1a';
+        badge.style.color=doc.status_color||'#6b7280';
+        badge.style.border='1.5px solid '+(doc.status_color||'#6b7280')+'55';
+
+        var tl=document.getElementById('rTimeline');
+        tl.innerHTML='';
+        var logs=doc.routing_logs||[];
+        if(!logs.length){tl.innerHTML='<div style="color:var(--text-muted);font-size:13px">No routing history yet.</div>';}
+        else{
+            var prevGroupKey = null;
+            Array.from(logs).reverse().forEach(function(log, idx){
+                var isLatest = idx === 0;
+                var dc = isLatest ? 'latest' : dotClass(log.status_after);
+                var dotIcon = isLatest ? 'fa-arrow-up' : 'fa-check';
+                var groupKey = (log.action === 'submitted') ? '__pending__' :
+                               (log.action === 'forwarded' ? (log.from_office || 'Unknown') :
+                               (log.to_office || log.from_office || 'Unknown'));
+                var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Acceptance' : groupKey;
+                if (groupKey !== prevGroupKey) {
+                    prevGroupKey = groupKey;
+                    var hdr = document.createElement('div');
+                    hdr.className = 'tl-office-hdr';
+                    hdr.innerHTML = '<div class="tl-dot '+dc+'" style="margin-right:5px"><i class="fas '+dotIcon+'" style="font-size:5px"></i></div><span>' + esc(groupLabel) + '</span>';
+                    tl.appendChild(hdr);
+                }
+                var item=document.createElement('div');item.className='tl-item';
+                item.innerHTML=
+                    (log.performed_by?'<div class="tl-action">'+esc(log.performed_by)+'</div>':'')+
+                    '<div class="tl-meta"><i class="fas fa-clock" style="margin-right:3px;font-size:10px"></i>'+esc(log.timestamp||'-')+'</div>'+
+                    '<div class="tl-meta"><i class="fas fa-tasks" style="margin-right:3px;font-size:10px"></i>'+esc(log.action_label||'Status Updated')+'</div>'+
+                    (log.remarks?'<div class="tl-remarks">'+esc(log.remarks)+'</div>':'');
+                tl.appendChild(item);
+            });
+        }
+        document.getElementById('resultCard').classList.add('show');
+        document.querySelector('.page').classList.add('has-result');
+    }
+    window.quickTrack=function(ref){
+        setRef(ref);
+        document.getElementById('refBoxes').scrollIntoView({behavior:'smooth',block:'center'});
+        setTimeout(function(){window.trackDoc();},250);
+    };
+
+    // Bind my-doc-row clicks via data-tracking attribute (avoids inline onclick quote issues)
+    document.querySelectorAll('.my-doc-row[data-tracking]').forEach(function(row){
+        row.addEventListener('click', function(e){
+            e.preventDefault();
+            var tn = row.getAttribute('data-tracking');
+            if(tn) quickTrack(tn);
         });
-        
-        // Remove error on input
-        document.getElementById('trackingInput').addEventListener('input', function() {
-             this.style.borderColor = '#e2e8f0';
-             document.getElementById('errorMsg').style.display = 'none';
-        });
-    </script>
+    });
+
+    var urlRef=new URLSearchParams(window.location.search).get('ref');
+    if(urlRef){setRef(urlRef);window.trackDoc();}
+})();
+</script>
+    <footer class="dash-footer">
+        <div class="footer-left">
+            <span>&copy; <?php echo e(date('Y')); ?> DepEd Document Tracking System</span>
+        </div>
+        <div class="footer-right">
+            Developed by Raymond Bautista
+        </div>
+    </footer>
 </body>
 </html>
+
 <?php /**PATH C:\Users\iamra\Desktop\DepedDocumentTrackingSystem\resources\views/track/index.blade.php ENDPATH**/ ?>

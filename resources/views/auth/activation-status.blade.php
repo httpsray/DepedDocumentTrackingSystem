@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="{{ asset('images/DOCTRAXLOGO.svg') }}" type="image/svg+xml">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo csrf_token(); ?>">
     <title>Account Activation - DepEd DTS</title>
@@ -11,6 +12,8 @@
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="/css/auth.css">
     <script src="/js/spa.js" defer></script>
+    <script src="/js/form-utils.js" defer></script>
+    <script src="/js/request-utils.js" defer></script>
     <style>
         .container { background: transparent; box-shadow: none; animation: none; }
         .main-wrapper { justify-content: center; padding-top: 40px; padding-bottom: 40px; }
@@ -228,6 +231,10 @@
             .status-card h2 { font-size: 16px; }
             .status-card .status-desc { font-size: 12px; }
         }
+        .dash-footer{width:100%;background:#fff;border-top:1px solid #e2e8f0;padding:20px 5%;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#94a3b8;margin-top:40px}
+        .footer-left{display:flex;align-items:center;gap:6px}
+        .footer-right{font-size:11px;color:#b0b8c4}
+        @media(max-width:768px){.dash-footer{flex-direction:column;gap:6px;text-align:center;padding:16px 5%}}
     </style>
 </head>
 <body>
@@ -239,7 +246,14 @@
                 <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
             </div>
         </div>
-        <div class="nav-actions"></div>
+        <button class="nav-hamburger" id="navHamburger" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')" aria-label="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-links" id="navLinks">
+            <a href="/" class="nav-link"><i class="fas fa-home"></i> Home</a>
+            <a href="/about-us" class="nav-link"><i class="fas fa-info-circle"></i> About Us</a>
+            <a href="/contact-us" class="nav-link"><i class="fas fa-envelope"></i> Contact Us</a>
+        </div>
     </nav>
 
     <div class="main-wrapper">
@@ -370,5 +384,13 @@
         }
     </script>
     @endif
+    <footer class="dash-footer">
+        <div class="footer-left">
+            <span>&copy; {{ date('Y') }} DepEd Document Tracking System</span>
+        </div>
+        <div class="footer-right">
+            Developed by Raymond Bautista
+        </div>
+    </footer>
 </body>
 </html>

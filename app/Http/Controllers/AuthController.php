@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\ActivationMail;
+use App\Mail\PasswordResetMail;
 use App\Models\User;
 use App\Services\ActivationService;
 use Illuminate\Http\Request;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -35,14 +37,16 @@ class AuthController extends Controller
             // Create the user in a transaction — email is sent outside so a
             // mail failure never prevents account creation.
             $user = DB::transaction(function () use ($request) {
-                return User::create([
+                $user = new User([
                     'name'         => $request->name,
                     'email'        => $request->email,
                     'mobile'       => $request->mobile,
                     'account_type' => $request->account_type ?? 'individual',
                     'password'     => Hash::make(Str::random(64)), // placeholder — never usable
-                    'status'       => 'pending',
                 ]);
+                $user->status = 'pending';
+                $user->save();
+                return $user;
             });
 
             // Generate activation token (outside transaction — safe to retry)
@@ -63,7 +67,7 @@ class AuthController extends Controller
             \Log::error('Registration failed: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Registration failed: ' . $e->getMessage(),
+                'message' => 'Registration failed. Please try again later.',
             ], 500);
         }
     }
@@ -208,11 +212,25 @@ class AuthController extends Controller
             ]);
         }
 
-        return response()->json(['exists' => true, 'pending' => false]);
+        // If the account has been suspended/deactivated
+        if ($user->isSuspended()) {
+            return response()->json([
+                'exists'     => true,
+                'suspended'  => true,
+                'message'    => 'Your account has been deactivated. Please contact the administrator for assistance.',
+            ]);
+        }
+
+        return response()->json(['exists' => true, 'pending' => false, 'suspended' => false]);
     }
 
     /**
      * Log in with email + password (only active accounts).
+     *
+     * Three-layer rate limiting:
+     *  1. login_ip:{ip}        — 30 attempts / 60s  (global per-IP, blocks bots rotating emails)
+     *  2. login:{email}:{ip}   — 5  attempts / 60s  (per email+IP combo, normal brute-force)
+     *  3. login_email:{email}  — 15 attempts / 600s (per-email distributed, blocks multi-IP targeting one account)
      */
     public function login(Request $request)
     {
@@ -220,6 +238,28 @@ class AuthController extends Controller
             'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
+
+        $emailKey  = 'login:'        . Str::lower($request->email) . ':' . $request->ip();
+        $ipKey     = 'login_ip:'     . $request->ip();
+        $targetKey = 'login_email:'  . Str::lower($request->email);
+
+        // Layer 1: global per-IP (catches bots rotating emails from one IP)
+        if (RateLimiter::tooManyAttempts($ipKey, 30)) {
+            $seconds = RateLimiter::availableIn($ipKey);
+            return $this->throttleResponse($seconds);
+        }
+
+        // Layer 2: per email+IP (normal brute-force from one machine)
+        if (RateLimiter::tooManyAttempts($emailKey, 5)) {
+            $seconds = RateLimiter::availableIn($emailKey);
+            return $this->throttleResponse($seconds);
+        }
+
+        // Layer 3: per-email across all IPs (distributed attack on one account)
+        if (RateLimiter::tooManyAttempts($targetKey, 15)) {
+            $seconds = RateLimiter::availableIn($targetKey);
+            return $this->throttleResponse($seconds);
+        }
 
         // Check if user exists and is pending
         $user = User::where('email', $request->email)->first();
@@ -232,28 +272,219 @@ class AuthController extends Controller
             ], 403);
         }
 
+        if ($user && $user->isSuspended()) {
+            return response()->json([
+                'success'    => false,
+                'suspended'  => true,
+                'message'    => 'Your account has been deactivated. Please contact the administrator for assistance.',
+            ], 403);
+        }
+
         if (Auth::attempt($credentials)) {
+            // Clear all limiters on successful login
+            RateLimiter::clear($emailKey);
+            RateLimiter::clear($ipKey);
+            RateLimiter::clear($targetKey);
             $request->session()->regenerate();
 
+            $authed = Auth::user();
             return response()->json([
                 'success' => true,
                 'message' => 'Login successful',
-                'user'    => Auth::user(),
+                'user'    => [
+                    'name'         => $authed->name,
+                    'email'        => $authed->email,
+                    'role'         => $authed->role,
+                    'account_type' => $authed->account_type,
+                ],
             ]);
         }
 
+        // Hit all three limiters for each failed attempt
+        RateLimiter::hit($emailKey,  60);   // 1 minute window
+        RateLimiter::hit($ipKey,     60);   // 1 minute window
+        RateLimiter::hit($targetKey, 600);  // 10 minute window
+
+        $attemptsLeft = max(0, 5 - RateLimiter::attempts($emailKey));
+
         return response()->json([
             'success' => false,
-            'message' => 'The provided credentials do not match our records.',
+            'message' => $attemptsLeft > 0
+                ? 'Incorrect password. Please try again. (' . $attemptsLeft . ' ' . ($attemptsLeft === 1 ? 'attempt' : 'attempts') . ' remaining)'
+                : 'Too many failed attempts. Please try again later.',
         ], 401);
+    }
+
+    /**
+     * Standard throttle JSON response.
+     */
+    private function throttleResponse(int $seconds): \Illuminate\Http\JsonResponse
+    {
+        return response()->json([
+            'success'     => false,
+            'throttled'   => true,
+            'message'     => 'Too many login attempts. Please try again in ' . $seconds . ' ' . ($seconds === 1 ? 'second' : 'seconds') . '.',
+            'retry_after' => $seconds,
+        ], 429);
     }
 
     public function logout(Request $request)
     {
+        // Clear authentication
         Auth::logout();
+        
+        // Invalidate session completely
         $request->session()->invalidate();
+        $request->session()->flush();
         $request->session()->regenerateToken();
+        
+        // Clear all cookies
+        foreach ($request->cookies->all() as $name => $value) {
+            cookie()->queue(cookie()->forget($name));
+        }
 
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'redirect' => '/login'])
+            ->withHeaders([
+                'Cache-Control' => 'no-cache, no-store, must-revalidate, max-age=0',
+                'Pragma' => 'no-cache',
+                'Expires' => 'Sat, 01 Jan 2000 00:00:00 GMT',
+                'Clear-Site-Data' => '"cache", "cookies", "storage"'
+            ]);
+    }
+
+    // ─────────────────────────────────────────────
+    // Forgot / Reset Password
+    // ─────────────────────────────────────────────
+
+    public function showForgotPassword()
+    {
+        return view('auth.forgot-password');
+    }
+
+    /**
+     * Send a password-reset link to the given email.
+     * Always returns 200 to avoid email enumeration.
+     */
+    public function sendResetLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email|max:255']);
+
+        $user = User::where('email', $request->email)->first();
+
+        // Always respond generically — never confirm whether the email exists
+        if (!$user || !$user->isActive()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'If that email is registered and active, a reset link has been sent.',
+            ]);
+        }
+
+        // Hash a new raw token and upsert into password_reset_tokens
+        $rawToken = Str::random(64);
+        $hash     = hash('sha256', $rawToken);
+
+        DB::table('password_reset_tokens')->upsert(
+            [['email' => $user->email, 'token' => $hash, 'created_at' => now()]],
+            ['email'],
+            ['token', 'created_at']
+        );
+
+        try {
+            Mail::to($user->email)->send(new PasswordResetMail($user, $rawToken));
+        } catch (\Exception $e) {
+            \Log::warning('Password reset email failed for ' . $user->email . ': ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'If that email is registered and active, a reset link has been sent.',
+        ]);
+    }
+
+    /**
+     * Show the reset-password form (from email link).
+     */
+    public function showResetPassword(Request $request)
+    {
+        $token = $request->query('token', '');
+        $email = $request->query('email', '');
+
+        if (!$token || !$email) {
+            return view('auth.reset-password', ['invalid' => true]);
+        }
+
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $email)
+            ->first();
+
+        // Validate token and 60-minute expiry
+        if (
+            !$record ||
+            !hash_equals($record->token, hash('sha256', $token)) ||
+            now()->diffInMinutes($record->created_at) > 60
+        ) {
+            return view('auth.reset-password', ['invalid' => true]);
+        }
+
+        return view('auth.reset-password', [
+            'invalid' => false,
+            'token'   => $token,
+            'email'   => $email,
+        ]);
+    }
+
+    /**
+     * Process the password reset.
+     */
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token'    => 'required|string',
+            'email'    => 'required|email',
+            'password' => [
+                'required', 'string', 'min:8', 'confirmed',
+                'regex:/[a-z]/',
+                'regex:/[A-Z]/',
+                'regex:/[0-9]/',
+                'regex:/[^A-Za-z0-9]/',
+            ],
+        ], [
+            'password.regex' => 'Password must contain uppercase, lowercase, number, and special character.',
+        ]);
+
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->first();
+
+        if (
+            !$record ||
+            !hash_equals($record->token, hash('sha256', $request->token)) ||
+            now()->diffInMinutes($record->created_at) > 60
+        ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This reset link is invalid or has expired. Please request a new one.',
+            ], 422);
+        }
+
+        $user = User::where('email', $request->email)->where('status', 'active')->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No active account found for that email.',
+            ], 404);
+        }
+
+        // Update password and delete the used token (single-use)
+        DB::transaction(function () use ($user, $request) {
+            $user->update(['password' => Hash::make($request->password)]);
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password updated successfully.',
+        ]);
     }
 }

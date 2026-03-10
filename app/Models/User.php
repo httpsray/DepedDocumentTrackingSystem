@@ -18,9 +18,18 @@ class User extends Authenticatable
         'email',
         'mobile',
         'password',
-        'status',
-        'role',
         'account_type',
+        'office_id',
+    ];
+
+    /**
+     * Attributes guarded from mass assignment.
+     * role, status, activated_at, activation_ip are set explicitly in controllers.
+     */
+    protected $guarded = [
+        'id',
+        'role',
+        'status',
         'activated_at',
         'activation_ip',
     ];
@@ -42,6 +51,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'activated_at' => 'datetime',
             'password' => 'hashed',
+            'has_reports_access' => 'boolean',
         ];
     }
 
@@ -62,11 +72,37 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if the user account is suspended/deactivated.
+     */
+    public function isSuspended(): bool
+    {
+        return $this->status === 'suspended';
+    }
+
+    /**
      * Check if the user is an administrator.
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === 'admin' || $this->role === 'superadmin';
+    }
+
+    /**
+     * Check if the user is a super administrator.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'superadmin';
+    }
+
+    /**
+     * Check if the user is a Records Section representative.
+     */
+    public function isRecords(): bool
+    {
+        return $this->isRepresentative()
+            && $this->office
+            && strtoupper($this->office->code) === 'RECORDS';
     }
 
     /**
@@ -83,5 +119,50 @@ class User extends Authenticatable
     public function documents()
     {
         return $this->hasMany(Document::class);
+    }
+
+    /**
+     * The office this representative belongs to.
+     */
+    public function office()
+    {
+        return $this->belongsTo(Office::class);
+    }
+
+    /**
+     * Routing log actions performed by this user.
+     */
+    public function routingLogs()
+    {
+        return $this->hasMany(RoutingLog::class, 'performed_by');
+    }
+
+    /**
+     * Documents currently tagged/assigned to this user.
+     */
+    public function handledDocuments()
+    {
+        return $this->hasMany(Document::class, 'current_handler_id');
+    }
+
+    /**
+     * Check if the user is a representative (office staff).
+     */
+    public function isRepresentative(): bool
+    {
+        return $this->account_type === 'representative';
+    }
+
+    /**
+     * Check if the user has access to the Reports dashboard.
+     * SuperAdmins always have access; everyone else is controlled by the toggle.
+     */
+    public function hasReportsAccess(): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return (bool) $this->has_reports_access;
     }
 }

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="{{ asset('images/DOCTRAXLOGO.svg') }}" type="image/svg+xml">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo csrf_token(); ?>">
     <title>Login - DepEd DTS</title>
@@ -13,6 +14,8 @@
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="/css/auth.css">
     <script src="/js/spa.js" defer></script>
+    <script src="/js/form-utils.js" defer></script>
+    <script src="/js/request-utils.js" defer></script>
     <style>
         .container { background: transparent; box-shadow: none; animation: none; }
 
@@ -28,6 +31,12 @@
                 font-size: 12px;
             }
         }
+        .dash-footer{width:100%;background:#fff;border-top:1px solid #e2e8f0;padding:20px 5%;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#94a3b8;margin-top:40px}
+        .footer-left{display:flex;align-items:center;gap:6px}
+        .footer-right{font-size:11px;color:#b0b8c4}
+        @media(max-width:768px){.dash-footer{flex-direction:column;gap:6px;text-align:center;padding:16px 5%}}
+        #email.email-locked::-ms-clear { display: none; }
+        #email.email-locked::-webkit-search-cancel-button { display: none; }
     </style>
 </head>
 <body>
@@ -39,10 +48,13 @@
                 <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
             </div>
         </div>
-        <div class="nav-actions">
-           <a href="/" class="btn-text" style="color: white; text-decoration: none; font-size: 14px; opacity: 0.9;">
-               <i class="fas fa-home"></i> Home
-           </a>
+        <button class="nav-hamburger" id="navHamburger" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')" aria-label="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-links" id="navLinks">
+            <a href="/" class="nav-link"><i class="fas fa-home"></i> Home</a>
+            <a href="/about-us" class="nav-link"><i class="fas fa-info-circle"></i> About Us</a>
+            <a href="/contact-us" class="nav-link"><i class="fas fa-envelope"></i> Contact Us</a>
         </div>
     </nav>
 
@@ -61,7 +73,8 @@
                 <div class="form-group">
                     <label class="form-label">Email</label>
                     <input type="text" id="email" class="form-control" placeholder="ex: myname@example.com" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly');">
-                    
+                    <div id="emailDisplay" style="display:none; width:100%; padding:12px 16px; border:2px solid #e2e8f0; border-radius:8px; font-size:16px; font-family:inherit; background:#f1f5f9; color:#64748b; box-sizing:border-box;"></div>
+
                     <!-- Custom Error Alert -->
                     <div class="error-alert" id="emailErrorAlert">
                         <i class="fas fa-exclamation-circle"></i>
@@ -79,7 +92,10 @@
                             </span>
                         </button>
                     </div>
-                    
+                    <div style="text-align:right; margin-top:6px;">
+                        <a href="/forgot-password" style="font-size:12px; color:#64748b; text-decoration:none; font-weight:400;">Forgot password?</a>
+                    </div>
+
                     <!-- Custom Error Alert -->
                     <div class="error-alert" id="passwordErrorAlert">
                         <i class="fas fa-exclamation-circle"></i>
@@ -88,7 +104,7 @@
                 </div>
 
                 <div style="margin-top: 20px;">
-                    <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+                    <button type="submit" class="btn btn-primary btn-block" id="submitBtn" data-no-auto-loading>
                         Proceed
                     </button>
                 </div>
@@ -116,12 +132,38 @@
 
         const form = document.getElementById('loginForm');
         const emailInput = document.getElementById('email');
+        const emailDisplay = document.getElementById('emailDisplay');
         const passwordInput = document.getElementById('password');
         const passwordGroup = document.getElementById('passwordGroup');
         const submitBtn = document.getElementById('submitBtn');
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         let step = 1; // 1: Email check, 2: Password
+        let confirmedEmail = '';
+
+        // Back button resets the form to step 1
+        const backLink = document.querySelector('.auth-header a[href="/"]');
+        if (backLink) {
+            backLink.addEventListener('click', function() {
+                step = 1;
+                passwordGroup.classList.add('hidden');
+                passwordInput.value = '';
+                emailInput.value = '';
+                hideError('email');
+                hideError('password');
+                emailInput.disabled = false;
+                emailInput.classList.remove('email-locked');
+                emailInput.style.display = '';
+                emailDisplay.style.display = 'none';
+                emailDisplay.textContent = '';
+                confirmedEmail = '';
+                // restore the clear-input-btn
+                const clearBtn = emailInput.parentElement ? emailInput.parentElement.querySelector('.clear-input-btn') : null;
+                if (clearBtn) clearBtn.style.display = '';
+                submitBtn.innerText = 'Proceed';
+                submitBtn.disabled = false;
+            });
+        }
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -157,9 +199,23 @@
                             submitBtn.disabled = false;
                             return;
                         }
+                        if (data.suspended) {
+                            showError('email', data.message || 'Your account has been deactivated. Please contact the administrator.');
+                            submitBtn.innerText = 'Proceed';
+                            submitBtn.disabled = false;
+                            return;
+                        }
                         passwordGroup.classList.remove('hidden');
                         passwordGroup.style.animation = 'fadeIn 0.5s ease';
-                        emailInput.setAttribute('readonly', true);
+                        confirmedEmail = emailVal;
+                        emailDisplay.textContent = emailVal;
+                        emailDisplay.style.display = 'block';
+                        emailInput.value = ''; // clear so browser X button disappears
+                        emailInput.style.display = 'none';
+                        emailInput.disabled = true;
+                        // hide the custom clear-input-btn injected by form-utils
+                        const clearBtn = emailInput.parentElement.querySelector('.clear-input-btn');
+                        if (clearBtn) clearBtn.style.display = 'none';
                         passwordInput.focus();
                         submitBtn.innerText = 'Login';
                         submitBtn.disabled = false;
@@ -188,7 +244,7 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
                         body: JSON.stringify({
-                            email: emailInput.value.trim(),
+                            email: confirmedEmail,
                             password: passwordInput.value
                         })
                     });
@@ -196,12 +252,32 @@
 
                     if (data.success) {
                         window.location.href = '/dashboard';
+                    } else if (data.throttled) {
+                        let secs = data.retry_after || 60;
+                        showError('password', data.message);
+                        submitBtn.disabled = true;
+                        const countdown = setInterval(() => {
+                            secs--;
+                            if (secs <= 0) {
+                                clearInterval(countdown);
+                                submitBtn.innerText = 'Login';
+                                submitBtn.disabled = false;
+                                hideError('password');
+                            } else {
+                                submitBtn.innerText = 'Try again in ' + secs + 's';
+                            }
+                        }, 1000);
+                        submitBtn.innerText = 'Try again in ' + secs + 's';
                     } else if (data.pending) {
                         showError('password', data.message || 'Account not yet activated. Check your email.');
                         submitBtn.innerText = 'Login';
                         submitBtn.disabled = false;
+                    } else if (data.suspended) {
+                        showError('password', data.message || 'Your account has been deactivated. Please contact the administrator.');
+                        submitBtn.innerText = 'Login';
+                        submitBtn.disabled = false;
                     } else {
-                        showError('password', data.message || 'Invalid credentials');
+                        showError('password', data.message || 'Incorrect password. Please try again.');
                         submitBtn.innerText = 'Login';
                         submitBtn.disabled = false;
                     }
@@ -237,6 +313,14 @@
         window.togglePassword = togglePassword;
     })();
     </script>
+    <footer class="dash-footer">
+        <div class="footer-left">
+            <span>&copy; {{ date('Y') }} DepEd Document Tracking System</span>
+        </div>
+        <div class="footer-right">
+            Developed by Raymond Bautista
+        </div>
+    </footer>
 </body>
 </html>
 

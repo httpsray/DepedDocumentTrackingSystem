@@ -2,485 +2,483 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="{{ asset('images/DOCTRAXLOGO.svg') }}" type="image/svg+xml">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="<?php echo csrf_token(); ?>">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Submit Document - DepEd DTS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="/css/auth.css">
-    <script src="/js/spa.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        .container { background: transparent; box-shadow: none; animation: none; }
+        :root {
+            --primary: #0056b3;
+            --primary-dark: #004494;
+            --accent: #fca311;
+            --bg: #f0f2f5;
+            --white: #ffffff;
+            --border: #e2e8f0;
+            --text-dark: #1b263b;
+            --text-muted: #64748b;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); font-family: 'Poppins', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
 
-        .main-wrapper {
-            justify-content: center;
-            padding-top: 30px;
-            padding-bottom: 30px;
+        /* Navbar */
+        .navbar { background: linear-gradient(135deg, #0056b3, #004494); padding: 14px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+        .brand-text { display: flex; flex-direction: column; }
+        .brand-subtitle { font-size: clamp(8px, 2vw, 10px); color: rgba(255,255,255,.8); text-transform: uppercase; letter-spacing: 1.5px; }
+        .navbar h1 { font-size: clamp(12px, 3.2vw, 17px); font-weight: 700; color: #fff; }
+        .nav-links{display:flex;align-items:center;gap:4px}
+        .nav-link{color:rgba(255,255,255,.85);text-decoration:none;font-size:13px;font-weight:500;padding:7px 14px;border-radius:8px;transition:background .2s,color .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+        .nav-link:hover{background:rgba(255,255,255,.15);color:#fff}
+        .nav-link.active{background:rgba(255,255,255,.18);color:#fff}
+        .nav-hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;color:#fff;font-size:20px;z-index:101;align-items:center;justify-content:center;transition:transform .2s}
+        .nav-hamburger.open{transform:rotate(90deg)}
+
+        /* Page wrapper */
+        .page { max-width: 680px; margin: 36px auto; padding: 0 16px 60px; flex: 1; width: 100%; }
+
+        /* Card */
+        .card { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,.07); overflow: hidden; }
+        .card-head { background: linear-gradient(135deg, #0056b3, #004494); padding: 22px 28px; display: flex; align-items: center; gap: 14px; color: #fff; }
+        .card-head-icon { width: 44px; height: 44px; background: rgba(255,255,255,.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .card-head h2 { font-size: clamp(14px, 3.5vw, 18px); font-weight: 700; margin: 0; }
+        .card-head p { font-size: clamp(10px, 2.2vw, 12px); opacity: .8; margin: 2px 0 0; }
+        .card-body { padding: 28px; }
+
+        /* Section dividers */
+        .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin: 22px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+        .section-label:first-child { margin-top: 0; }
+
+        /* Form groups */
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group.full { grid-column: 1 / -1; }
+        label { display: block; font-size: clamp(11px, 2.5vw, 12px); font-weight: 600; color: #334155; margin-bottom: 5px; }
+        label .req { color: #dc2626; }
+        label .opt { color: #94a3b8; font-weight: 400; }
+
+        input[type=text], input[type=email], input[type=tel], select, textarea {
+            width: 100%; padding: 10px 13px; font-family: 'Poppins', sans-serif; font-size: clamp(12px, 2.5vw, 13px);
+            border: 1.5px solid var(--border); border-radius: 10px; background: #f8fafc;
+            color: var(--text-dark); outline: none; transition: border-color .2s, box-shadow .2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,86,179,.1); background: #fff;
+        }
+        input.err, select.err, textarea.err { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,.08); }
+        select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; cursor: pointer; }
+        textarea { resize: vertical; min-height: 88px; }
+
+        .err-text { display: none; font-size: 11px; color: #dc2626; margin-top: 4px; }
+        .err-text.show { display: flex; align-items: center; gap: 4px; }
+
+        /* Others input */
+        .others-wrap { display: none; margin-top: 10px; }
+        .others-wrap.show { display: block; }
+        .fixed-office {
             width: 100%;
-        }
-
-        .request-container {
-            width: 100%;
-            max-width: 520px;
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 40, 100, 0.1);
-            overflow: hidden;
-            animation: fadeIn 0.5s ease-out;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .request-header {
-            background: linear-gradient(135deg, #0056b3 0%, #004494 100%);
-            padding: 24px 30px;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .request-header-icon {
-            width: 44px;
-            height: 44px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .request-header-text h2 {
-            font-size: 18px;
-            font-weight: 700;
-            margin: 0;
-            color: #fff;
-        }
-
-        .request-header-text p {
-            font-size: 12px;
-            opacity: 0.8;
-            margin: 2px 0 0;
-        }
-
-        .request-body {
-            padding: 28px 30px;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        .form-group label {
-            display: block;
-            font-family: 'Poppins', sans-serif;
+            padding: 10px 13px;
+            border: 1.5px solid #bfdbfe;
+            border-radius: 10px;
+            background: #eff6ff;
+            color: #1e3a8a;
             font-size: 13px;
             font-weight: 600;
-            color: #334155;
-            margin-bottom: 6px;
         }
-
-        .form-group label .required {
-            color: #dc2626;
-            margin-left: 2px;
-        }
-
-        .form-group label .optional {
-            color: #94a3b8;
-            font-weight: 400;
-            font-size: 12px;
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: 11px 14px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 13px;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 10px;
-            background: #f8fafc;
-            color: #1e293b;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            border-color: #0056b3;
-            box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
-            background: #fff;
-        }
-
-        .form-input.error,
-        .form-select.error,
-        .form-textarea.error {
-            border-color: #dc2626;
-            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
-        }
-
-        .form-select {
-            appearance: none;
-            cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 36px;
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 90px;
-        }
-
-        /* Others input (conditional) */
-        .others-input-wrapper {
-            margin-top: 8px;
-            display: none;
-        }
-
-        .others-input-wrapper.show {
+        .fixed-office small {
             display: block;
-        }
-
-        .error-text {
-            font-family: 'Poppins', sans-serif;
-            font-size: 12px;
-            color: #dc2626;
-            margin-top: 5px;
-            display: none;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .error-text.show {
-            display: flex;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 12px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            color: #fff;
-            background: linear-gradient(135deg, #0056b3 0%, #004494 100%);
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 6px;
-        }
-
-        .btn-submit:hover {
-            background: linear-gradient(135deg, #004494 0%, #003370 100%);
-        }
-
-        .btn-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .btn-back {
-            width: 100%;
-            padding: 11px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 13px;
+            margin-top: 3px;
+            color: #475569;
             font-weight: 500;
-            color: #64748b;
-            background: transparent;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.2s, color 0.2s;
-            margin-top: 8px;
-        }
-
-        .btn-back:hover {
-            background: #f1f5f9;
-            color: #334155;
-        }
-
-        /* Success State */
-        .success-state {
-            display: none;
-            padding: 40px 30px;
-            text-align: center;
-        }
-
-        .success-icon {
-            width: 64px;
-            height: 64px;
-            background: #f0fdf4;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-            color: #16a34a;
-        }
-
-        .success-state h2 {
-            font-family: 'Poppins', sans-serif;
-            font-size: 20px;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 4px;
-        }
-
-        .success-state .subtitle {
-            font-size: 13px;
-            color: #64748b;
-            margin-bottom: 20px;
-        }
-
-        .tracking-display {
-            background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
-            border: 2px dashed #0056b3;
-            border-radius: 14px;
-            padding: 20px;
-            margin-bottom: 24px;
-        }
-
-        .tracking-display small {
-            font-family: 'Poppins', sans-serif;
             font-size: 11px;
-            font-weight: 600;
-            color: #0056b3;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        .tracking-display h3 {
-            font-family: 'Poppins', monospace;
-            font-size: 28px;
-            font-weight: 700;
-            color: #0056b3;
-            letter-spacing: 3px;
-            margin: 6px 0 0;
-        }
+        /* Submit button */
+        .btn-submit { width: 100%; padding: 13px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: clamp(12px, 2.8vw, 14px); font-weight: 600; cursor: pointer; transition: background .2s, transform .1s; margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-submit:hover { background: var(--primary-dark); }
+        .btn-submit:active { transform: scale(.99); }
+        .btn-submit:disabled { opacity: .7; cursor: not-allowed; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* Success state */
+        .success-card { text-align: center; padding: 40px 28px; }
+        .success-icon { width: 70px; height: 70px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: #16a34a; font-size: 28px; }
+        .success-card h2 { font-size: 22px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; }
+        .success-card p { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+        .tracking-box { background: #eff6ff; border: 2px solid #bfdbfe; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+        .tracking-box small { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #64748b; font-weight: 600; }
+        .tracking-number { font-size: 32px; font-weight: 700; color: var(--primary); font-family: monospace; letter-spacing: 2px; margin: 6px 0 0; }
+        .btn-secondary { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border: 1.5px solid var(--border); border-radius: 10px; color: var(--text-dark); text-decoration: none; font-size: 13px; font-weight: 500; cursor: pointer; background: #fff; font-family: 'Poppins', sans-serif; transition: border-color .2s; }
+        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
 
-        @media (max-width: 600px) {
-            .request-container {
-                border-radius: 12px;
-                margin: 0 8px;
-            }
-            .request-header {
-                padding: 18px 20px;
-            }
-            .request-header-icon {
-                width: 38px;
-                height: 38px;
-            }
-            .request-header-text h2 {
-                font-size: 16px;
-            }
-            .request-body {
-                padding: 20px;
-            }
-            .tracking-display h3 {
-                font-size: 22px;
-                letter-spacing: 2px;
-            }
-            .main-wrapper {
-                padding-left: 8px;
-                padding-right: 8px;
-            }
+        /* Detail summary */
+        .detail-summary { width:100%; text-align:left; border-collapse:collapse; margin-bottom:20px; }
+        .detail-summary td { padding:8px 12px; font-size:12.5px; border-bottom:1px solid #e2e8f0; vertical-align:top; }
+        .detail-summary td:first-child { font-weight:600; color:#475569; white-space:nowrap; width:120px; }
+        .detail-summary td:last-child { color:#1b263b; word-break:break-word; }
+        .detail-summary tr:last-child td { border-bottom:none; }
+        .note-box { font-size:12px; border-radius:8px; padding:10px 14px; margin-bottom:12px; text-align:left; }
+        .note-box i { margin-right:4px; }
+        .note-warning { color:#92400e; background:#fffbeb; border:1px solid #fde68a; }
+        .note-info { color:#1e40af; background:#eff6ff; border:1px solid #bfdbfe; }
+
+        /* Auth info banner */
+        .auth-info-banner { display:flex; align-items:center; gap:12px; background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:10px; padding:12px 16px; margin-bottom:4px; }
+        .auth-info-banner i { color:#0056b3; font-size:18px; flex-shrink:0; }
+        .auth-info-name { font-size:13px; font-weight:600; color:#1b263b; }
+        .auth-info-email { font-size:11px; color:#64748b; margin-top:2px; }
+
+        /* Spinner */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+
+        @media (max-width: 640px) {
+            .navbar{padding:12px 4%;position:relative;flex-wrap:wrap}
+            .nav-hamburger{display:flex;order:-1}
+            .brand-text{flex:1;min-width:0}
+            .navbar h1{font-size:13px;line-height:1.3}
+            .brand-subtitle{font-size:8px}
+            .nav-links{display:none;position:absolute;top:100%;right:0;left:0;background:linear-gradient(135deg,#004494,#003378);flex-direction:column;padding:6px 0;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:100}
+            .nav-links.open{display:flex}
+            .nav-link{width:100%;padding:13px 20px;border-radius:0;font-size:13px;border-bottom:1px solid rgba(255,255,255,.08)}
+            .nav-link:last-child{border-bottom:none}
+            .nav-link:hover{background:rgba(255,255,255,.1)}
+            .form-row{grid-template-columns:1fr}
+            .card-body{padding:20px}
+            .page{margin:20px auto;padding:0 10px 40px}
+            .card-head{padding:16px 18px;gap:10px}
+            .card-head-icon{width:36px;height:36px;font-size:16px}
+            .card-head h2{font-size:14px}
+            .card-head p{font-size:10px}
+            .btn-submit{padding:12px}
+            .success-card{padding:28px 16px}
+            .success-card h2{font-size:18px}
+            .tracking-number{font-size:22px}
+            .tracking-box{padding:14px}
+            .detail-summary td{padding:6px 8px;font-size:11.5px}
+            .detail-summary td:first-child{width:90px;font-size:11px}
+            .note-box{font-size:11px;padding:8px 10px}
+            .auth-info-banner{padding:10px 12px;gap:8px}
+            .auth-info-name{font-size:12px}
+            .section-label{font-size:10px;margin:16px 0 10px}
         }
+        .dash-footer{width:100%;background:#fff;border-top:1px solid #e2e8f0;padding:20px 5%;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#94a3b8;margin-top:40px}
+        .footer-left{display:flex;align-items:center;gap:6px}
+        .footer-right{font-size:11px;color:#b0b8c4}
+        @media(max-width:768px){.dash-footer{flex-direction:column;gap:6px;text-align:center;padding:16px 5%}}
+
+        /* ─── Toast ─── */
+        .toast{position:fixed;top:24px;right:24px;z-index:300;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 20px;box-shadow:0 8px 24px rgba(0,0,0,0.1);font-size:13px;font-family:'Poppins',sans-serif;color:#1b263b;display:flex;align-items:center;gap:8px;min-width:240px;transform:translateY(-20px) translateX(120%);transition:transform .3s ease}
+        .toast.show{transform:translateY(0) translateX(0)}
+        .toast.success{border-left:3px solid #16a34a}
+        .toast.error{border-left:3px solid #dc2626}
+        .toast-icon{font-size:16px}
+        .toast.success .toast-icon{color:#16a34a}
+        .toast.error .toast-icon{color:#dc2626}
     </style>
+    <script src="/js/spa.js" defer></script>
+    <script src="/js/form-utils.js" defer></script>
+    <script src="/js/request-utils.js" defer></script>
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar">
-        <div class="nav-content">
-            <div class="brand-text">
-                <span class="brand-subtitle">Department of Education</span>
-                <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
-            </div>
+        <div class="brand-text">
+            <span class="brand-subtitle">Department of Education</span>
+            <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
         </div>
-        <div class="nav-actions">
+        <button class="nav-hamburger" id="navHamburger" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')" aria-label="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-links" id="navLinks">
+            <a href="/" class="nav-link"><i class="fas fa-home"></i> Home</a>
+            <a href="/about-us" class="nav-link"><i class="fas fa-info-circle"></i> About Us</a>
+            <a href="/contact-us" class="nav-link"><i class="fas fa-envelope"></i> Contact Us</a>
         </div>
     </nav>
 
-    <div class="main-wrapper">
-        <div class="request-container">
-            <!-- Form State -->
-            <div id="form-state">
-                <div class="request-header">
-                    <div class="request-header-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-                    </div>
-                    <div class="request-header-text">
+    <div class="page">
+
+        <!-- Form state -->
+        <div id="formState">
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-head-icon"><i class="fas fa-file-alt"></i></div>
+                    <div>
                         <h2>Submit Document</h2>
-                        <p>Fill in details to generate a tracking number</p>
+                        <p>Fill in the details below to generate a Tracking Number for your document.</p>
                     </div>
                 </div>
+                <div class="card-body">
 
-                <div class="request-body">
-                    <a href="{{ auth()->check() ? '/dashboard' : '/' }}" style="display: inline-flex; align-items: center; gap: 6px; color: #64748b; text-decoration: none; font-size: 13px; font-weight: 500; margin-bottom: 16px; transition: color 0.2s;" onmouseover="this.style.color='#0056b3'" onmouseout="this.style.color='#64748b'">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M5 12l6 6" /><path d="M5 12l6 -6" /></svg>
-                        {{ auth()->check() ? 'Back to Dashboard' : 'Back to Home' }}
-                    </a>
-                    <div class="form-group">
-                        <label>Document Type <span class="required">*</span></label>
-                        <select class="form-select" id="docType" onchange="toggleOthers()">
-                            <option value="" disabled selected>Select document type</option>
-                            <option value="TOR">Transcript of Records (TOR)</option>
-                            <option value="Others">Others</option>
-                        </select>
-                        <div class="error-text" id="docTypeError"><i class="fas fa-exclamation-circle"></i> <span>Please select a document type</span></div>
+                    <!-- Submitter Information -->
+                    <div class="section-label"><i class="fas fa-user"></i> Submitter Information</div>
+                    @auth
+                    <div class="auth-info-banner">
+                        <i class="fas fa-user-check"></i>
+                        <div>
+                            <div class="auth-info-name">{{ auth()->user()->name }}</div>
+                            <div class="auth-info-email">{{ auth()->user()->email }}</div>
+                        </div>
+                    </div>
+                    @else
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>First Name <span class="req">*</span></label>
+                            <input type="text" id="senderFirstName" placeholder="e.g. Juan" autocomplete="off">
+                            <div class="err-text" id="errSenderFirstName"><i class="fas fa-exclamation-circle"></i> First name is required</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name <span class="req">*</span></label>
+                            <input type="text" id="senderLastName" placeholder="e.g. Dela Cruz" autocomplete="off">
+                            <div class="err-text" id="errSenderLastName"><i class="fas fa-exclamation-circle"></i> Last name is required</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Contact Number <span class="opt">(Optional)</span></label>
+                            <input type="tel" id="senderContact" placeholder="e.g. 09171234567" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address <span class="opt">(Optional)</span></label>
+                            <input type="email" id="senderEmail" placeholder="e.g. juan@example.com" autocomplete="off">
+                            <div class="err-text" id="errSenderEmail"><i class="fas fa-exclamation-circle"></i> Please enter a valid email</div>
+                        </div>
+                    </div>
+                    @endauth
+
+                    <!-- Document Details -->
+                    <div class="section-label"><i class="fas fa-file-invoice"></i> Document Details</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Document Type <span class="req">*</span></label>
+                            <select id="docType" onchange="toggleOthers()">
+                                <option value="" disabled selected>Select document type</option>
+                                <option>Transcript of Records (TOR)</option>
+                                <option>Certificate of Employment</option>
+                                <option>Service Record</option>
+                                <option>Leave Application</option>
+                                <option>Memorandum</option>
+                                <option>Letter / Endorsement</option>
+                                <option>Voucher / Payroll</option>
+                                <option>Report / Compliance</option>
+                                <option>Request / Petition</option>
+                                <option value="Others">Others</option>
+                            </select>
+                            <div class="err-text" id="errDocType"><i class="fas fa-exclamation-circle"></i> Please select a document type</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Submit To</label>
+                            <div class="fixed-office">
+                                {{ $recordsOfficeName ?? 'Records Section' }}
+                                <small>All submissions are automatically routed to Records Section first.</small>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="others-input-wrapper" id="othersWrapper">
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label>Please specify <span class="required">*</span></label>
-                            <input type="text" class="form-input" id="othersSpecify" placeholder="e.g. Certificate of Enrollment" autocomplete="off">
-                            <div class="error-text" id="othersError"><i class="fas fa-exclamation-circle"></i> <span>Please specify the document type</span></div>
+                    <div class="others-wrap" id="othersWrap">
+                        <div class="form-group">
+                            <label>Please specify <span class="req">*</span></label>
+                            <input type="text" id="othersSpecify" placeholder="e.g. Certificate of Enrollment" autocomplete="off">
+                            <div class="err-text" id="errOthers"><i class="fas fa-exclamation-circle"></i> Please specify the document type</div>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label>Subject <span class="required">*</span></label>
-                        <input type="text" class="form-input" id="subject" placeholder="e.g. Submit for TOR — Juan Dela Cruz" autocomplete="off">
-                        <div class="error-text" id="subjectError"><i class="fas fa-exclamation-circle"></i> <span>Subject is required</span></div>
+                        <label>Subject / Title <span class="req">*</span></label>
+                        <input type="text" id="subject" placeholder="Brief description of your document" autocomplete="off" data-no-capitalize>
+                        <div class="err-text" id="errSubject"><i class="fas fa-exclamation-circle"></i> Subject is required</div>
                     </div>
 
                     <div class="form-group">
-                        <label>Description <span class="optional">(Optional)</span></label>
-                        <textarea class="form-textarea" id="description" placeholder="Enter additional details or remarks..."></textarea>
+                        <label>Additional Remarks <span class="opt">(Optional)</span></label>
+                        <textarea id="description" placeholder="Any additional information, purpose, or special instructions..." data-no-capitalize></textarea>
                     </div>
 
                     <button class="btn-submit" id="submitBtn" onclick="submitDocument()">
-                        <i class="fas fa-paper-plane" style="margin-right: 6px;"></i>Generate Tracking Number
+                        <i class="fas fa-paper-plane"></i> Generate Tracking Number
                     </button>
                 </div>
             </div>
+        </div>
 
-            <!-- Success State -->
-            <div class="success-state" id="success-state">
-                <div class="success-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+        <!-- Success state -->
+        <div id="successState" style="display:none;">
+            <div class="card">
+                <div class="success-card">
+                    <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+                    <h2>Document Submitted Successfully!</h2>
+                    <p>Your document has been logged and is now awaiting acceptance by the Records Section.</p>
+
+                    <div class="tracking-box">
+                        <small>Reference Number</small>
+                        <div class="tracking-number" id="generatedCode"></div>
+                    </div>
+
+                    <table class="detail-summary" id="detailSummary">
+                        <tr><td>Submitted By</td><td id="dSender"></td></tr>
+                        <tr><td>Document Type</td><td id="dType"></td></tr>
+                        <tr><td>Subject</td><td id="dSubject"></td></tr>
+                        <tr><td>Remarks</td><td id="dRemarks"></td></tr>
+                        <tr><td>Submitted To</td><td id="dOffice"></td></tr>
+                        <tr><td>Date Submitted</td><td id="dDate"></td></tr>
+                    </table>
+
+                    <div class="note-box note-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Important:</strong> Please take a screenshot of this page. You will need your Reference Number to track, follow up, or claim your document.
+                    </div>
+                    <div class="note-box note-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Please note:</strong> Documents that are not received by the office within <strong>7 days</strong> of submission will be automatically archived. Make sure to follow up if needed.
+                    </div>
+
+                    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
+                        <button class="btn-submit" style="width:auto;padding:10px 22px;" onclick="document.getElementById('trackingInput')?.focus();window.location.href='/track?ref='+document.getElementById('generatedCode').textContent">
+                            <i class="fas fa-search"></i> Track This Document
+                        </button>
+                        @if(auth()->check())
+                        <button class="btn-submit" style="width:auto;padding:10px 22px;background:#059669;" onclick="window.location.href='/my-documents'">
+                            <i class="fas fa-folder"></i> My Documents
+                        </button>
+                        @endif
+                        <button class="btn-secondary" onclick="window.location.reload()">
+                            <i class="fas fa-plus"></i> Submit Another
+                        </button>
+                    </div>
                 </div>
-                <h2>Submitted!</h2>
-                <p class="subtitle">Save your tracking number to monitor the status of your document.</p>
-
-                <div class="tracking-display">
-                    <small>Tracking Number</small>
-                    <h3 id="generatedTracking"></h3>
-                </div>
-
-                <button class="btn-submit" onclick="window.location.reload()">
-                    <i class="fas fa-plus" style="margin-right: 6px;"></i>Submit Another
-                </button>
-                <button class="btn-back" onclick="window.location.href='/track'">
-                    <i class="fas fa-search" style="margin-right: 6px;"></i>Track This Document
-                </button>
             </div>
         </div>
+
     </div>
 
     <script>
-        function toggleOthers() {
-            const type = document.getElementById('docType').value;
-            const wrapper = document.getElementById('othersWrapper');
-            if (type === 'Others') {
-                wrapper.classList.add('show');
-            } else {
-                wrapper.classList.remove('show');
-                document.getElementById('othersSpecify').value = '';
-            }
+    (function () {
+        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const isLoggedIn = {{ auth()->check() ? 'true' : 'false' }};
+
+        function showToast(msg, type) {
+            var toast = document.getElementById('toast');
+            var icon  = document.getElementById('toastIcon');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.className = 'toast ' + type + ' show';
+            icon.className = 'fas toast-icon ' + (type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle');
+            setTimeout(function() { toast.classList.remove('show'); }, 3200);
         }
 
-        function showFieldError(id) {
-            const el = document.getElementById(id);
-            const input = el.previousElementSibling || el.closest('.form-group').querySelector('.form-input, .form-select');
-            if (input) input.classList.add('error');
-            el.classList.add('show');
-        }
+        window.toggleOthers = function () {
+            const val = document.getElementById('docType').value;
+            document.getElementById('othersWrap').classList.toggle('show', val === 'Others');
+            if (val !== 'Others') document.getElementById('othersSpecify').value = '';
+        };
 
         function clearErrors() {
-            document.querySelectorAll('.error-text').forEach(e => e.classList.remove('show'));
-            document.querySelectorAll('.form-input, .form-select, .form-textarea').forEach(e => e.classList.remove('error'));
+            document.querySelectorAll('.err-text').forEach(e => e.classList.remove('show'));
+            document.querySelectorAll('input,select,textarea').forEach(e => e.classList.remove('err'));
         }
 
-        async function submitDocument() {
+        // Name fields: letters, spaces, dots, and hyphens only (no numbers)
+        ['senderFirstName', 'senderLastName'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^a-zA-Z\s.\-]/g, '');
+                });
+            }
+        });
+
+        function fieldErr(inputId, errId) {
+            document.getElementById(inputId)?.classList.add('err');
+            document.getElementById(errId)?.classList.add('show');
+        }
+
+        window.submitDocument = async function () {
             clearErrors();
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            const btn = document.getElementById('submitBtn');
             let valid = true;
 
-            const docType = document.getElementById('docType').value;
-            const subject = document.getElementById('subject').value.trim();
+            // Only collect sender info from fields if guest
+            let senderFirstName = null, senderLastName = null, senderContact = null, senderEmail = null;
+            if (!isLoggedIn) {
+                senderFirstName = document.getElementById('senderFirstName').value.trim();
+                senderLastName  = document.getElementById('senderLastName').value.trim();
+                senderContact   = document.getElementById('senderContact').value.trim() || null;
+                senderEmail     = document.getElementById('senderEmail').value.trim() || null;
+                if (!senderFirstName) { fieldErr('senderFirstName', 'errSenderFirstName'); valid = false; }
+                if (!senderLastName)  { fieldErr('senderLastName', 'errSenderLastName'); valid = false; }
+                if (senderEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(senderEmail)) {
+                    fieldErr('senderEmail', 'errSenderEmail'); valid = false;
+                }
+            }
+
+            const docType     = document.getElementById('docType').value;
+            const othersVal   = document.getElementById('othersSpecify').value.trim();
+            const subject     = document.getElementById('subject').value.trim();
             const description = document.getElementById('description').value.trim();
-            const othersVal = document.getElementById('othersSpecify').value.trim();
 
-            if (!docType) {
-                document.getElementById('docType').classList.add('error');
-                document.getElementById('docTypeError').classList.add('show');
-                valid = false;
-            }
-
-            if (docType === 'Others' && !othersVal) {
-                document.getElementById('othersSpecify').classList.add('error');
-                document.getElementById('othersError').classList.add('show');
-                valid = false;
-            }
-
-            if (!subject) {
-                document.getElementById('subject').classList.add('error');
-                document.getElementById('subjectError').classList.add('show');
-                valid = false;
-            }
-
+            if (!docType)   { fieldErr('docType', 'errDocType'); valid = false; }
+            if (docType === 'Others' && !othersVal) { fieldErr('othersSpecify', 'errOthers'); valid = false; }
+            if (!subject)   { fieldErr('subject', 'errSubject'); valid = false; }
             if (!valid) return;
 
-            // Build final type string
-            const finalType = docType === 'Others' ? 'Others: ' + othersVal : docType;
-
-            btn.innerHTML = '<span class="loading-dots"><span></span></span>';
+            const finalType = docType === 'Others' ? othersVal : docType;
+            const btn = document.getElementById('submitBtn');
             btn.disabled = true;
 
-            try {
-                const response = await fetch('/api/submit-document', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    body: JSON.stringify({
-                        subject: subject,
-                        type: finalType,
-                        description: description
-                    })
-                });
+            const payload = {
+                type: finalType,
+                subject: subject,
+                description: description || null,
+            };
+            if (!isLoggedIn) {
+                payload.sender_first_name = senderFirstName;
+                payload.sender_last_name  = senderLastName;
+                payload.sender_contact    = senderContact;
+                payload.sender_email      = senderEmail;
+            }
 
-                const data = await response.json();
+            try {
+                const res  = await fetch('/api/submit-document', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
 
                 if (data.success) {
-                    document.getElementById('form-state').style.display = 'none';
-                    document.getElementById('success-state').style.display = 'block';
-                    document.getElementById('generatedTracking').innerText = data.data.tracking_number;
+                    document.getElementById('formState').style.display    = 'none';
+                    document.getElementById('successState').style.display = 'block';
+                    document.getElementById('generatedCode').textContent  = data.reference_number || data.tracking_number || '-';
+                    if (data.details) {
+                        document.getElementById('dSender').textContent  = data.details.sender_name || '-';
+                        document.getElementById('dType').textContent    = data.details.type || '-';
+                        document.getElementById('dSubject').textContent = data.details.subject || '-';
+                        document.getElementById('dRemarks').textContent = data.details.description || 'No remarks provided';
+                        document.getElementById('dOffice').textContent  = data.details.submitted_to || '-';
+                        document.getElementById('dDate').textContent    = data.details.date || '-';
+                    }
                 } else {
-                    throw new Error(data.message || 'Submission failed');
+                    showToast(data.message || 'Submission failed. Please try again.', 'error');
+                    btn.disabled = false;
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('System error occurred. Please try again.');
-                btn.innerHTML = '<i class="fas fa-paper-plane" style="margin-right: 6px;"></i>Generate Tracking Number';
+            } catch (err) {
+                showToast('System error. Please try again.', 'error');
                 btn.disabled = false;
             }
-        }
+        };
+    })();
     </script>
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <i class="fas toast-icon" id="toastIcon"></i>
+        <span id="toastMsg"></span>
+    </div>
+    <footer class="dash-footer">
+        <div class="footer-left">
+            <span>&copy; {{ date('Y') }} DepEd Document Tracking System</span>
+        </div>
+        <div class="footer-right">
+            Developed by Raymond Bautista
+        </div>
+    </footer>
 </body>
 </html>

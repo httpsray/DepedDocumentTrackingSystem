@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ActivationToken;
+use App\Models\Document;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -72,13 +73,20 @@ class ActivationService
 
         // Activate the user
         $user = $token->user;
-        $user->update([
-            'password'          => bcrypt($password),
-            'status'            => 'active',
-            'email_verified_at' => now(),
-            'activated_at'      => now(),
-            'activation_ip'     => $ip,
-        ]);
+        $user->password          = bcrypt($password);
+        $user->status            = 'active';
+        $user->email_verified_at = now();
+        $user->activated_at      = now();
+        $user->activation_ip     = $ip;
+        $user->save();
+
+        // Link any guest-submitted documents that used this email
+        // before the user had an account.
+        // Use query builder (not Eloquent update) since user_id is guarded.
+        \Illuminate\Support\Facades\DB::table('documents')
+            ->where('sender_email', $user->email)
+            ->whereNull('user_id')
+            ->update(['user_id' => $user->id]);
 
         return $user;
     }

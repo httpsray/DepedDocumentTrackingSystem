@@ -11,9 +11,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Trust Cloudflare Tunnel proxied requests (correct IP, HTTPS detection)
+        $middleware->trustProxies(at: '*');
+
+        // Global middleware — runs on every request
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'no-cache' => \App\Http\Middleware\NoCacheHeaders::class,
+            'ensure-auth' => \App\Http\Middleware\EnsureAuthenticated::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

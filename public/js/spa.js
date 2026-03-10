@@ -1,17 +1,15 @@
 /**
  * Lightweight SPA-style page navigation.
- * Intercepts internal link clicks → fetches via AJAX → swaps head+body via DOM.
- * No full page reload = no white flash = no heartbeat.
- *
- * Routes that use a different layout (sidebar dashboard, admin) are excluded
- * and trigger a normal full-page navigation instead.
+ * Intercepts internal link clicks, fetches pages via AJAX, swaps head+body via DOM.
+ * No full page reload = no white flash = no heartbeat between dashboards.
  */
 (function () {
-    // Routes that must NOT be handled by the SPA router.
-    // - /dashboard, /admin  → different layout (sidebar, no navbar)
-    // - /login, /register   → rely on CSRF tokens & page-specific scripts
-    //                          that break under SPA body-swap
-    var FULL_RELOAD_ROUTES = ['/dashboard', '/admin', '/login', '/register', '/activate'];
+
+    // Only genuine auth/public pages need a hard browser reload.
+    // Every authenticated dashboard / office / records / admin route is handled via SPA swap.
+    var FULL_RELOAD_ROUTES = [
+        '/login', '/register', '/activate', '/set-password', '/activation-status'
+    ];
 
     function shouldFullReload(url) {
         try {
@@ -24,141 +22,253 @@
         return false;
     }
 
+    /* ── Progress bar ── */
+    var _barEl = document.createElement('div');
+    _barEl.id = 'spa-bar';
+    document.documentElement.appendChild(_barEl);
+
+    var _barCss = document.createElement('style');
+    _barCss.textContent =
+        '#spa-bar{position:fixed;top:0;left:0;height:5px;z-index:99999;width:0;opacity:0;pointer-events:none;' +
+        'background:linear-gradient(90deg,#fca311 0%,#ffde00 60%,#fca311 100%);' +
+        'background-size:200% 100%;box-shadow:0 0 10px rgba(252,163,17,.9),0 0 4px rgba(255,222,0,.7);' +
+        'transition:width .25s ease,opacity .35s ease}' +
+        '#spa-bar.active{opacity:1;animation:spa-shimmer 1.2s linear infinite}' +
+        '@keyframes spa-shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}' +
+        /* Fade-transition classes injected into live <body> */
+        'body{transition:opacity .12s ease}' +
+        'body.spa-out{opacity:0!important;pointer-events:none}';
+    document.head.appendChild(_barCss);
+
+    function _barStart() {
+        _barEl.style.width = '0';
+        _barEl.classList.add('active');
+        setTimeout(function () { _barEl.style.width = '75%'; }, 16);
+    }
+    function _barDone() {
+        _barEl.style.width = '100%';
+        setTimeout(function () { _barEl.classList.remove('active'); _barEl.style.width = '0'; }, 350);
+    }
+
+    /* ── Track already-loaded external scripts to avoid double-execution ── */
+    var _loadedSrcs = {};
+    document.querySelectorAll('script[src]').forEach(function (s) {
+        if (s.src) _loadedSrcs[new URL(s.src, location.origin).href] = true;
+    });
+
     function init() {
 
-        function swap(html, url, push) {
+        /* Perform the actual DOM swap (head sync + body replace + script re-exec) */
+        function applySwap(html, url, push) {
             var doc = new DOMParser().parseFromString(html, 'text/html');
 
-            // Update title
+            /* -- Title -- */
             document.title = doc.title;
 
-            /* ── Head cleanup ── */
-            // Remove old inline styles
-            document.querySelectorAll('head > style').forEach(function (s) { s.remove(); });
-
-            // Remove old meta tags (except charset and viewport)
-            document.querySelectorAll('head > meta').forEach(function (m) {
-                var name = m.getAttribute('name') || '';
-                if (name !== 'viewport' && !m.getAttribute('charset')) m.remove();
-            });
-
-            // Copy new meta tags
-            doc.querySelectorAll('head > meta').forEach(function (m) {
-                var name = m.getAttribute('name') || '';
-                if (name !== 'viewport' && !m.getAttribute('charset')) {
-                    document.head.appendChild(m.cloneNode(true));
+            /* -- Favicon: sync link[rel="icon"] from new page -- */
+            var newFavicon = doc.querySelector('link[rel="icon"]');
+            if (newFavicon) {
+                var oldFavicon = document.querySelector('head > link[rel="icon"]');
+                if (oldFavicon) {
+                    oldFavicon.setAttribute('href', newFavicon.getAttribute('href'));
+                    if (newFavicon.getAttribute('type')) oldFavicon.setAttribute('type', newFavicon.getAttribute('type'));
+                } else {
+                    document.head.appendChild(newFavicon.cloneNode(true));
                 }
+            }
+
+            /* -- Meta tags (keep charset + viewport, replace the rest) -- */
+            document.querySelectorAll('head > meta').forEach(function (m) {
+                var n = m.getAttribute('name') || '';
+                if (n !== 'viewport' && !m.getAttribute('charset')) m.remove();
+            });
+            doc.querySelectorAll('head > meta').forEach(function (m) {
+                var n = m.getAttribute('name') || '';
+                if (n !== 'viewport' && !m.getAttribute('charset'))
+                    document.head.appendChild(m.cloneNode(true));
             });
 
-            // Copy new inline styles
+            /* -- Inline <style> blocks --
+               Only remove anonymous (no id) styles — keyed styles (e.g. clearable-input-style,
+               loading-dots-global-style) are injected by form-utils.js which we skip from
+               re-execution, so they must be preserved across swaps. */
+            document.querySelectorAll('head > style:not([id])').forEach(function (s) { s.remove(); });
             doc.querySelectorAll('head > style').forEach(function (s) {
+                // Skip inserting if an element with the same id already exists
+                if (s.id && document.getElementById(s.id)) return;
                 document.head.appendChild(s.cloneNode(true));
             });
+            // Re-inject our persistent spa/fade CSS (it has no id so it was removed above)
+            document.head.appendChild(_barCss);
 
-            /* ── Stylesheet sync — add missing AND remove stale ── */
-            // Build set of stylesheets the new page needs
+            /* -- Stylesheets: remove stale, add new -- */
             var newHrefs = {};
             doc.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
-                var href = l.getAttribute('href');
-                if (href) newHrefs[href] = true;
-            });
-
-            // Remove stylesheets that the new page does NOT include
-            // (skip CDN fonts / icons — only remove local project sheets)
-            document.querySelectorAll('head > link[rel="stylesheet"]').forEach(function (l) {
-                var href = l.getAttribute('href');
-                if (!href) return;
-                // Keep external CDN resources (fonts, icons)
-                if (href.indexOf('cdnjs.cloudflare.com') !== -1) return;
-                if (href.indexOf('fonts.googleapis.com') !== -1) return;
-                // Remove if not in new page
-                if (!newHrefs[href]) l.remove();
-            });
-
-            // Add stylesheets from new page that don't exist yet
-            var currentHrefs = {};
-            document.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
                 var h = l.getAttribute('href');
-                if (h) currentHrefs[h] = true;
+                if (h) newHrefs[h] = true;
+            });
+            document.querySelectorAll('head > link[rel="stylesheet"]').forEach(function (l) {
+                var h = l.getAttribute('href');
+                if (!h) return;
+                if (h.indexOf('cdnjs.cloudflare.com') !== -1) return; // keep CDN icons/fonts
+                if (h.indexOf('fonts.googleapis.com') !== -1) return;
+                if (!newHrefs[h]) l.remove();
+            });
+            var existHrefs = {};
+            document.querySelectorAll('head > link[rel="stylesheet"]').forEach(function (l) {
+                var h = l.getAttribute('href');
+                if (h) existHrefs[h] = true;
             });
             doc.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
-                var href = l.getAttribute('href');
-                if (href && !currentHrefs[href]) {
-                    var link = document.createElement('link');
-                    link.rel = 'stylesheet';
-                    link.href = href;
-                    document.head.appendChild(link);
+                var h = l.getAttribute('href');
+                if (h && !existHrefs[h]) {
+                    var lnk = document.createElement('link');
+                    lnk.rel = 'stylesheet';
+                    lnk.href = h;
+                    document.head.appendChild(lnk);
                 }
             });
 
-            // Swap body content
-            document.body.innerHTML = doc.body.innerHTML;
+            /* -- Body -- */
+            /* Save sidebar open state before replacing body */
+            var _sbWasOpen = !!document.querySelector('.sidebar.open');
 
-            // Re-execute inline scripts in body
-            var scripts = document.body.querySelectorAll('script');
-            scripts.forEach(function (old) {
-                // Skip spa.js
-                if (old.src && old.src.indexOf('spa.js') !== -1) return;
+            /* Pre-apply sidebar open state to new content BEFORE inserting into DOM
+               so the sidebar never visually disappears during SPA navigation. */
+            if (_sbWasOpen) {
+                var _newSb = doc.querySelector('.sidebar');
+                var _newOv = doc.querySelector('.mob-overlay');
+                var _newHb = doc.querySelector('.mob-hamburger');
+                if (_newSb) { _newSb.classList.add('open'); _newSb.style.transition = 'none'; }
+                if (_newOv) { _newOv.classList.add('open'); _newOv.classList.add('show'); }
+                if (_newHb) { _newHb.classList.add('toggle'); }
+            }
+
+            document.body.innerHTML = doc.body.innerHTML;
+            document.body.className  = doc.body.className;
+            /* Reset any inline styles carried over from the previous page (e.g. overflow:hidden
+               set by a drawer/modal) so the new page always starts with a clean slate. */
+            document.body.removeAttribute('style');
+
+            /* Keep body locked if sidebar was open */
+            if (_sbWasOpen && document.querySelector('.sidebar')) {
+                document.body.style.overflow = 'hidden';
+                /* Re-enable sidebar transition after one frame so future toggles animate */
+                requestAnimationFrame(function () {
+                    var sb = document.querySelector('.sidebar');
+                    if (sb) sb.style.transition = '';
+                });
+            }
+
+            /* -- Re-execute body <script> tags -- */
+            document.body.querySelectorAll('script').forEach(function (old) {
+                // Never re-run spa.js or form-utils.js (they survive swaps via event delegation)
+                if (old.src && old.src.indexOf('spa.js') !== -1)       return;
+                if (old.src && old.src.indexOf('form-utils.js') !== -1) return;
+                if (old.src && old.src.indexOf('request-utils.js') !== -1) return;
+
                 var s = document.createElement('script');
+                // Copy ALL attributes (id, type, data-*, etc.) so elements like
+                // <script type="application/json" id="docsData"> keep their id after swap.
+                Array.from(old.attributes).forEach(function (attr) {
+                    s.setAttribute(attr.name, attr.value);
+                });
                 if (old.src) {
+                    var abs = new URL(old.src, location.origin).href;
+                    if (_loadedSrcs[abs]) {
+                        // Already loaded — fire reinit event for any listeners
+                        window.dispatchEvent(new CustomEvent('spa:reinit'));
+                        return;
+                    }
+                    _loadedSrcs[abs] = true;
                     s.src = old.src;
                 } else {
                     s.textContent = old.textContent;
                 }
-                if (old.type) s.type = old.type;
                 old.parentNode.replaceChild(s, old);
             });
 
-            // Push/replace URL
             if (push) history.pushState({ spa: true }, '', url);
-
-            // Scroll to top
             window.scrollTo(0, 0);
         }
 
-        // Intercept internal link clicks — uses event delegation on document
+        /* Fade out (120 ms) -> swap content -> fade in */
+        function swap(html, url, push) {
+            // Detect layout mismatch: sidebar layout <-> navbar layout.
+            // Crossing layouts causes visual glitches.
+            // Force a real navigation instead so the user sees a clean context switch.
+            var doc = new DOMParser().parseFromString(html, 'text/html');
+            var currentHasSidebar = !!document.querySelector('.sidebar');
+            var newHasSidebar     = !!doc.querySelector('.sidebar');
+            if (currentHasSidebar !== newHasSidebar) {
+                _barDone();
+                window.location.href = url;
+                return;
+            }
+
+            document.body.classList.add('spa-out');
+            setTimeout(function () {
+                applySwap(html, url, push);
+                // Double rAF: first commit new DOM, second ensures browser painted before fade-in
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(function () {
+                        document.body.classList.remove('spa-out');
+                    });
+                });
+            }, 120);
+        }
+
+        /* ── Intercept internal link clicks ── */
         document.addEventListener('click', function (e) {
             var a = e.target.closest('a');
             if (!a || !a.href || a.target) return;
-            if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+            if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
             if (a.hostname !== location.hostname) return;
             var href = a.getAttribute('href');
             if (!href || href === '#' || href.charAt(0) === '#') return;
-            if (a.href === location.href + '#' || a.href === location.href) return;
+            if (a.href === location.href || a.href === location.href + '#') return;
 
-            // If target or current page is a full-reload route, skip SPA
+            // Full reload for auth pages (or if we're currently on one)
             if (shouldFullReload(a.href) || shouldFullReload(location.href)) {
-                // Let the browser do a normal navigation
-                return;
+                _barStart();
+                return; // Browser navigates normally
             }
 
             e.preventDefault();
+            _barStart();
 
             fetch(a.href, { credentials: 'same-origin' })
-                .then(function (r) { return r.text().then(function (h) { return { html: h, url: r.url }; }); })
-                .then(function (r) { swap(r.html, r.url, true); })
-                .catch(function () { window.location = a.href; });
+                .then(function (r) {
+                    // Server redirected to a login page (session expired etc.)
+                    if (shouldFullReload(r.url)) {
+                        _barDone();
+                        window.location.href = r.url;
+                        return null;
+                    }
+                    return r.text().then(function (h) { return { html: h, url: r.url }; });
+                })
+                .then(function (r) {
+                    if (r) { swap(r.html, r.url, true); _barDone(); }
+                })
+                .catch(function () { _barDone(); window.location.href = a.href; });
         });
 
-        // Back / Forward buttons
+        /* ── Browser back / forward ── */
         window.addEventListener('popstate', function () {
-            // Full reload for dashboard / admin routes
-            if (shouldFullReload(location.href)) {
-                location.reload();
-                return;
-            }
+            if (shouldFullReload(location.href)) { location.reload(); return; }
+            _barStart();
             fetch(location.href, { credentials: 'same-origin' })
                 .then(function (r) { return r.text(); })
-                .then(function (h) { swap(h, location.href, false); })
-                .catch(function () { location.reload(); });
+                .then(function (h) { swap(h, location.href, false); _barDone(); })
+                .catch(function () { _barDone(); location.reload(); });
         });
 
         history.replaceState({ spa: true }, '', location.href);
     }
 
-    // Only init once per window
     if (!window._spaReady) {
         window._spaReady = true;
         init();
     }
+
 })();

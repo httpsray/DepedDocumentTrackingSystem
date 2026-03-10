@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="{{ asset('images/DOCTRAXLOGO.svg') }}" type="image/svg+xml">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo csrf_token(); ?>">
     <title>Set Password - DepEd DTS</title>
@@ -11,6 +12,8 @@
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="/css/auth.css">
     <script src="/js/spa.js" defer></script>
+    <script src="/js/form-utils.js" defer></script>
+    <script src="/js/request-utils.js" defer></script>
     <style>
         .container { background: transparent; box-shadow: none; animation: none; }
 
@@ -230,10 +233,13 @@
                 <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
             </div>
         </div>
-        <div class="nav-actions">
-           <a href="/" class="btn-text" style="color: white; text-decoration: none; font-size: 14px; opacity: 0.9;">
-               <i class="fas fa-home"></i> Home
-           </a>
+        <button class="nav-hamburger" id="navHamburger" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')" aria-label="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-links" id="navLinks">
+            <a href="/" class="nav-link"><i class="fas fa-home"></i> Home</a>
+            <a href="/about-us" class="nav-link"><i class="fas fa-info-circle"></i> About Us</a>
+            <a href="/contact-us" class="nav-link"><i class="fas fa-envelope"></i> Contact Us</a>
         </div>
     </nav>
 
@@ -265,7 +271,7 @@
                 <div class="form-group">
                     <label class="form-label">New Password</label>
                     <div class="password-wrapper">
-                        <input type="password" id="password" name="password" class="form-control" placeholder="Enter new password" required autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly');">
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Enter new password" required autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
                         <button type="button" class="toggle-pw" onclick="togglePw('password', this)">
                             <i class="far fa-eye"></i>
                         </button>
@@ -298,7 +304,7 @@
                 <div class="form-group">
                     <label class="form-label">Confirm Password</label>
                     <div class="password-wrapper">
-                        <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="Repeat password" required autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly');">
+                        <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="Repeat password" required autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
                         <button type="button" class="toggle-pw" onclick="togglePw('password_confirmation', this)">
                             <i class="far fa-eye"></i>
                         </button>
