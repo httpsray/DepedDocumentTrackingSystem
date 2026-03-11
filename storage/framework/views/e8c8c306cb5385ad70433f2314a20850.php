@@ -288,6 +288,7 @@
 
         .pill.pending { background: #fff7ed; color: #9a3412; }
         .pill.forwarded { background: #eff6ff; color: #1e40af; }
+        .pill.processing { background: #fffbeb; color: #d97706; }
         .pill.completed { background: #f0fdf4; color: #166534; }
         .pill.other { background: #f3f4f6; color: #4b5563; }
 
@@ -672,7 +673,8 @@
                             <td>
                                 <?php
                                     $sc = match($doc->status) {
-                                        'received' => 'pending',
+                                        'submitted', 'received' => 'pending',
+                                        'in_review', 'on_hold' => 'processing',
                                         'completed', 'for_pickup' => 'completed',
                                         default => 'other',
                                     };
@@ -703,7 +705,8 @@
                         <div class="mob-card-meta">
                             <?php
                                 $sc = match($doc->status) {
-                                    'received' => 'pending',
+                                    'submitted', 'received' => 'pending',
+                                    'in_review', 'on_hold' => 'processing',
                                     'completed', 'for_pickup' => 'completed',
                                     default => 'other',
                                 };
@@ -830,8 +833,9 @@
             var h = n.getHours(), m = n.getMinutes(), s = n.getSeconds();
             var p = h >= 12 ? 'PM' : 'AM';
             var h12 = h % 12 || 12;
+            var el = document.getElementById('c-h'); if (!el) { clearInterval(clockInterval); return; }
 
-            document.getElementById('c-h').textContent = String(h12).padStart(2, '0');
+            el.textContent = String(h12).padStart(2, '0');
             document.getElementById('c-m').textContent = String(m).padStart(2, '0');
             document.getElementById('c-s').textContent = String(s).padStart(2, '0');
             document.getElementById('c-p').textContent = p;
@@ -841,7 +845,7 @@
             document.getElementById('c-day').textContent = days[n.getDay()];
             document.getElementById('c-date').textContent = mos[n.getMonth()] + ' ' + n.getDate() + ', ' + n.getFullYear();
         }
-        tick(); setInterval(tick, 1000);
+        tick(); var clockInterval = setInterval(tick, 1000);
 
         // ─── Sidebar Toggle ───
         window.toggleSidebar = function() {

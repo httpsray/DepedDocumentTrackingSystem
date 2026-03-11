@@ -35,6 +35,8 @@
             -webkit-font-smoothing: antialiased;
             color: var(--text-dark);
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         /* ─── Sidebar ─── */
@@ -233,6 +235,7 @@
 
         .pill.pending { background: #fff7ed; color: #9a3412; }
         .pill.forwarded { background: #eff6ff; color: #1e40af; }
+        .pill.processing { background: #fffbeb; color: #d97706; }
         .pill.completed { background: #f0fdf4; color: #166534; }
         .pill.other { background: #f3f4f6; color: #4b5563; }
 
@@ -607,8 +610,9 @@
                         <td>
                             <?php
                                 $sc = match($doc->status) {
-                                    'received', 'submitted', 'in_review', 'for_pickup' => 'pending',
-                                    'completed' => 'completed',
+                                    'submitted', 'received' => 'pending',
+                                    'in_review', 'on_hold' => 'processing',
+                                    'completed', 'for_pickup' => 'completed',
                                     default => 'other',
                                 };
                                 $statusLabel = $doc->statusLabel();
