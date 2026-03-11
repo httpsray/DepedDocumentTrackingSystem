@@ -25,8 +25,8 @@ class DashboardController extends Controller
                 'stats' => [
                     'total_users'     => User::where('role', 'user')->count(),
                     'total_documents' => Document::count(),
-                    'pending_docs'    => Document::whereIn('status', ['submitted', 'received', 'in_review', 'for_pickup'])->count(),
-                    'completed_docs'  => Document::whereIn('status', ['completed'])->count(),
+                    'pending_docs'    => Document::whereIn('status', ['submitted', 'received', 'in_review'])->count(),
+                    'completed_docs'  => Document::whereIn('status', ['completed', 'for_pickup'])->count(),
                 ],
                 'recentDocs' => $recentDocs,
             ];
@@ -74,8 +74,8 @@ class DashboardController extends Controller
                 'stats' => [
                     'total_users'     => User::where('role', 'user')->count(),
                     'total_documents' => Document::count(),
-                    'pending_docs'    => Document::whereIn('status', ['submitted', 'received', 'in_review', 'for_pickup'])->count(),
-                    'completed_docs'  => Document::whereIn('status', ['completed'])->count(),
+                    'pending_docs'    => Document::whereIn('status', ['submitted', 'received', 'in_review'])->count(),
+                    'completed_docs'  => Document::whereIn('status', ['completed', 'for_pickup'])->count(),
                 ],
                 'recentDocs' => $recentDocs,
             ]);
@@ -167,8 +167,8 @@ class DashboardController extends Controller
             return [
                 'total_users'    => User::where('role', 'user')->count(),
                 'total_documents'=> Document::count(),
-                'pending_docs'   => Document::whereIn('status', ['submitted', 'received', 'in_review', 'for_pickup'])->count(),
-                'completed_docs' => Document::whereIn('status', ['completed'])->count(),
+                'pending_docs'   => Document::whereIn('status', ['submitted', 'received', 'in_review'])->count(),
+                'completed_docs' => Document::whereIn('status', ['completed', 'for_pickup'])->count(),
             ];
         });
         return response()->json($stats);
