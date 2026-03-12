@@ -109,6 +109,11 @@ Route::post('/api/reset-password', [AuthController::class, 'resetPassword'])
     ->middleware('throttle:5,60')
     ->name('password.update');
 
+// QR code image (public - anyone with tracking number can view)
+Route::get('/qr/{tracking}', [DocumentController::class, 'qrCode'])
+    ->middleware('throttle:60,1')
+    ->where('tracking', '[A-Za-z0-9\-]+');
+
 // Public API Routes
 Route::post('/api/submit-document', [DocumentController::class, 'submit'])
     ->middleware('throttle:10,1');
@@ -145,6 +150,14 @@ Route::middleware(['auth', 'ensure-auth', 'no-cache'])->group(function () {
     })->name('help');
 
     // ─── Office account routes ───────────────────────────────────────────────
+    Route::get('/receive/{tracking}', function ($tracking) {
+        $user = auth()->user();
+        if (!$user->isSuperAdmin() && (!$user->isRepresentative() || !$user->office_id)) {
+            abort(403);
+        }
+        $tracking = strtoupper(trim(strip_tags($tracking)));
+        return view('office.receive', compact('user', 'tracking'));
+    })->where('tracking', '[A-Za-z0-9\-]+')->name('office.receive');
     Route::get('/office/dashboard', [RepresentativeController::class, 'dashboard'])
         ->name('office.dashboard');
     Route::get('/office/documents/{id}', [RepresentativeController::class, 'show'])

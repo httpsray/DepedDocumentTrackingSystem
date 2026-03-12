@@ -464,11 +464,14 @@
         .ref-sep{font-size:18px;color:#cbd5e1;user-select:none;padding:0 2px}
         .btn-clear-x{width:36px;height:36px;border:1.5px solid #e2e8f0;border-radius:50%;background:#f8fafc;color:#94a3b8;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;padding:0}
         .rs-center{width:fit-content;margin:0 auto}
-        .rs-btn-wrap{display:flex;justify-content:center;margin-top:18px}
-        .btn-receive{width:auto;min-width:600px;height:60px;padding:0 32px;border:none;border-radius:8px;background:#16a34a;color:#fff;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s}
+        .rs-btn-wrap{display:flex;justify-content:center;margin-top:18px;gap:12px}
+        .btn-receive{flex:1;max-width:300px;height:60px;padding:0 32px;border:none;border-radius:8px;background:#16a34a;color:#fff;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s}
         .btn-receive:hover{background:#15803d}
         .btn-receive:active{background:#166534}
         .btn-receive:disabled{opacity:.5;cursor:not-allowed}
+        .btn-scan-qr{flex:1;max-width:300px;height:60px;padding:0 32px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s;text-decoration:none}
+        .btn-scan-qr:hover{background:var(--primary-dark)}
+        .btn-scan-qr:active{background:#003976}
         .receive-alert{margin-top:12px;padding:8px 12px;border-radius:7px;font-size:12px;display:none;align-items:center;gap:8px;animation:rcvFadeIn .2s ease-out;width:100%}
         .receive-alert.show{display:flex}
         .receive-alert.err{background:#fef2f2;border-left:3px solid #dc2626;color:#b91c1c}
@@ -483,7 +486,23 @@
             .ref-box{width:38px;height:44px;font-size:17px}
             .btn-clear-x{width:32px;height:32px;font-size:12px}
             .btn-receive{min-width:auto;width:100%;height:44px;font-size:13px}
+            .btn-scan-qr{min-width:auto;width:100%;height:44px;font-size:13px}
         }
+        /* ─── QR Scanner Modal ─── */
+        .scanner-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center;padding:16px}
+        .scanner-overlay.show{display:flex}
+        .scanner-modal{background:#fff;border-radius:16px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:modalIn .18s ease;max-height:90vh;overflow-y:auto}
+        .scanner-modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)}
+        .scanner-modal-head h3{font-size:15px;font-weight:700;color:var(--text-dark);display:flex;align-items:center;gap:8px}
+        .scanner-modal-head h3 i{color:var(--primary)}
+        .scanner-close{width:32px;height:32px;border:none;background:#f1f5f9;border-radius:8px;font-size:16px;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+        .scanner-close:hover{background:#e2e8f0}
+        .scanner-body{padding:20px 22px}
+        .scanner-hint{font-size:12px;color:var(--text-muted);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+        .scanner-hint i{color:#94a3b8}
+        #qr-reader{width:100%;border-radius:8px;overflow:hidden}
+        #qr-reader video{border-radius:8px}
+        .camera-status{text-align:center;padding:10px 0 4px;font-size:12px;color:var(--text-muted)}
         /* ─── Tracking Drawer ─── */
         .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:400;opacity:0;pointer-events:none;transition:opacity .25s}
         .drawer-overlay.open{opacity:1;pointer-events:all}
@@ -608,6 +627,35 @@
                 </div>
             </div>
         </div>
+
+        <!-- Receive Strip (SuperAdmin with office) -->
+        @if($user->isSuperAdmin() && $user->office_id)
+        <div class="receive-strip" style="border-radius:12px;margin-bottom:24px">
+            <h2>Receive Document</h2>
+            <p class="rs-sub">Enter the 8-character tracking number</p>
+            <div class="rs-center">
+                <div class="rs-main">
+                    <div class="ref-boxes-row" id="refBoxes">
+                        <input type="text" maxlength="1" class="ref-box" data-idx="0" data-no-clearable data-no-capitalize autocomplete="off">
+                        <input type="text" maxlength="1" class="ref-box" data-idx="1" data-no-clearable data-no-capitalize autocomplete="off">
+                        <input type="text" maxlength="1" class="ref-box" data-idx="2" data-no-clearable data-no-capitalize autocomplete="off">
+                        <input type="text" maxlength="1" class="ref-box" data-idx="3" data-no-clearable data-no-capitalize autocomplete="off">
+                        <span class="ref-sep">&mdash;</span>
+                        <input type="text" maxlength="1" class="ref-box" data-idx="4" data-no-clearable data-no-capitalize autocomplete="off">
+                        <input type="text" maxlength="1" class="ref-box" data-idx="5" data-no-clearable data-no-capitalize autocomplete="off">
+                        <input type="text" maxlength="1" class="ref-box" data-idx="6" data-no-clearable data-no-capitalize autocomplete="off">
+                        <input type="text" maxlength="1" class="ref-box" data-idx="7" data-no-clearable data-no-capitalize autocomplete="off">
+                    </div>
+                    <button type="button" class="btn-clear-x" onclick="clearRefBoxes()" title="Clear">&#10005;</button>
+                </div>
+                <div class="receive-alert" id="receiveRefMsg"><i class="fas fa-exclamation-circle"></i><span></span></div>
+            </div>
+            <div class="rs-btn-wrap">
+                <button class="btn-receive" id="receiveRefBtn" onclick="receiveByReference()"><i class="fas fa-check"></i> Receive</button>
+                <button class="btn-scan-qr" id="scanQrBtn" onclick="openScanner()"><i class="fas fa-qrcode"></i> Scan Document</button>
+            </div>
+        </div>
+        @endif
 
         <!-- Stats -->
         <div class="stats">
@@ -1119,8 +1167,103 @@
                 '<div class="drawer-timeline"><div class="tl">' + tlHtml + '</div></div>';
         }
         document.addEventListener('keydown', function(e){
-            if(e.key === 'Escape'){ closeDrawer(); closeSidebar(); }
+            if(e.key === 'Escape'){
+                var scannerOpen = document.getElementById('scannerOverlay') && document.getElementById('scannerOverlay').classList.contains('show');
+                if(scannerOpen) closeScanner();
+                else { closeDrawer(); closeSidebar(); }
+            }
         });
+    })();
+    </script>
+
+    <!-- QR Scanner Modal -->
+    <div class="scanner-overlay" id="scannerOverlay" onclick="if(event.target===this)closeScanner()">
+        <div class="scanner-modal">
+            <div class="scanner-modal-head">
+                <h3><i class="fas fa-qrcode"></i> Scan Document QR Code</h3>
+                <button class="scanner-close" onclick="closeScanner()">&#10005;</button>
+            </div>
+            <div class="scanner-body">
+                <div class="scanner-hint"><i class="fas fa-info-circle"></i> Point your camera at the document's QR code to auto-fill the tracking number.</div>
+                <div id="qr-reader"></div>
+                <p class="camera-status" id="cameraStatus">Initializing camera...</p>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+    (function(){
+        var html5QrCode = null;
+        var scannerRunning = false;
+        var scanCooldown = false;
+
+        window.openScanner = function() {
+            document.getElementById('scannerOverlay').classList.add('show');
+            document.body.style.overflow = 'hidden';
+            startCamera();
+        };
+
+        window.closeScanner = function() {
+            document.getElementById('scannerOverlay').classList.remove('show');
+            document.body.style.overflow = '';
+            stopCamera();
+        };
+
+        function startCamera() {
+            if (scannerRunning) return;
+            var statusEl = document.getElementById('cameraStatus');
+            statusEl.textContent = 'Initializing camera...';
+            statusEl.style.display = 'block';
+
+            try {
+                html5QrCode = new Html5Qrcode('qr-reader');
+                html5QrCode.start(
+                    { facingMode: 'environment' },
+                    { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
+                    function(decodedText) {
+                        if (scanCooldown) return;
+                        scanCooldown = true;
+                        setTimeout(function(){ scanCooldown = false; }, 2000);
+                        onQrScanned(decodedText);
+                    },
+                    function() {}
+                ).then(function() {
+                    scannerRunning = true;
+                    statusEl.textContent = 'Point your camera at a QR code';
+                }).catch(function() {
+                    statusEl.textContent = 'Camera not available. Please enter the tracking number manually.';
+                });
+            } catch(e) {
+                statusEl.textContent = 'Camera not available. Please enter the tracking number manually.';
+            }
+        }
+
+        function stopCamera() {
+            if (html5QrCode && scannerRunning) {
+                html5QrCode.stop().then(function() {
+                    scannerRunning = false;
+                    html5QrCode.clear();
+                }).catch(function() {
+                    scannerRunning = false;
+                });
+            }
+        }
+
+        function onQrScanned(text) {
+            var tracking = text.trim();
+            var match = tracking.match(/\/receive\/([A-Za-z0-9]+)/);
+            if (match) tracking = match[1];
+            tracking = tracking.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (!tracking || tracking.length < 4) return;
+
+            closeScanner();
+            var boxes = document.querySelectorAll('#refBoxes .ref-box');
+            for (var i = 0; i < boxes.length && i < tracking.length; i++) {
+                boxes[i].value = tracking[i];
+                boxes[i].classList.add('filled');
+            }
+            receiveByReference();
+        }
     })();
     </script>
 </body>

@@ -124,6 +124,11 @@ class ComposerStaticInit5269dec09802e3fd73cc96ab32e2ec0b
         array (
             'voku\\' => 5,
         ),
+        'c' =>
+        array (
+            'chillerlan\\Settings\\' => 20,
+            'chillerlan\\QRCode\\' => 18,
+        ),
         'T' =>
         array (
             'TijsVerkoyen\\CssToInlineStyles\\' => 31,
@@ -254,6 +259,14 @@ class ComposerStaticInit5269dec09802e3fd73cc96ab32e2ec0b
         'voku\\' =>
         array (
             0 => __DIR__ . '/..' . '/voku/portable-ascii/src/voku',
+        ),
+        'chillerlan\\Settings\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/chillerlan/php-settings-container/src',
+        ),
+        'chillerlan\\QRCode\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/chillerlan/php-qrcode/src',
         ),
         'TijsVerkoyen\\CssToInlineStyles\\' =>
         array (

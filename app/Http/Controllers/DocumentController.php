@@ -7,6 +7,8 @@ use App\Models\Office;
 use App\Models\RoutingLog;
 use App\Services\ReferenceNumberService;
 use App\Services\TrackingNumberService;
+use chillerlan\QRCode\QRCode;
+use chillerlan\QRCode\QROptions;
 use Illuminate\Http\Request;
 
 class DocumentController extends Controller
@@ -318,6 +320,39 @@ class DocumentController extends Controller
                 'submitted_at' => $document->created_at->setTimezone('Asia/Manila')->format('M d, Y h:i A'),
                 'routing_logs' => $logs,
             ],
+        ]);
+    }
+
+    /**
+     * Generate QR code SVG for a tracking number.
+     */
+    public function qrCode(string $tracking)
+    {
+        $tracking = strtoupper(trim(strip_tags($tracking)));
+
+        $document = Document::where(function ($q) use ($tracking) {
+            $q->whereRaw('UPPER(tracking_number) = ?', [$tracking])
+              ->orWhereRaw('UPPER(reference_number) = ?', [$tracking]);
+        })->first();
+
+        if (!$document) {
+            abort(404);
+        }
+
+        $options = new QROptions([
+            'outputType'   => QRCode::OUTPUT_MARKUP_SVG,
+            'eccLevel'     => QRCode::ECC_M,
+            'scale'        => 10,
+            'addQuietzone' => true,
+            'imageBase64'  => false,
+        ]);
+
+        $receiveUrl = url('/receive/' . $document->tracking_number);
+        $svg = (new QRCode($options))->render($receiveUrl);
+
+        return response($svg, 200, [
+            'Content-Type'  => 'image/svg+xml',
+            'Cache-Control' => 'public, max-age=86400',
         ]);
     }
 

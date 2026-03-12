@@ -299,6 +299,12 @@
                     <div class="tracking-number" id="generatedCode"></div>
                 </div>
 
+                <div id="qrBox" style="display:none;text-align:center;margin-bottom:24px">
+                    <img id="qrImg" alt="QR Code" style="width:180px;height:180px;border:1px solid #e2e8f0;border-radius:8px;padding:8px;background:#fff">
+                    <div style="font-size:11px;color:#64748b;margin-top:8px"><i class="fas fa-qrcode" style="margin-right:4px"></i>Show this QR code at the receiving office for faster processing</div>
+                    <div id="qrTrackNum" style="margin-top:6px;font-size:18px;font-weight:700;font-family:monospace;letter-spacing:2px;color:#0056b3"></div>
+                </div>
+
                 <table class="detail-summary" id="detailSummary">
                     <tr><td>Submitted By</td><td id="dSender"></td></tr>
                     <tr><td>Document Type</td><td id="dType"></td></tr>
@@ -414,6 +420,11 @@
                 document.getElementById('formState').style.display    = 'none';
                 document.getElementById('successState').style.display = 'block';
                 document.getElementById('generatedCode').textContent  = data.reference_number || data.tracking_number;
+                if (data.tracking_number) {
+                    document.getElementById('qrImg').src = '/qr/' + encodeURIComponent(data.tracking_number);
+                    document.getElementById('qrTrackNum').textContent = data.tracking_number;
+                    document.getElementById('qrBox').style.display = 'block';
+                }
                 if (data.details) {
                     document.getElementById('dSender').textContent  = data.details.sender_name || '-';
                     document.getElementById('dType').textContent    = data.details.type || '-';

@@ -603,11 +603,13 @@ function logout(){
 
 // ─── Live clock ───
 (function(){
+    var clockInterval;
     function tick(){
         var n=new Date();
         var h=n.getHours(),m=n.getMinutes(),s=n.getSeconds();
         var p=h>=12?'PM':'AM',h12=h%12||12;
-        document.getElementById('c-h').textContent=String(h12).padStart(2,'0');
+        var el=document.getElementById('c-h');if(!el){clearInterval(clockInterval);return;}
+        el.textContent=String(h12).padStart(2,'0');
         document.getElementById('c-m').textContent=String(m).padStart(2,'0');
         document.getElementById('c-s').textContent=String(s).padStart(2,'0');
         document.getElementById('c-p').textContent=p;
@@ -616,7 +618,7 @@ function logout(){
         document.getElementById('c-day').textContent=days[n.getDay()];
         document.getElementById('c-date').textContent=mos[n.getMonth()]+' '+n.getDate()+', '+n.getFullYear();
     }
-    tick();setInterval(tick,1000);
+    tick();clockInterval=setInterval(tick,1000);
 })();
 </script>
 </body>
