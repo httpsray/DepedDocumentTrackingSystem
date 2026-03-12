@@ -493,16 +493,14 @@
         .scanner-overlay.show{display:flex}
         .scanner-modal{background:#fff;border-radius:16px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:modalIn .18s ease;max-height:90vh;overflow-y:auto}
         .scanner-modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)}
-        .scanner-modal-head h3{font-size:15px;font-weight:700;color:var(--text-dark);display:flex;align-items:center;gap:8px}
-        .scanner-modal-head h3 i{color:var(--primary)}
+        .scanner-modal-head h3{font-size:15px;font-weight:700;color:var(--text-dark)}
         .scanner-close{width:32px;height:32px;border:none;background:#f1f5f9;border-radius:8px;font-size:16px;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
         .scanner-close:hover{background:#e2e8f0}
         .scanner-body{padding:20px 22px}
-        .scanner-hint{font-size:12px;color:var(--text-muted);margin-bottom:14px;display:flex;align-items:center;gap:6px}
-        .scanner-hint i{color:#94a3b8}
+        .scanner-hint{font-size:12px;color:var(--text-muted);margin-bottom:14px;text-align:left}
         #qr-reader{width:100%;border-radius:8px;overflow:hidden}
         #qr-reader video{border-radius:8px}
-        .camera-status{text-align:center;padding:10px 0 4px;font-size:12px;color:var(--text-muted)}
+        .camera-status{text-align:left;padding:10px 0 4px;font-size:12px;color:var(--text-muted)}
         /* ─── Tracking Drawer ─── */
         .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:400;opacity:0;pointer-events:none;transition:opacity .25s}
         .drawer-overlay.open{opacity:1;pointer-events:all}
@@ -1180,11 +1178,11 @@
     <div class="scanner-overlay" id="scannerOverlay" onclick="if(event.target===this)closeScanner()">
         <div class="scanner-modal">
             <div class="scanner-modal-head">
-                <h3><i class="fas fa-qrcode"></i> Scan Document QR Code</h3>
+                <h3>Scan Document QR Code</h3>
                 <button class="scanner-close" onclick="closeScanner()">&#10005;</button>
             </div>
             <div class="scanner-body">
-                <div class="scanner-hint"><i class="fas fa-info-circle"></i> Point your camera at the document's QR code to auto-fill the tracking number.</div>
+                <div class="scanner-hint">Point your camera at the document's QR code to auto-fill the tracking number.</div>
                 <div id="qr-reader"></div>
                 <p class="camera-status" id="cameraStatus">Initializing camera...</p>
             </div>
