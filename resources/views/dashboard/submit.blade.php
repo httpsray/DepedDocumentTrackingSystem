@@ -131,20 +131,102 @@
         .success-icon { width:48px; height:48px; background:#dcfce7; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; color:#16a34a; font-size:22px; }
         .success-card h2 { font-size:18px; font-weight:700; color:var(--text-dark); margin-bottom:4px; }
         .success-card p { color:var(--text-muted); font-size:12px; margin-bottom:16px; }
-        .receipt-top { display:flex; align-items:center; gap:20px; justify-content:center; margin-bottom:16px; }
-        .tracking-box { background:#eff6ff; border:2px solid #bfdbfe; border-radius:12px; padding:16px 20px; flex:1; min-width:0; }
-        .tracking-box small { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:#64748b; font-weight:600; }
-        .tracking-number { font-size:48px; font-weight:700; color:var(--primary); font-family:monospace; letter-spacing:3px; margin:4px 0 0; word-break:break-all; }
+        .receipt-layout { width:100%; max-width:680px; margin:10px auto 8px; display:flex; flex-direction:column; gap:8px; }
+        .receipt-top {
+            width:100%;
+            display:flex;
+            flex-direction:column;
+            align-items:stretch;
+            gap:6px;
+            padding:0;
+            background:transparent;
+            border:none;
+            border-radius:0;
+            box-shadow:none;
+        }
+        .tracking-box,
+        .qr-box { width:100%; max-width:none; }
+        .tracking-box {
+            background:transparent;
+            border:none;
+            border-radius:0;
+            padding:0 4px 2px;
+            min-height:0;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:4px;
+            text-align:center;
+            box-shadow:none;
+        }
+        .tracking-box::after {
+            content:"Present this number or let the office scan the QR below.";
+            max-width:100%;
+            font-size:13px;
+            line-height:1.4;
+            color:#64748b;
+            margin-top:2px;
+        }
+        .tracking-box small {
+            font-size:clamp(18px, 2.6vw, 22px);
+            text-transform:uppercase;
+            letter-spacing:6px;
+            color:#334155;
+            font-weight:700;
+            margin:0;
+            line-height:1;
+        }
+        .tracking-number {
+            font-size:clamp(56px, 9vw, 82px);
+            font-weight:700;
+            color:var(--primary);
+            font-family:monospace;
+            letter-spacing:5px;
+            line-height:.95;
+            margin:0;
+            word-break:break-word;
+            text-shadow:none;
+        }
+        .qr-box {
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap:6px;
+            padding:12px;
+            background:#fff;
+            border:1px solid #e2e8f0;
+            border-radius:20px;
+            box-shadow:none;
+            text-align:center;
+        }
+        .qr-img {
+            width:min(100%, 320px)!important;
+            max-width:320px;
+            height:auto!important;
+            aspect-ratio:1 / 1;
+            object-fit:contain;
+            border:1px solid #e2e8f0;
+            border-radius:14px;
+            padding:9px;
+            background:#fff;
+        }
+        .qr-caption { display:flex; align-items:center; gap:4px; font-size:11px; color:#64748b; font-weight:500; }
         .btn-secondary { display:inline-flex; align-items:center; gap:6px; padding:10px 20px; border:1.5px solid var(--border); border-radius:10px; color:var(--text-dark); text-decoration:none; font-size:13px; font-weight:500; cursor:pointer; background:#fff; font-family:'Poppins',sans-serif; transition:border-color .2s; }
         .btn-secondary:hover { border-color:var(--primary); color:var(--primary); }
 
         /* Detail summary */
+        .receipt-details { width:100%; background:#fff; border:1px solid #e2e8f0; border-radius:18px; padding:10px 12px; text-align:left; box-shadow:none; }
+        .receipt-details-label { font-size:10px; text-transform:uppercase; letter-spacing:2px; color:#64748b; font-weight:700; margin-bottom:8px; }
         .detail-summary{width:100%;text-align:left;border-collapse:collapse;margin-bottom:14px}
-        .detail-summary td{padding:5px 10px;font-size:11.5px;border-bottom:1px solid #e2e8f0;vertical-align:top}
-        .detail-summary td:first-child{font-weight:600;color:#475569;white-space:nowrap;width:110px}
-        .detail-summary td:last-child{color:#1b263b;word-break:break-word}
+        .detail-summary td{padding:6px 8px;font-size:12px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+        .detail-summary td:first-child{font-weight:700;color:#59708b;white-space:nowrap;width:126px;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px}
+        .detail-summary td:last-child{color:#1b263b;word-break:break-word;font-weight:500}
         .detail-summary tr:last-child td{border-bottom:none}
-        .note-box{font-size:11px;border-radius:8px;padding:8px 12px;margin-bottom:8px;text-align:left}
+        .receipt-details .detail-summary{margin-bottom:0}
+        .receipt-notes{width:min(100%, 680px);margin:0 auto}
+        .receipt-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+        .note-box{font-size:11px;border-radius:10px;padding:9px 12px;margin-bottom:8px;text-align:left}
         .note-box i{margin-right:4px}
         .note-warning{color:#92400e;background:#fffbeb;border:1px solid #fde68a}
         .note-info{color:#1e40af;background:#eff6ff;border:1px solid #bfdbfe}
@@ -157,12 +239,18 @@
         @media (max-width:580px) { .form-row { grid-template-columns:1fr; } .card-body { padding:20px; }
             .success-card{padding:18px 12px}
             .success-card h2{font-size:16px}
-            .receipt-top{flex-direction:column;gap:12px}
-            .tracking-number{font-size:36px;letter-spacing:2px}
-            .tracking-box{padding:12px}
-            .qr-img{width:150px!important;height:150px!important}
+            .receipt-layout{gap:8px}
+            .receipt-top{gap:6px}
+            .tracking-box,.qr-box{width:100%}
+            .tracking-box{padding:0}
+            .tracking-box::after{max-width:100%;font-size:11px}
+            .tracking-box small{font-size:15px;letter-spacing:4px}
+            .tracking-number{font-size:48px;letter-spacing:3px}
+            .qr-box{padding:10px}
+            .qr-img{width:min(100%,260px)!important;max-width:260px;padding:8px}
             .detail-summary td{padding:4px 6px;font-size:10.5px}
-            .detail-summary td:first-child{width:85px;font-size:10px}
+            .detail-summary td:first-child{width:88px;font-size:9px}
+            .receipt-details{padding:10px}
             .note-box{font-size:10px;padding:6px 8px}
         }
 
@@ -317,36 +405,43 @@
                 <h2>Document Submitted Successfully!</h2>
                 <p>Your document has been logged and is now awaiting acceptance by the Records Section.</p>
 
-                <div class="receipt-top">
-                    <div class="tracking-box">
-                        <small>Tracking Number</small>
-                        <div class="tracking-number" id="generatedCode"></div>
+                <div class="receipt-layout">
+                    <div class="receipt-top">
+                        <div class="tracking-box">
+                            <small>Tracking Number</small>
+                            <div class="tracking-number" id="generatedCode"></div>
+                        </div>
+                        <div id="qrBox" class="qr-box" style="display:none">
+                            <img id="qrImg" alt="QR Code" class="qr-img">
+                            <div class="qr-caption"><i class="fas fa-qrcode" style="margin-right:3px"></i>Scan to receive</div>
+                        </div>
                     </div>
-                    <div id="qrBox" style="display:none;text-align:center;flex-shrink:0">
-                        <img id="qrImg" alt="QR Code" class="qr-img" style="width:180px;height:180px;border:1px solid #e2e8f0;border-radius:8px;padding:6px;background:#fff">
-                        <div style="font-size:10px;color:#64748b;margin-top:4px"><i class="fas fa-qrcode" style="margin-right:3px"></i>Scan to receive</div>
+
+                    <div class="receipt-details">
+                        <div class="receipt-details-label">Document Details</div>
+                        <table class="detail-summary" id="detailSummary">
+                            <tr><td>Submitted By</td><td id="dSender"></td></tr>
+                            <tr><td>Document Type</td><td id="dType"></td></tr>
+                            <tr><td>Subject</td><td id="dSubject"></td></tr>
+                            <tr><td>Remarks</td><td id="dRemarks"></td></tr>
+                            <tr><td>Submitted To</td><td id="dOffice"></td></tr>
+                            <tr><td>Date Submitted</td><td id="dDate"></td></tr>
+                        </table>
                     </div>
                 </div>
 
-                <table class="detail-summary" id="detailSummary">
-                    <tr><td>Submitted By</td><td id="dSender"></td></tr>
-                    <tr><td>Document Type</td><td id="dType"></td></tr>
-                    <tr><td>Subject</td><td id="dSubject"></td></tr>
-                    <tr><td>Remarks</td><td id="dRemarks"></td></tr>
-                    <tr><td>Submitted To</td><td id="dOffice"></td></tr>
-                    <tr><td>Date Submitted</td><td id="dDate"></td></tr>
-                </table>
-
-                <div class="note-box note-warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <strong>Important:</strong> Please take a screenshot of this page. You will need your Tracking Number to track, follow up, or claim your document.
-                </div>
-                <div class="note-box note-info">
-                    <i class="fas fa-info-circle"></i>
-                    <strong>Please note:</strong> Documents that are not received by the office within <strong>7 days</strong> of submission will be automatically archived. Make sure to follow up if needed.
+                <div class="receipt-notes">
+                    <div class="note-box note-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Important:</strong> Please take a screenshot of this page. You will need your Tracking Number to track, follow up, or claim your document.
+                    </div>
+                    <div class="note-box note-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Please note:</strong> Documents that are not received by the office within <strong>7 days</strong> of submission will be automatically archived. Make sure to follow up if needed.
+                    </div>
                 </div>
 
-                <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;">
+                <div class="receipt-actions">
                     <a href="/my-documents" class="btn-submit" style="width:auto;padding:10px 22px;text-decoration:none;">
                         <i class="fas fa-folder"></i> My Documents
                     </a>

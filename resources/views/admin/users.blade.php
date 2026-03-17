@@ -17,7 +17,12 @@
             --primary: #0056b3;
             --primary-dark: #004494;
             --primary-gradient: linear-gradient(135deg, #0056b3 0%, #004494 100%);
-            --accent: #fca311;
+            --blue-soft: #eff6ff;
+            --blue-soft-2: #dbeafe;
+            --slate-soft: #f1f5f9;
+            --slate-soft-2: #e2e8f0;
+            --slate: #475569;
+            --slate-dark: #334155;
             --text-dark: #1b263b;
             --text-muted: #64748b;
             --white: #ffffff;
@@ -188,7 +193,7 @@
 
         .panel-title { font-size: 17px; font-weight: 700; color: var(--text-dark); }
         .panel-badge {
-            background: rgba(0, 86, 179, 0.08);
+            background: var(--blue-soft);
             color: var(--primary);
             padding: 3px 10px;
             border-radius: 4px;
@@ -228,9 +233,9 @@
             font-weight: 500;
         }
 
-        .pill.active { background: #f0fdf4; color: #166534; }
-        .pill.pending { background: #fff7ed; color: #9a3412; }
-        .pill.suspended { background: #fef2f2; color: #991b1b; }
+        .pill.active { background: var(--blue-soft); color: var(--primary); }
+        .pill.pending { background: var(--slate-soft); color: var(--slate-dark); }
+        .pill.suspended { background: var(--slate-soft-2); color: var(--slate-dark); }
 
         .t-date { font-size: 12px; color: #94a3b8; }
         .t-docs { font-size: 12px; color: var(--text-muted); font-weight: 500; }
@@ -263,11 +268,11 @@
         }
         .btn-sm:hover { background: #f8fafc; }
 
-        .btn-sm.activate { color: #166534; border-color: #bbf7d0; }
-        .btn-sm.activate:hover { background: #f0fdf4; }
+        .btn-sm.activate { color: var(--primary); border-color: #bfdbfe; }
+        .btn-sm.activate:hover { background: var(--blue-soft); }
 
-        .btn-sm.suspend { color: #9a3412; border-color: #fed7aa; }
-        .btn-sm.suspend:hover { background: #fff7ed; }
+        .btn-sm.suspend { color: var(--slate-dark); border-color: var(--slate-soft-2); }
+        .btn-sm.suspend:hover { background: var(--slate-soft); }
 
         .btn-sm.delete { color: #991b1b; border-color: #fecaca; }
         .btn-sm.delete:hover { background: #fef2f2; }
@@ -359,11 +364,11 @@
         .modal-btn.danger { background: #dc2626; color: #fff; border-color: #dc2626; }
         .modal-btn.danger:hover { background: #b91c1c; }
 
-        .modal-btn.warning { background: #d97706; color: #fff; border-color: #d97706; }
-        .modal-btn.warning:hover { background: #b45309; }
+        .modal-btn.warning { background: var(--slate-dark); color: #fff; border-color: var(--slate-dark); }
+        .modal-btn.warning:hover { background: #243244; }
 
-        .modal-btn.success { background: #16a34a; color: #fff; border-color: #16a34a; }
-        .modal-btn.success:hover { background: #15803d; }
+        .modal-btn.success { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .modal-btn.success:hover { background: var(--primary-dark); }
 
         .modal-btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
         .modal-btn.primary:hover { background: var(--primary-dark); }
@@ -400,8 +405,8 @@
             text-transform: uppercase;
             white-space: nowrap;
         }
-        .type-badge.individual { background: #eff6ff; color: #1d4ed8; }
-        .type-badge.representative { background: #fdf4ff; color: #7e22ce; }
+        .type-badge.individual { background: var(--blue-soft); color: var(--primary); }
+        .type-badge.representative { background: var(--slate-soft); color: var(--slate-dark); }
 
         /* ─── Rep name cell ─── */
         .name-cell { display: flex; flex-direction: column; gap: 2px; }
@@ -434,7 +439,7 @@
             transition: transform 0.3s ease;
         }
         .toast.show { transform: translateX(0); }
-        .toast.success { border-left: 3px solid #16a34a; }
+        .toast.success { border-left: 3px solid var(--primary); }
         .toast.error { border-left: 3px solid #dc2626; }
 
         /* ─── Footer ─── */
@@ -529,7 +534,9 @@
         <span class="nav-section">Management</span>
         <a href="/admin/users" class="active"><i class="fas fa-users"></i> Users</a>
         <a href="/admin/offices"><i class="fas fa-building"></i> Offices</a>
+        @unless($user->isSuperAdmin())
         <a href="/admin/documents"><i class="fas fa-folder-open"></i> Documents</a>
+        @endunless
         @if($user->isSuperAdmin())
         <a href="/records/documents"><i class="fas fa-eye"></i> Records View</a>
         <span class="nav-section">ICT Unit</span>
@@ -898,8 +905,8 @@
 
             var isSuspend = status === 'suspended';
             var title     = isSuspend ? 'Suspend User' : 'Activate User';
-            var iconBg    = isSuspend ? '#fef2f2' : '#f0fdf4';
-            var iconColor = isSuspend ? '#dc2626' : '#16a34a';
+            var iconBg    = isSuspend ? 'var(--slate-soft)' : 'var(--blue-soft)';
+            var iconColor = isSuspend ? 'var(--slate-dark)' : 'var(--primary)';
             var iconClass = isSuspend ? 'fas fa-ban' : 'fas fa-check-circle';
             var btnClass  = isSuspend ? 'danger'  : 'success';
             var btnLabel  = isSuspend ? 'Suspend' : 'Activate';

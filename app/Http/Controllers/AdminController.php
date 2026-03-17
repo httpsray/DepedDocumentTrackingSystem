@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Document;
 use App\Models\Office;
+use App\Models\RoutingLog;
 use App\Mail\ActivationMail;
 use App\Services\ActivationService;
 use Illuminate\Http\Request;
@@ -112,7 +113,7 @@ class AdminController extends Controller
         }
 
         if ($request->has('name'))      $target->name      = $request->name;
-        if ($request->has('email'))     $target->email     = $request->email;
+        if ($request->has('email'))     $target->email     = strtolower(trim($request->email));
         if ($request->has('mobile'))    $target->mobile    = $request->mobile ?: null;
         if ($request->has('office_id')) $target->office_id = $request->office_id ?: null;
 
@@ -170,6 +171,15 @@ class AdminController extends Controller
     public function documents(Request $request)
     {
         $this->authorize();
+
+        if (Auth::user()?->isSuperAdmin()) {
+            return redirect()->route('records.documents', array_filter([
+                'search' => $request->get('search'),
+                'status' => $request->get('status'),
+            ], function ($value) {
+                return $value !== null && $value !== '';
+            }));
+        }
 
         $query = Document::with('user');
 
@@ -490,10 +500,11 @@ class AdminController extends Controller
             return response()->json(['success' => false, 'message' => 'Reference number is required.'], 422);
         }
 
-        $document = Document::where(function ($q) use ($lookupInput) {
-            $q->whereRaw('UPPER(reference_number) = ?', [$lookupInput])
-              ->orWhereRaw('UPPER(tracking_number) = ?', [$lookupInput]);
-        })->first();
+        return DB::transaction(function () use ($lookupInput, $user) {
+            $document = Document::with('currentHandler')->where(function ($q) use ($lookupInput) {
+                $q->whereRaw('UPPER(reference_number) = ?', [$lookupInput])
+                  ->orWhereRaw('UPPER(tracking_number) = ?', [$lookupInput]);
+            })->lockForUpdate()->first();
 
         if (!$document) {
             return response()->json(['success' => false, 'message' => 'Reference number not found.'], 404);
@@ -503,9 +514,29 @@ class AdminController extends Controller
             return response()->json(['success' => false, 'message' => 'This document is already closed and cannot be received.'], 422);
         }
 
-        if ($document->current_handler_id && (int) $document->current_handler_id === (int) $user->id
+        if ($user->office_id
+            && (int) $document->current_office_id === (int) $user->office_id
             && in_array($document->status, ['received', 'in_review', 'for_pickup'], true)) {
-            return response()->json(['success' => false, 'message' => 'This document is already tagged to you (' . $document->statusLabel() . ').'], 422);
+            if ($document->current_handler_id && (int) $document->current_handler_id === (int) $user->id) {
+                return response()->json(['success' => false, 'message' => 'This document is already tagged to you (' . $document->statusLabel() . ').'], 422);
+            }
+
+            if ($document->current_handler_id && (int) $document->current_handler_id !== (int) $user->id) {
+                $handlerName = optional($document->currentHandler)->name ?: 'another office user';
+                return response()->json(['success' => false, 'message' => "This document is already at your office and tagged to {$handlerName}."], 409);
+            }
+
+            $document->current_handler_id = $user->id;
+            $document->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'This document is already at your office. You have been set as the handler.',
+                'status' => $document->status,
+                'reference_number' => $document->reference_number ?: $document->tracking_number,
+                'tracking_number' => $document->tracking_number,
+                'current_handler' => $user->name,
+            ]);
         }
 
         $fromOfficeId = $document->current_office_id;
@@ -532,14 +563,15 @@ class AdminController extends Controller
             'remarks'       => 'Document is now being processed by ICT Unit (Super Admin).',
         ]);
 
-        return response()->json([
-            'success'          => true,
-            'message'          => 'Document is now being processed.',
-            'status'           => 'in_review',
-            'reference_number' => $document->reference_number ?: $document->tracking_number,
-            'tracking_number'  => $document->tracking_number,
-            'current_handler'  => $user->name,
-        ]);
+            return response()->json([
+                'success'          => true,
+                'message'          => 'Document is now being processed.',
+                'status'           => 'in_review',
+                'reference_number' => $document->reference_number ?: $document->tracking_number,
+                'tracking_number'  => $document->tracking_number,
+                'current_handler'  => $user->name,
+            ]);
+        }, 3);
     }
 
     /**

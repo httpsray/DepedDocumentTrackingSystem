@@ -39,7 +39,7 @@ class AuthController extends Controller
             $user = DB::transaction(function () use ($request) {
                 $user = new User([
                     'name'         => $request->name,
-                    'email'        => $request->email,
+                    'email'        => strtolower(trim($request->email)),
                     'mobile'       => $request->mobile,
                     'account_type' => $request->account_type ?? 'individual',
                     'password'     => Hash::make(Str::random(64)), // placeholder — never usable
@@ -156,7 +156,7 @@ class AuthController extends Controller
             'email' => 'required|email',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', strtolower(trim($request->email)))->first();
 
         if (!$user) {
             return response()->json([
@@ -197,7 +197,7 @@ class AuthController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', strtolower(trim($request->email)))->first();
 
         if (!$user) {
             return response()->json(['exists' => false]);
@@ -239,9 +239,12 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        $emailKey  = 'login:'        . Str::lower($request->email) . ':' . $request->ip();
+        // Normalize email to lowercase before lookup and attempt
+        $credentials['email'] = strtolower(trim($credentials['email']));
+
+        $emailKey  = 'login:'        . $credentials['email'] . ':' . $request->ip();
         $ipKey     = 'login_ip:'     . $request->ip();
-        $targetKey = 'login_email:'  . Str::lower($request->email);
+        $targetKey = 'login_email:'  . $credentials['email'];
 
         // Layer 1: global per-IP (catches bots rotating emails from one IP)
         if (RateLimiter::tooManyAttempts($ipKey, 30)) {
@@ -262,7 +265,7 @@ class AuthController extends Controller
         }
 
         // Check if user exists and is pending
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $credentials['email'])->first();
 
         if ($user && $user->isPending()) {
             return response()->json([
@@ -369,7 +372,7 @@ class AuthController extends Controller
     {
         $request->validate(['email' => 'required|email|max:255']);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', strtolower(trim($request->email)))->first();
 
         // Always respond generically — never confirm whether the email exists
         if (!$user || !$user->isActive()) {
@@ -453,7 +456,7 @@ class AuthController extends Controller
         ]);
 
         $record = DB::table('password_reset_tokens')
-            ->where('email', $request->email)
+            ->where('email', strtolower(trim($request->email)))
             ->first();
 
         if (
@@ -467,7 +470,7 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $user = User::where('email', $request->email)->where('status', 'active')->first();
+        $user = User::where('email', strtolower(trim($request->email)))->where('status', 'active')->first();
 
         if (!$user) {
             return response()->json([
@@ -479,7 +482,7 @@ class AuthController extends Controller
         // Update password and delete the used token (single-use)
         DB::transaction(function () use ($user, $request) {
             $user->update(['password' => Hash::make($request->password)]);
-            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            DB::table('password_reset_tokens')->where('email', strtolower(trim($request->email)))->delete();
         });
 
         return response()->json([

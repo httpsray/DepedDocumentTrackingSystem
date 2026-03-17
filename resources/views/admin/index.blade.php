@@ -17,7 +17,14 @@
             --primary: #0056b3;
             --primary-dark: #004494;
             --primary-gradient: linear-gradient(135deg, #0056b3 0%, #004494 100%);
-            --accent: #fca311;
+            --blue-soft: #eff6ff;
+            --blue-soft-2: #dbeafe;
+            --blue-soft-3: #e8f1fb;
+            --blue-deep: #1d4ed8;
+            --slate-soft: #f1f5f9;
+            --slate-soft-2: #e2e8f0;
+            --slate: #475569;
+            --slate-dark: #334155;
             --text-dark: #1b263b;
             --text-muted: #64748b;
             --white: #ffffff;
@@ -195,10 +202,10 @@
             flex-shrink: 0;
         }
 
-        .s-icon.blue { background: rgba(0, 86, 179, 0.1); color: var(--primary); }
-        .s-icon.orange { background: rgba(252, 163, 17, 0.12); color: #d97706; }
-        .s-icon.green { background: rgba(22, 163, 74, 0.1); color: #16a34a; }
-        .s-icon.purple { background: rgba(139, 92, 246, 0.1); color: #7c3aed; }
+        .s-icon.blue { background: var(--blue-soft); color: var(--primary); }
+        .s-icon.orange { background: var(--blue-soft-2); color: var(--primary); }
+        .s-icon.green { background: var(--blue-soft-3); color: var(--primary); }
+        .s-icon.purple { background: var(--blue-soft); color: var(--primary); }
 
         .s-num {
             font-size: 22px;
@@ -215,6 +222,7 @@
             display: grid;
             grid-template-columns: 1.7fr 1fr;
             gap: 20px;
+            align-items: start;
         }
 
         .panel {
@@ -223,6 +231,24 @@
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
             overflow: hidden;
+        }
+
+        .panel-fixed {
+            align-self: start;
+        }
+
+        .panel-scroll-body {
+            overflow: visible;
+        }
+
+        .panel-actions {
+            align-self: start;
+        }
+
+        .recent-panel .dtable th,
+        .recent-panel .dtable td {
+            padding-top: 11px;
+            padding-bottom: 11px;
         }
 
         .panel-head {
@@ -286,10 +312,10 @@
             font-weight: 500;
         }
 
-        .pill.pending { background: #fff7ed; color: #9a3412; }
-        .pill.forwarded { background: #eff6ff; color: #1e40af; }
-        .pill.processing { background: #fffbeb; color: #d97706; }
-        .pill.completed { background: #f0fdf4; color: #166534; }
+        .pill.pending { background: var(--slate-soft); color: var(--slate-dark); }
+        .pill.forwarded { background: var(--blue-soft); color: var(--primary); }
+        .pill.processing { background: var(--blue-soft-3); color: #335a8a; }
+        .pill.completed { background: var(--blue-soft-2); color: var(--blue-deep); }
         .pill.other { background: #f3f4f6; color: #4b5563; }
 
         .t-date { font-size: 12px; color: #94a3b8; }
@@ -331,6 +357,8 @@
             justify-content: center;
             font-size: 15px;
             flex-shrink: 0;
+            background: var(--blue-soft);
+            color: var(--primary);
         }
 
         .act-body { flex: 1; }
@@ -448,45 +476,49 @@
         }
 
         /* Badge colors for office docs */
-        .badge-submitted{background:#eff6ff;color:#2563eb}
-        .badge-received{background:#f0fdf4;color:#16a34a}
-        .badge-in_review{background:#fffbeb;color:#d97706}
+        .badge-submitted{background:var(--blue-soft);color:var(--primary)}
+        .badge-received{background:var(--slate-soft);color:var(--slate-dark)}
+        .badge-in_review{background:var(--blue-soft-3);color:#335a8a}
 
         /* ─── Receive strip (office style) ─── */
-        .receive-strip{background:#fff;border:1px solid var(--border);border-radius:0;padding:22px 24px}
+        .receive-strip{background:#fff;border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:24px}
         .receive-strip h2{font-size:20px;font-weight:700;color:var(--text-dark);margin:0 0 6px}
         .receive-strip p.rs-sub{font-size:13px;color:var(--text-muted);margin:0 0 18px}
         .rs-main{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:0}
-        .ref-boxes-row{display:flex;align-items:center;gap:7px;flex:0 1 auto;flex-wrap:nowrap}
-        .ref-box{width:76px;height:60px;text-align:center;font-size:24px;font-weight:700;font-family:'Poppins',sans-serif;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;text-transform:uppercase;background:#f8fafc;transition:border-color .2s,box-shadow .2s,background .2s;color:#1e293b;padding:0;caret-color:#16a34a}
-        .ref-box:focus{border-color:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.13);background:#fff}
+        .ref-boxes-row{display:flex;align-items:center;gap:7px;flex:1;min-width:0;flex-wrap:nowrap}
+        .ref-box{flex:1;min-width:0;height:clamp(60px,5.8vw,72px);text-align:center;font-size:clamp(21px,2.2vw,26px);font-weight:700;font-family:'Poppins',sans-serif;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;text-transform:uppercase;background:#f8fafc;transition:border-color .2s,box-shadow .2s,background .2s;color:#1e293b;padding:0;caret-color:var(--primary)}
+        .ref-box:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,86,179,.13);background:#fff}
         .ref-box.filled{background:#fff;border-color:#94a3b8}
         .ref-sep{font-size:18px;color:#cbd5e1;user-select:none;padding:0 2px}
         .btn-clear-x{width:36px;height:36px;border:1.5px solid #e2e8f0;border-radius:50%;background:#f8fafc;color:#94a3b8;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;padding:0}
-        .rs-center{width:fit-content;margin:0 auto}
+        .rs-center{width:100%;margin:0 auto}
         .rs-btn-wrap{display:flex;justify-content:center;margin-top:18px;gap:12px}
-        .btn-receive{flex:1;max-width:300px;height:60px;padding:0 32px;border:none;border-radius:8px;background:#16a34a;color:#fff;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s}
-        .btn-receive:hover{background:#15803d}
-        .btn-receive:active{background:#166534}
+        .btn-receive{flex:1;height:clamp(54px,5.6vw,60px);padding:0 clamp(16px,2.8vw,32px);border:none;border-radius:8px;background:var(--slate-dark);color:#fff;font-family:'Poppins',sans-serif;font-size:clamp(13px,1.7vw,14px);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s}
+        .btn-receive:hover{background:#243244}
+        .btn-receive:active{background:#1e293b}
         .btn-receive:disabled{opacity:.5;cursor:not-allowed}
-        .btn-scan-qr{flex:1;max-width:300px;height:60px;padding:0 32px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s;text-decoration:none}
+        .btn-scan-qr{flex:1;height:clamp(54px,5.6vw,60px);padding:0 clamp(16px,2.8vw,32px);border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:'Poppins',sans-serif;font-size:clamp(13px,1.7vw,14px);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s;text-decoration:none}
         .btn-scan-qr:hover{background:var(--primary-dark)}
         .btn-scan-qr:active{background:#003976}
+        .btn-scan-qr svg{width:18px;height:18px;flex-shrink:0}
         .receive-alert{margin-top:12px;padding:8px 12px;border-radius:7px;font-size:12px;display:none;align-items:center;gap:8px;animation:rcvFadeIn .2s ease-out;width:100%}
         .receive-alert.show{display:flex}
         .receive-alert.err{background:#fef2f2;border-left:3px solid #dc2626;color:#b91c1c}
-        .receive-alert.ok{background:#f0fdf4;border-left:3px solid #16a34a;color:#15803d}
+        .receive-alert.ok{background:var(--blue-soft);border-left:3px solid var(--primary);color:var(--primary-dark)}
         .receive-alert i{font-size:13px;flex-shrink:0}
         .receive-alert span{line-height:1.4}
         @keyframes rcvFadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
-        @media(max-width:768px){
+        @media(max-width:900px){
             .receive-strip{padding:16px 18px}
+            .receive-strip h2{font-size:15px}
             .rs-main{gap:5px}
-            .ref-boxes-row{gap:4px}
-            .ref-box{width:38px;height:44px;font-size:17px}
+            .ref-boxes-row{gap:3px}
+            .ref-box{height:clamp(52px,13vw,58px);font-size:clamp(17px,4.4vw,19px)}
+            .ref-sep{font-size:13px;padding:0 1px}
             .btn-clear-x{width:32px;height:32px;font-size:12px}
-            .btn-receive{min-width:auto;width:100%;height:44px;font-size:13px}
-            .btn-scan-qr{min-width:auto;width:100%;height:44px;font-size:13px}
+            .rs-btn-wrap .btn-receive{flex:1 1 0;min-width:0;width:auto;height:48px;padding:0 12px;font-size:12.5px;white-space:nowrap}
+            .rs-btn-wrap .btn-scan-qr{flex:1 1 0;min-width:0;width:auto;height:48px;padding:0 12px;font-size:12.5px;white-space:nowrap}
+            .rs-btn-wrap{flex-direction:row;gap:8px}
         }
         /* ─── QR Scanner Modal ─── */
         .scanner-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center;padding:16px}
@@ -501,6 +533,9 @@
         #qr-reader{width:100%;border-radius:8px;overflow:hidden}
         #qr-reader video{border-radius:8px}
         .camera-status{text-align:left;padding:10px 0 4px;font-size:12px;color:var(--text-muted)}
+        .camera-status .cam-steps{margin:4px 0 8px;padding-left:16px;font-size:11.5px;line-height:1.7}
+        .btn-cam-retry{margin-top:6px;padding:6px 16px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600}
+        .btn-cam-retry:hover{background:var(--primary-dark)}
         /* ─── Tracking Drawer ─── */
         .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:400;opacity:0;pointer-events:none;transition:opacity .25s}
         .drawer-overlay.open{opacity:1;pointer-events:all}
@@ -526,11 +561,11 @@
         .tl-item{position:relative;margin-bottom:20px;padding-left:24px}
         .tl-item:last-child{margin-bottom:0}
         .tl-dot{width:16px;height:16px;border-radius:50%;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
-        .tl-dot.c-active{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
-        .tl-dot.c-done{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
-        .tl-dot.c-warn{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
-        .tl-dot.c-danger{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
-        .tl-dot.c-latest{background:#f59e0b;box-shadow:0 0 0 2px #f59e0b}
+        .tl-dot.c-active{background:var(--primary);box-shadow:0 0 0 2px var(--primary)}
+        .tl-dot.c-done{background:var(--primary);box-shadow:0 0 0 2px var(--primary)}
+        .tl-dot.c-warn{background:var(--primary);box-shadow:0 0 0 2px var(--primary)}
+        .tl-dot.c-danger{background:var(--primary);box-shadow:0 0 0 2px var(--primary)}
+        .tl-dot.c-latest{background:var(--blue-deep);box-shadow:0 0 0 2px var(--blue-deep)}
         .tl-action{font-size:12px;font-weight:500;color:#64748b}
         .tl-meta{font-size:12px;color:#64748b;margin:2px 0}
         .tl-remarks{font-size:12px;color:#64748b;background:#f8fafc;border-left:3px solid var(--border);padding:5px 9px;border-radius:4px;margin-top:5px}
@@ -538,9 +573,9 @@
         .tl-office-hdr::after{content:'';position:absolute;left:21px;right:0;bottom:0;height:1.5px;background:var(--border)}
         .tl-office-hdr:first-child{margin-top:0}
         .drawer-loader{display:flex;align-items:center;justify-content:center;padding:48px;flex-direction:column;gap:12px;color:var(--text-muted);font-size:13px}
-        .badge-forwarded{background:#f5f3ff;color:#7c3aed}
-        .badge-for_pickup{background:#fff7ed;color:#c2410c}
-        .badge-completed{background:#f0fdf4;color:#15803d}
+        .badge-forwarded{background:var(--slate-soft);color:var(--slate-dark)}
+        .badge-for_pickup{background:var(--slate-soft-2);color:var(--slate-dark)}
+        .badge-completed{background:var(--blue-soft-2);color:var(--blue-deep)}
     </style>
     <script src="/js/spa.js" defer></script>
     <script src="/js/form-utils.js" defer></script>
@@ -571,7 +606,9 @@
         <span class="nav-section">Management</span>
         <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
         <a href="/admin/offices"><i class="fas fa-building"></i> Offices</a>
+        @unless($user->isSuperAdmin())
         <a href="/admin/documents"><i class="fas fa-folder-open"></i> Documents</a>
+        @endunless
         @if($user->isSuperAdmin())
         <a href="/records/documents"><i class="fas fa-eye"></i> Records View</a>
         <span class="nav-section">ICT Unit</span>
@@ -608,9 +645,17 @@
 
         <!-- Top Bar -->
         <div class="top-bar anim">
+            @php
+                $adminWelcomeName = $user->name ?? 'Admin';
+                $adminQueueLabel = $user->office?->name
+                    ?? ($user->isSuperAdmin() ? 'Super Admin' : 'Admin');
+                $adminQueueCopy = $user->office_id
+                    ? $adminQueueLabel . " &mdash; here's your document queue."
+                    : $adminQueueLabel . " &mdash; here's your system overview.";
+            @endphp
             <div class="greeting-section">
-                <h1>Admin Dashboard</h1>
-                <p>{{ now()->format('l, F j, Y') }}</p>
+                <h1>Welcome back, {{ $adminWelcomeName }}!</h1>
+                <p>{!! $adminQueueCopy !!}</p>
             </div>
 
             <div class="live-clock">
@@ -628,9 +673,9 @@
 
         <!-- Receive Strip (SuperAdmin with office) -->
         @if($user->isSuperAdmin() && $user->office_id)
-        <div class="receive-strip" style="border-radius:12px;margin-bottom:24px">
+        <div class="receive-strip">
             <h2>Receive Document</h2>
-            <p class="rs-sub">Enter the 8-character tracking number</p>
+            <p class="rs-sub">Enter the 8-character reference number</p>
             <div class="rs-center">
                 <div class="rs-main">
                     <div class="ref-boxes-row" id="refBoxes">
@@ -644,13 +689,13 @@
                         <input type="text" maxlength="1" class="ref-box" data-idx="6" data-no-clearable data-no-capitalize autocomplete="off">
                         <input type="text" maxlength="1" class="ref-box" data-idx="7" data-no-clearable data-no-capitalize autocomplete="off">
                     </div>
-                    <button type="button" class="btn-clear-x" onclick="clearRefBoxes()" title="Clear">&#10005;</button>
+                    <button type="button" class="btn-clear-x" onclick="window.clearRefBoxes()" title="Clear">&#10005;</button>
                 </div>
                 <div class="receive-alert" id="receiveRefMsg"><i class="fas fa-exclamation-circle"></i><span></span></div>
             </div>
             <div class="rs-btn-wrap">
-                <button class="btn-receive" id="receiveRefBtn" onclick="receiveByReference()"><i class="fas fa-check"></i> Receive</button>
-                <button class="btn-scan-qr" id="scanQrBtn" onclick="openScanner()"><i class="fas fa-qrcode"></i> Scan Document</button>
+                <button class="btn-receive" id="receiveRefBtn" onclick="window.receiveByReference()"><i class="fas fa-check"></i> Receive</button>
+                <button class="btn-scan-qr" id="scanQrBtn" onclick="openScanner()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 8v-2a2 2 0 0 1 2 -2h2"/><path d="M4 16v2a2 2 0 0 0 2 2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M16 20h2a2 2 0 0 0 2 -2v-2"/><path d="M11 12h6"/><path d="M8 8h5"/><path d="M9 16h5"/></svg> Scan Document</button>
             </div>
         </div>
         @endif
@@ -691,13 +736,14 @@
         <div class="grid">
 
             <!-- Recent Submissions -->
-            <div class="panel anim">
+            <div class="panel panel-fixed recent-panel anim" id="recentSubmissionsPanel">
                 <div class="panel-head">
                     <div class="panel-title">Recent Submissions</div>
+                    <a href="{{ $user->isSuperAdmin() ? '/records/documents' : '/admin/documents' }}" class="panel-link">View all <i class="fas fa-arrow-right" style="font-size:11px"></i></a>
                 </div>
 
                 @if($recentDocs->count() > 0)
-                <div class="dtable-wrap">
+                <div class="dtable-wrap panel-scroll-body">
                 <table class="dtable">
                     <thead>
                         <tr>
@@ -773,13 +819,13 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="panel anim">
+            <div class="panel panel-actions anim" id="quickActionsPanel">
                 <div class="panel-head">
                     <div class="panel-title">Quick Actions</div>
                 </div>
                 <div class="actions-list">
                     <a href="/" class="act">
-                        <div class="act-icon" style="background:rgba(0,86,179,0.08);color:var(--primary);"><i class="fas fa-home"></i></div>
+                        <div class="act-icon"><i class="fas fa-home"></i></div>
                         <div class="act-body">
                             <div class="act-title">Home</div>
                             <div class="act-desc">Go to the main landing page</div>
@@ -787,23 +833,25 @@
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
                     <a href="/admin/users" class="act">
-                        <div class="act-icon" style="background:rgba(0,86,179,0.1);color:var(--primary);"><i class="fas fa-users-cog"></i></div>
+                        <div class="act-icon"><i class="fas fa-users-cog"></i></div>
                         <div class="act-body">
                             <div class="act-title">Manage Users</div>
                             <div class="act-desc">View &amp; manage accounts</div>
                         </div>
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
+                    @unless($user->isSuperAdmin())
                     <a href="/admin/documents" class="act">
-                        <div class="act-icon" style="background:rgba(252,163,17,0.1);color:#d97706;"><i class="fas fa-folder-open"></i></div>
+                        <div class="act-icon"><i class="fas fa-folder-open"></i></div>
                         <div class="act-body">
                             <div class="act-title">All Documents</div>
                             <div class="act-desc">Browse all submissions</div>
                         </div>
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
+                    @endunless
                     <a href="/admin/users?status=pending" class="act">
-                        <div class="act-icon" style="background:#fff7ed;color:#9a3412;"><i class="fas fa-user-clock"></i></div>
+                        <div class="act-icon"><i class="fas fa-user-clock"></i></div>
                         <div class="act-body">
                             <div class="act-title">Pending Accounts</div>
                             <div class="act-desc">Accounts waiting for activation</div>
@@ -811,15 +859,15 @@
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
                     <a href="/admin/offices" class="act">
-                        <div class="act-icon" style="background:rgba(0,86,179,0.08);color:var(--primary);"><i class="fas fa-building"></i></div>
+                        <div class="act-icon"><i class="fas fa-building"></i></div>
                         <div class="act-body">
                             <div class="act-title">Office Accounts</div>
                             <div class="act-desc">Manage internal DepEd office accounts</div>
                         </div>
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
-                    <a href="/admin/documents?status=in_review" class="act">
-                        <div class="act-icon" style="background:#f1f5f9;color:#475569;"><i class="fas fa-inbox"></i></div>
+                    <a href="{{ $user->isSuperAdmin() ? '/records/documents?status=in_review' : '/admin/documents?status=in_review' }}" class="act">
+                        <div class="act-icon"><i class="fas fa-inbox"></i></div>
                         <div class="act-body">
                             <div class="act-title">Pending Documents</div>
                             <div class="act-desc">Documents awaiting processing</div>
@@ -828,7 +876,7 @@
                     </a>
                     @if($user->isSuperAdmin())
                     <a href="/records/documents" class="act">
-                        <div class="act-icon" style="background:#dcfce7;color:#16a34a;"><i class="fas fa-eye"></i></div>
+                        <div class="act-icon"><i class="fas fa-eye"></i></div>
                         <div class="act-body">
                             <div class="act-title">Records View</div>
                             <div class="act-desc">View all incoming documents (Records Section)</div>
@@ -872,6 +920,18 @@
 
     <script>
     (function() {
+        function syncRecentPanelHeight() {
+            var recentPanel = document.getElementById('recentSubmissionsPanel');
+            var actionsPanel = document.getElementById('quickActionsPanel');
+            if (!recentPanel || !actionsPanel) return;
+
+            if (window.innerWidth <= 1024) {
+                recentPanel.style.minHeight = '';
+                return;
+            }
+
+            recentPanel.style.minHeight = actionsPanel.offsetHeight + 'px';
+        }
         // ─── Clock ───
         function tick() {
             var n = new Date();
@@ -952,6 +1012,10 @@
         })();
 
         // ─── Office document actions (SuperAdmin with office) ───
+        syncRecentPanelHeight();
+        window.addEventListener('load', syncRecentPanelHeight);
+        window.addEventListener('resize', syncRecentPanelHeight);
+
         var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         window.acceptDoc = function(id) {
@@ -997,7 +1061,7 @@
                         var prev = container.querySelector('[data-idx="'+(parseInt(this.dataset.idx)-1)+'"]');
                         if(prev){ prev.focus(); prev.select(); }
                     }
-                    if(e.key === 'Enter'){ e.preventDefault(); receiveByReference(); }
+                    if(e.key === 'Enter'){ e.preventDefault(); window.receiveByReference(); }
                     if(e.key === 'ArrowLeft'){
                         var p2 = container.querySelector('[data-idx="'+(parseInt(this.dataset.idx)-1)+'"]');
                         if(p2) p2.focus();
@@ -1047,37 +1111,64 @@
             showReceiveMsg('', '');
         }
 
+        async function submitReceiveLookup(lookupValue, pendingMessage){
+            var receiveBtn = document.getElementById('receiveRefBtn');
+            var scanBtn = document.getElementById('scanQrBtn');
+            var lookup = String(lookupValue || '').trim().toUpperCase();
+
+            if(!lookup){
+                showReceiveMsg('Reference number is required.', 'err');
+                return false;
+            }
+
+            showReceiveMsg(pendingMessage || 'Receiving document...', '');
+            if(receiveBtn) receiveBtn.disabled = true;
+            if(scanBtn) scanBtn.disabled = true;
+
+            try{
+                var res = await fetch('/api/office/documents/receive-by-reference', {
+                    method: 'POST',
+                    headers:{'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
+                    body: JSON.stringify({
+                        reference_number: lookup,
+                        tracking_number: lookup
+                    })
+                });
+                var data = await res.json();
+
+                if(data.success){
+                    showReceiveMsg(data.message || 'Document received successfully.', 'ok');
+                    setTimeout(function(){ location.reload(); }, 700);
+                    return true;
+                }
+
+                showReceiveMsg(data.message || 'Failed to receive document.', 'err');
+            }catch(e){
+                showReceiveMsg('Network error. Please try again.', 'err');
+            }
+
+            if(receiveBtn) receiveBtn.disabled = false;
+            if(scanBtn) scanBtn.disabled = false;
+            return false;
+        }
+
         async function receiveByReference(){
-            var btn = document.getElementById('receiveRefBtn');
             var ref = getRefValue();
             if(ref.length < 8){
-                showReceiveMsg('Please enter all 8 characters of the tracking number.', 'err');
+                showReceiveMsg('Please enter all 8 characters of the reference number.', 'err');
                 var boxes = document.querySelectorAll('#refBoxes .ref-box');
                 for(var i=0;i<boxes.length;i++){
                     if(!boxes[i].value){ boxes[i].focus(); break; }
                 }
                 return;
             }
-            showReceiveMsg('', '');
-            btnLoading(btn);
-            try{
-                var res = await fetch('/api/office/documents/receive-by-reference', {
-                    method: 'POST',
-                    headers:{'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
-                    body: JSON.stringify({ reference_number: ref, tracking_number: ref })
-                });
-                var data = await res.json();
-                if(data.success){
-                    showReceiveMsg(data.message || 'Document received successfully.', 'ok');
-                    setTimeout(function(){ location.reload(); }, 700);
-                    return;
-                }
-                showReceiveMsg(data.message || 'Failed to receive document.', 'err');
-            }catch(e){
-                showReceiveMsg('Network error. Please try again.', 'err');
-            }
-            btn.disabled = false;
+
+            return submitReceiveLookup(ref, 'Receiving document...');
         }
+
+        window.clearRefBoxes = clearRefBoxes;
+        window.submitReceiveLookup = submitReceiveLookup;
+        window.receiveByReference = receiveByReference;
 
         /* ─── Tracking Drawer ─── */
         function escapeHtml(value){
@@ -1167,7 +1258,7 @@
         document.addEventListener('keydown', function(e){
             if(e.key === 'Escape'){
                 var scannerOpen = document.getElementById('scannerOverlay') && document.getElementById('scannerOverlay').classList.contains('show');
-                if(scannerOpen) closeScanner();
+                if(scannerOpen) window.closeScanner();
                 else { closeDrawer(); closeSidebar(); }
             }
         });
@@ -1182,86 +1273,441 @@
                 <button class="scanner-close" onclick="closeScanner()">&#10005;</button>
             </div>
             <div class="scanner-body">
-                <div class="scanner-hint">Point your camera at the document's QR code to auto-fill the tracking number.</div>
+                <div class="scanner-hint">Point your camera at the document's QR code to receive it automatically.</div>
                 <div id="qr-reader"></div>
                 <p class="camera-status" id="cameraStatus">Initializing camera...</p>
             </div>
         </div>
     </div>
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="/js/html5-qrcode.min.js"></script>
+    <script src="/js/jsqr.js"></script>
     <script>
     (function(){
+        if (window.__docTraxAdminScanner && typeof window.__docTraxAdminScanner.cleanup === 'function') {
+            try { window.__docTraxAdminScanner.cleanup(); } catch (e) {}
+        }
+
         var html5QrCode = null;
         var scannerRunning = false;
+        var activeStream = null;
+        var scanLoopTimer = null;
+        var barcodeDetector = null;
+        var previewVideo = null;
         var scanCooldown = false;
+        var scanBuffer = '';
+        var scanTimer = null;
+        var SCAN_IDLE_MS = 80;
+        var scannerDestroyed = false;
+
+        function scannerOverlay(){
+            return document.getElementById('scannerOverlay');
+        }
+
+        function statusEl(){
+            return document.getElementById('cameraStatus');
+        }
+
+        function showStatus(message, isHtml){
+            var el = statusEl();
+            if (!el) return;
+            if (isHtml) { el.innerHTML = message; } else { el.textContent = message; }
+            el.style.display = 'block';
+        }
+
+        function showPermissionDenied(){
+            var localhostUrl = (location.hostname === '127.0.0.1')
+                ? location.href.replace('127.0.0.1', 'localhost')
+                : null;
+            var msg = '<strong style="color:#dc2626;">&#9888; Camera blocked.</strong> ';
+            if (localhostUrl) {
+                msg += 'Your browser blocked camera for <strong>127.0.0.1</strong>. '
+                    + '<a href="' + localhostUrl + '" style="color:#0056b3;font-weight:700;">Open on localhost instead</a> '
+                    + '(same app, camera will work there).';
+            } else {
+                msg += 'Click the <strong>lock icon</strong> in the address bar → Camera → <strong>Allow</strong>, then '
+                    + '<button class="btn-cam-retry" onclick="window.retryCamera()" style="padding:2px 10px;">Retry</button>.';
+            }
+            showStatus(msg, true);
+        }
+
+        function isScannerOpen(){
+            var overlay = scannerOverlay();
+            return !!(overlay && overlay.classList.contains('show'));
+        }
+
+        function onDecodeSuccess(decodedText) {
+            if (scanCooldown) return;
+            scanCooldown = true;
+            setTimeout(function(){ scanCooldown = false; }, 2000);
+            processScannedText(decodedText);
+        }
+
+        function fillRefBoxes(tracking){
+            if (!/^[A-Z0-9]{1,8}$/.test(tracking)) return;
+            var boxes = document.querySelectorAll('#refBoxes .ref-box');
+            if (!boxes.length) return;
+            for (var i = 0; i < boxes.length; i++) {
+                boxes[i].value = '';
+                boxes[i].classList.remove('filled');
+            }
+            for (var j = 0; j < boxes.length && j < tracking.length; j++) {
+                boxes[j].value = tracking[j];
+                boxes[j].classList.add('filled');
+            }
+        }
+
+        function normalizeScannedLookup(text) {
+            var raw = String(text || '').trim();
+            if (!raw) return '';
+
+            try {
+                var parsed = new URL(raw, window.location.origin);
+                var receiveMatch = parsed.pathname.match(/\/receive\/([A-Za-z0-9\-]+)/i);
+                if (receiveMatch) {
+                    raw = receiveMatch[1];
+                } else {
+                    var lookupParam = parsed.searchParams.get('ref')
+                        || parsed.searchParams.get('tracking')
+                        || parsed.searchParams.get('reference');
+                    if (lookupParam) raw = lookupParam;
+                }
+            } catch (e) {}
+
+            var fallbackMatch = raw.match(/\/receive\/([A-Za-z0-9\-]+)/i);
+            if (fallbackMatch) raw = fallbackMatch[1];
+
+            raw = raw.trim().toUpperCase();
+            if (!raw) return '';
+
+            var compact = raw.replace(/[^A-Z0-9]/g, '');
+            if (/^[A-Z0-9]{8}$/.test(compact)) {
+                return compact;
+            }
+
+            return raw.replace(/[^A-Z0-9\-]/g, '').replace(/^-+|-+$/g, '');
+        }
+
+        function processScannedText(text) {
+            var lookup = normalizeScannedLookup(text);
+            if (!lookup || lookup.length < 8) return;
+
+            window.closeScanner();
+            fillRefBoxes(lookup);
+            window.submitReceiveLookup(lookup, 'QR detected. Receiving document...');
+        }
 
         window.openScanner = function() {
-            document.getElementById('scannerOverlay').classList.add('show');
+            var overlay = scannerOverlay();
+            if (!overlay) return;
+            scannerDestroyed = false;
+            overlay.classList.add('show');
             document.body.style.overflow = 'hidden';
+            scanCooldown = false;
+            scanBuffer = '';
+            if (scanTimer) {
+                clearTimeout(scanTimer);
+                scanTimer = null;
+            }
+            stopCamera();
             startCamera();
         };
 
         window.closeScanner = function() {
-            document.getElementById('scannerOverlay').classList.remove('show');
+            var overlay = scannerOverlay();
+            if (overlay) overlay.classList.remove('show');
             document.body.style.overflow = '';
             stopCamera();
         };
 
-        function startCamera() {
-            if (scannerRunning) return;
-            var statusEl = document.getElementById('cameraStatus');
-            statusEl.textContent = 'Initializing camera...';
-            statusEl.style.display = 'block';
+        function readerEl() {
+            return document.getElementById('qr-reader');
+        }
 
-            try {
-                html5QrCode = new Html5Qrcode('qr-reader');
-                html5QrCode.start(
-                    { facingMode: 'environment' },
-                    { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
-                    function(decodedText) {
-                        if (scanCooldown) return;
-                        scanCooldown = true;
-                        setTimeout(function(){ scanCooldown = false; }, 2000);
-                        onQrScanned(decodedText);
-                    },
-                    function() {}
-                ).then(function() {
-                    scannerRunning = true;
-                    statusEl.textContent = 'Point your camera at a QR code';
-                }).catch(function() {
-                    statusEl.textContent = 'Camera not available. Please enter the tracking number manually.';
-                });
-            } catch(e) {
-                statusEl.textContent = 'Camera not available. Please enter the tracking number manually.';
+        function clearReader() {
+            var el = readerEl();
+            if (el) el.innerHTML = '';
+            previewVideo = null;
+        }
+
+        function isPermDenied(e) {
+            var s = String(e || '').toLowerCase();
+            return s.indexOf('notallowed') !== -1 || s.indexOf('permission') !== -1 || s.indexOf('denied') !== -1;
+        }
+
+        function normalizeCameraError(err) {
+            var raw = String((err && (err.name || err.message)) || err || '').toLowerCase();
+            if (raw.indexOf('notallowed') !== -1 || raw.indexOf('permission') !== -1 || raw.indexOf('denied') !== -1) return 'denied';
+            if (raw.indexOf('notfound') !== -1 || raw.indexOf('devicesnotfound') !== -1 || raw.indexOf('overconstrained') !== -1 || raw.indexOf('constraint') !== -1) return 'notfound';
+            if (raw.indexOf('notreadable') !== -1 || raw.indexOf('trackstart') !== -1 || raw.indexOf('could not start') !== -1 || raw.indexOf('device in use') !== -1 || raw.indexOf('in use') !== -1) return 'busy';
+            if (raw.indexOf('security') !== -1 || raw.indexOf('secure') !== -1) return 'security';
+            return raw || 'unknown';
+        }
+
+        function getCameraStream(constraints) {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                return Promise.reject(new Error('GET_USER_MEDIA_UNAVAILABLE'));
             }
+            return navigator.mediaDevices.getUserMedia({ video: constraints, audio: false });
+        }
+
+        function listVideoInputs() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+                return Promise.resolve([]);
+            }
+            return navigator.mediaDevices.enumerateDevices()
+                .then(function(devices) {
+                    return (devices || []).filter(function(device) {
+                        return device && device.kind === 'videoinput';
+                    });
+                })
+                .catch(function() {
+                    return [];
+                });
+        }
+
+        function cameraScore(device, isMobile) {
+            var label = String((device && device.label) || '').toLowerCase();
+            var score = 0;
+
+            if (isMobile) {
+                if (/back|rear|environment|world|traseira|trasera|externa/.test(label)) score += 50;
+                if (/front|user|selfie|facetime|integrated|frontal|frente/.test(label)) score -= 25;
+            } else {
+                if (/usb|external|rear|back|environment/.test(label)) score += 20;
+                if (/integrated|front|facetime|user/.test(label)) score += 5;
+            }
+
+            return score;
+        }
+
+        function buildCameraAttempts(isMobile, devices) {
+            var attempts = [];
+            var seen = {};
+            var hdHint = { width: { ideal: 1280 }, height: { ideal: 720 } };
+
+            function addAttempt(constraints) {
+                var key = typeof constraints === 'boolean'
+                    ? ('bool:' + constraints)
+                    : JSON.stringify(constraints);
+                if (seen[key]) return;
+                seen[key] = true;
+                attempts.push(constraints);
+            }
+
+            if (isMobile) {
+                addAttempt({
+                    facingMode: { ideal: 'environment' },
+                    width: hdHint.width,
+                    height: hdHint.height
+                });
+            }
+
+            (devices || []).slice().sort(function(a, b) {
+                return cameraScore(b, isMobile) - cameraScore(a, isMobile);
+            }).forEach(function(device) {
+                if (!device.deviceId) return;
+                addAttempt({
+                    deviceId: { exact: device.deviceId },
+                    width: hdHint.width,
+                    height: hdHint.height
+                });
+            });
+
+            addAttempt(true);
+            addAttempt({
+                facingMode: 'user',
+                width: hdHint.width,
+                height: hdHint.height
+            });
+
+            return attempts;
+        }
+
+        function attachPreview(stream) {
+            clearReader();
+            var el = readerEl();
+            if (!el) return Promise.reject(new Error('QR_READER_MISSING'));
+            var video = document.createElement('video');
+            video.setAttribute('autoplay', '');
+            video.setAttribute('muted', '');
+            video.setAttribute('playsinline', '');
+            video.muted = true;
+            video.srcObject = stream;
+            video.style.width = '100%';
+            video.style.display = 'block';
+            video.style.borderRadius = '8px';
+            el.appendChild(video);
+            previewVideo = video;
+            return video.play().catch(function() {}).then(function(){ return video; });
+        }
+
+        function startDetectLoop() {
+            if (typeof jsQR === 'undefined') {
+                showStatus('QR library not loaded. Please refresh the page.');
+                return;
+            }
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            function scanFrame() {
+                if (!scannerRunning || !previewVideo) return;
+                if (previewVideo.readyState < 2 || !previewVideo.videoWidth) {
+                    if (scannerRunning) scanLoopTimer = setTimeout(scanFrame, 200);
+                    return;
+                }
+                try {
+                    canvas.width = previewVideo.videoWidth;
+                    canvas.height = previewVideo.videoHeight;
+                    ctx.drawImage(previewVideo, 0, 0);
+                    var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    var code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+                    if (code && code.data) {
+                        onDecodeSuccess(code.data);
+                        return;
+                    }
+                } catch (e) {}
+                if (scannerRunning) scanLoopTimer = setTimeout(scanFrame, 150);
+            }
+            scanLoopTimer = setTimeout(scanFrame, 600);
+        }
+
+        window.retryCamera = function() {
+            stopCamera();
+            startCamera();
+        };
+
+        function startCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showStatus('Camera not available. Please use Chrome or Edge.');
+                return;
+            }
+
+            function doStart() {
+                showStatus('Requesting camera access...');
+                var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                listVideoInputs().then(function(devices) {
+                    var attempts = buildCameraAttempts(isMobile, devices);
+                    var seenFailures = {};
+
+                    function finishFailure() {
+                        if (seenFailures.security) {
+                            showStatus('Camera access requires HTTPS or localhost. Open this app on localhost or HTTPS and try again.');
+                            return;
+                        }
+                        if (seenFailures.notfound) {
+                            showStatus('No available camera was found on this device. Allow camera access, then reopen the scanner to try another camera.');
+                            return;
+                        }
+                        showStatus('Camera could not start. Close any app using your webcam (Zoom, Teams, OBS), then reload the page.');
+                    }
+
+                    function tryNext(idx) {
+                        if (idx >= attempts.length) {
+                            finishFailure();
+                            return;
+                        }
+
+                        getCameraStream(attempts[idx])
+                            .then(function(stream) {
+                                activeStream = stream;
+                                return attachPreview(stream);
+                            })
+                            .then(function() {
+                                scannerRunning = true;
+                                showStatus('Camera live. Point it at a QR code.');
+                                startDetectLoop();
+                            })
+                            .catch(function(err) {
+                                var kind = normalizeCameraError(err);
+                                seenFailures[kind] = true;
+                                if (kind === 'denied') { showPermissionDenied(); return; }
+                                if (kind === 'busy') { showStatus('Camera is in use by another app. Close Zoom, Teams, or OBS and retry.'); return; }
+                                tryNext(idx + 1);
+                            });
+                    }
+
+                    tryNext(0);
+                });
+            }
+
+            doStart();
         }
 
         function stopCamera() {
-            if (html5QrCode && scannerRunning) {
-                html5QrCode.stop().then(function() {
-                    scannerRunning = false;
-                    html5QrCode.clear();
-                }).catch(function() {
-                    scannerRunning = false;
-                });
+            scannerRunning = false;
+            if (scanLoopTimer) {
+                clearTimeout(scanLoopTimer);
+                scanLoopTimer = null;
+            }
+            if (activeStream) {
+                activeStream.getTracks().forEach(function(track) { track.stop(); });
+                activeStream = null;
+            }
+            if (html5QrCode) {
+                try { html5QrCode.stop(); } catch (e) {}
+                try { html5QrCode.clear(); } catch (e2) {}
+            }
+            clearReader();
+        }
+
+        function handleScannerKeydown(e) {
+            if (e.key === 'Escape' && isScannerOpen()) {
+                e.preventDefault();
+                window.closeScanner();
+                return;
+            }
+
+            if (!isScannerOpen()) return;
+            if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+            if (e.key === 'Enter') {
+                if (scanBuffer.length) {
+                    var payload = scanBuffer;
+                    scanBuffer = '';
+                    if (scanTimer) {
+                        clearTimeout(scanTimer);
+                        scanTimer = null;
+                    }
+                    processScannedText(payload);
+                }
+                return;
+            }
+
+            if (e.key.length === 1) {
+                scanBuffer += e.key;
+                if (scanTimer) clearTimeout(scanTimer);
+                scanTimer = setTimeout(function(){
+                    if (scanBuffer.length >= 6) processScannedText(scanBuffer);
+                    scanBuffer = '';
+                    scanTimer = null;
+                }, SCAN_IDLE_MS);
             }
         }
 
-        function onQrScanned(text) {
-            var tracking = text.trim();
-            var match = tracking.match(/\/receive\/([A-Za-z0-9]+)/);
-            if (match) tracking = match[1];
-            tracking = tracking.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            if (!tracking || tracking.length < 4) return;
-
-            closeScanner();
-            var boxes = document.querySelectorAll('#refBoxes .ref-box');
-            for (var i = 0; i < boxes.length && i < tracking.length; i++) {
-                boxes[i].value = tracking[i];
-                boxes[i].classList.add('filled');
+        function destroyScanner() {
+            if (scannerDestroyed) return;
+            scannerDestroyed = true;
+            scanCooldown = false;
+            scanBuffer = '';
+            if (scanTimer) {
+                clearTimeout(scanTimer);
+                scanTimer = null;
             }
-            receiveByReference();
+            stopCamera();
+            var overlay = scannerOverlay();
+            if (overlay) overlay.classList.remove('show');
+            if (document.body) document.body.style.overflow = '';
+            document.removeEventListener('keydown', handleScannerKeydown);
+            window.removeEventListener('spa:before-swap', destroyScanner);
+            window.removeEventListener('pagehide', destroyScanner);
+            if (window.__docTraxAdminScanner && window.__docTraxAdminScanner.cleanup === destroyScanner) {
+                window.__docTraxAdminScanner = null;
+            }
         }
+
+        window.__docTraxAdminScanner = { cleanup: destroyScanner };
+        window.addEventListener('spa:before-swap', destroyScanner);
+        window.addEventListener('pagehide', destroyScanner);
+        document.addEventListener('keydown', handleScannerKeydown);
     })();
     </script>
 </body>

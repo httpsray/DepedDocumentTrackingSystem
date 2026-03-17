@@ -7,6 +7,7 @@ use App\Models\Office;
 use App\Models\RoutingLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class RepresentativeController extends Controller
@@ -34,6 +35,20 @@ class RepresentativeController extends Controller
         }
     }
 
+    /**
+     * Hide only the current user's untouched self-submissions from office queue views.
+     * Guest/public submissions (user_id null) must remain visible, and once a document
+     * is actually tagged to the current rep it should appear in the queue.
+     */
+    private function applyOfficeQueueVisibility($query, $user)
+    {
+        return $query->where(function ($q) use ($user) {
+            $q->whereNull('user_id')
+              ->orWhere('user_id', '!=', $user->id)
+              ->orWhere('current_handler_id', $user->id);
+        });
+    }
+
     public function dashboard()
     {
         $this->authorizeRep();
@@ -46,13 +61,13 @@ class RepresentativeController extends Controller
 
         $office = $user->office;
 
-        // Only hide the CURRENT user's own submissions from the queue (they see those in "My Documents").
-        // Officemates' submissions should still appear so they can be processed.
-        $excludeUserId = [$user->id];
         $isRecordsOffice = $user->isRecords();
 
         // Records receives docs via tracking number — don't show unprocessed 'submitted' docs in their queue
-        $incoming = Document::with(['submittedToOffice', 'currentOffice'])
+        $incoming = $this->applyOfficeQueueVisibility(
+            Document::with(['submittedToOffice', 'currentOffice']),
+            $user
+        )
             ->where(function ($q) use ($office, $isRecordsOffice) {
                 if ($isRecordsOffice) {
                     // Records: only docs already at their office (received via tracking #)
@@ -65,7 +80,6 @@ class RepresentativeController extends Controller
                       });
                 }
             })
-            ->whereNotIn('user_id', $excludeUserId)
             ->when($isRecordsOffice,
                 fn ($q) => $q->whereNotIn('status', ['submitted', 'completed', 'returned', 'cancelled', 'archived']),
                 fn ($q) => $q->whereNotIn('status', ['completed', 'returned', 'cancelled', 'archived'])
@@ -74,7 +88,10 @@ class RepresentativeController extends Controller
             ->paginate(20);
 
         $stats = [
-            'incoming' => Document::where(function ($q) use ($office, $isRecordsOffice) {
+            'incoming' => $this->applyOfficeQueueVisibility(
+                    Document::query(),
+                    $user
+                )->where(function ($q) use ($office, $isRecordsOffice) {
                     if ($isRecordsOffice) {
                         $q->where('current_office_id', $office->id);
                     } else {
@@ -85,24 +102,36 @@ class RepresentativeController extends Controller
                           });
                     }
                 })
-                ->whereNotIn('user_id', $excludeUserId)
                 ->when($isRecordsOffice,
                     fn ($q) => $q->whereIn('status', ['received', 'in_review']),
                     fn ($q) => $q->whereIn('status', ['submitted', 'received', 'in_review'])
                 )
                 ->count(),
-            'received' => Document::where('current_office_id', $office->id)->whereNotIn('user_id', $excludeUserId)->where('status', 'received')->count(),
-            'in_review' => Document::where('current_office_id', $office->id)->whereNotIn('user_id', $excludeUserId)->where('status', 'in_review')->count(),
-            'completed' => Document::where('submitted_to_office_id', $office->id)
-                ->whereNotIn('user_id', $excludeUserId)
+            'received' => $this->applyOfficeQueueVisibility(
+                    Document::where('current_office_id', $office->id),
+                    $user
+                )->where('status', 'received')->count(),
+            'in_review' => $this->applyOfficeQueueVisibility(
+                    Document::where('current_office_id', $office->id),
+                    $user
+                )->where('status', 'in_review')->count(),
+            'completed' => $this->applyOfficeQueueVisibility(
+                    Document::where('submitted_to_office_id', $office->id),
+                    $user
+                )
                 ->whereIn('status', ['completed', 'for_pickup'])
                 ->count(),
-            'for_pickup' => Document::where('current_office_id', $office->id)->whereNotIn('user_id', $excludeUserId)->where('status', 'for_pickup')->count(),
+            'for_pickup' => $this->applyOfficeQueueVisibility(
+                    Document::where('current_office_id', $office->id),
+                    $user
+                )->where('status', 'for_pickup')->count(),
         ];
 
         $documents = $incoming;
 
-        return view('office.dashboard', compact('user', 'office', 'documents', 'stats'));
+        return response()
+            ->view('office.dashboard', compact('user', 'office', 'documents', 'stats'))
+            ->header('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(), payment=()');
     }
 
     public function show($id)
@@ -211,10 +240,11 @@ class RepresentativeController extends Controller
             ], 422);
         }
 
-        $document = Document::where(function ($q) use ($lookupInput) {
-            $q->whereRaw('UPPER(reference_number) = ?', [$lookupInput])
-              ->orWhereRaw('UPPER(tracking_number) = ?', [$lookupInput]);
-        })->first();
+        return DB::transaction(function () use ($lookupInput, $office, $user, $request) {
+            $document = Document::with('currentHandler')->where(function ($q) use ($lookupInput) {
+                $q->whereRaw('UPPER(reference_number) = ?', [$lookupInput])
+                  ->orWhereRaw('UPPER(tracking_number) = ?', [$lookupInput]);
+            })->lockForUpdate()->first();
 
         if (!$document) {
             return response()->json([
@@ -296,15 +326,16 @@ class RepresentativeController extends Controller
             ? "Document accepted from {$fromOfficeName}."
             : 'Document is now being processed.';
 
-        return response()->json([
-            'success' => true,
-            'message' => $message,
-            'status' => 'in_review',
-            'reference_number' => $document->reference_number ?: $document->tracking_number,
-            'tracking_number' => $document->tracking_number,
-            'current_office' => $office->name,
-            'current_handler' => $user->name,
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'status' => 'in_review',
+                'reference_number' => $document->reference_number ?: $document->tracking_number,
+                'tracking_number' => $document->tracking_number,
+                'current_office' => $office->name,
+                'current_handler' => $user->name,
+            ]);
+        }, 3);
     }
 
     public function updateStatus(Request $request, $id)
@@ -837,13 +868,14 @@ class RepresentativeController extends Controller
         $user = $this->rep();
         $office = $user->office;
 
-        // Only exclude the current user's own submissions from queue stats
-        $excludeUserId = [$user->id];
         $isRecordsOffice = $user->isRecords();
 
         // Fresh stats every request — no cache, queries are lightweight and stats must be real-time
         $stats = [
-            'incoming' => Document::where(function ($q) use ($office, $isRecordsOffice) {
+            'incoming' => $this->applyOfficeQueueVisibility(
+                    Document::query(),
+                    $user
+                )->where(function ($q) use ($office, $isRecordsOffice) {
                     if ($isRecordsOffice) {
                         $q->where('current_office_id', $office->id);
                     } else {
@@ -854,18 +886,25 @@ class RepresentativeController extends Controller
                           });
                     }
                 })
-                ->whereNotIn('user_id', $excludeUserId)
                 ->when($isRecordsOffice,
                     fn ($q) => $q->whereIn('status', ['received', 'in_review']),
                     fn ($q) => $q->whereIn('status', ['submitted', 'received', 'in_review'])
                 )
                 ->count(),
-            'in_review' => Document::where('current_office_id', $office->id)->whereNotIn('user_id', $excludeUserId)->whereIn('status', ['received', 'in_review'])->count(),
-            'completed' => Document::where('submitted_to_office_id', $office->id)
-                ->whereNotIn('user_id', $excludeUserId)
+            'in_review' => $this->applyOfficeQueueVisibility(
+                    Document::where('current_office_id', $office->id),
+                    $user
+                )->whereIn('status', ['received', 'in_review'])->count(),
+            'completed' => $this->applyOfficeQueueVisibility(
+                    Document::where('submitted_to_office_id', $office->id),
+                    $user
+                )
                 ->whereIn('status', ['completed', 'for_pickup'])
                 ->count(),
-            'for_pickup' => Document::where('current_office_id', $office->id)->whereNotIn('user_id', $excludeUserId)->where('status', 'for_pickup')->count(),
+            'for_pickup' => $this->applyOfficeQueueVisibility(
+                    Document::where('current_office_id', $office->id),
+                    $user
+                )->where('status', 'for_pickup')->count(),
         ];
 
         // User-specific flag (not cached by office)

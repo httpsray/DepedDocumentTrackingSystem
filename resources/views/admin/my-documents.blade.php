@@ -522,7 +522,9 @@
         <span class="nav-section">Management</span>
         <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
         <a href="/admin/offices"><i class="fas fa-building"></i> Offices</a>
+        @unless($user->isSuperAdmin())
         <a href="/admin/documents"><i class="fas fa-folder-open"></i> Documents</a>
+        @endunless
         @if($user->isSuperAdmin())
         <a href="/records/documents"><i class="fas fa-eye"></i> Records View</a>
         <span class="nav-section">ICT Unit</span>

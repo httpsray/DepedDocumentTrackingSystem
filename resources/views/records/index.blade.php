@@ -229,7 +229,6 @@
         <span class="nav-section">Management</span>
         <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
         <a href="/admin/offices"><i class="fas fa-building"></i> Offices</a>
-        <a href="/admin/documents"><i class="fas fa-folder-open"></i> Documents</a>
         <a href="/records/documents" class="active"><i class="fas fa-eye"></i> Records View</a>
         <span class="nav-section">ICT Unit</span>
         <a href="/ict/documents"><i class="fas fa-network-wired"></i> ICT Documents</a>
@@ -396,7 +395,7 @@
                                     @if($doc->created_at->diffInDays(now()) >= 7)
                                         Will archive soon
                                     @else
-                                        {{ 7 - $doc->created_at->diffInDays(now()) }} day(s) left
+                                        {{ 7 - (int) $doc->created_at->diffInDays(now()) }} day(s) left
                                     @endif
                                 </div>
                             @endif

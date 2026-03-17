@@ -17,7 +17,12 @@
             --primary: #0056b3;
             --primary-dark: #004494;
             --primary-gradient: linear-gradient(135deg, #0056b3 0%, #004494 100%);
-            --accent: #fca311;
+            --blue-soft: #eff6ff;
+            --blue-soft-2: #dbeafe;
+            --slate-soft: #f1f5f9;
+            --slate-soft-2: #e2e8f0;
+            --slate: #475569;
+            --slate-dark: #334155;
             --text-dark: #1b263b;
             --text-muted: #64748b;
             --white: #ffffff;
@@ -94,27 +99,27 @@
 
         /* ─── Badges ─── */
         .pill { display:inline-flex; align-items:center; padding:3px 10px; border-radius:99px; font-size:11px; font-weight:600; }
-        .pill.active { background:#dcfce7; color:#14532d; }
-        .pill.pending { background:#fff7ed; color:#9a3412; }
-        .pill.suspended { background:#fee2e2; color:#7f1d1d; }
+        .pill.active { background:var(--blue-soft); color:var(--primary); }
+        .pill.pending { background:var(--slate-soft); color:var(--slate-dark); }
+        .pill.suspended { background:var(--slate-soft-2); color:var(--slate-dark); }
 
         /* ─── Actions ─── */
         .action-btns { display:flex; gap:6px; flex-wrap:wrap; }
         .btn-sm { width:30px; height:30px; border:none; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; transition:all .2s; }
-        .btn-sm.suspend { background:#fee2e2; color:#dc2626; }
-        .btn-sm.suspend:hover { background:#dc2626; color:#fff; }
-        .btn-sm.activate { background:#dcfce7; color:#16a34a; }
-        .btn-sm.activate:hover { background:#16a34a; color:#fff; }
-        .btn-sm.reports-on { background:#dbeafe; color:#2563eb; }
-        .btn-sm.reports-on:hover { background:#2563eb; color:#fff; }
-        .btn-sm.reports-off { background:#f1f5f9; color:#94a3b8; }
-        .btn-sm.reports-off:hover { background:#64748b; color:#fff; }
-        .btn-sm.transfer { background:#fef3c7; color:#d97706; }
-        .btn-sm.transfer:hover { background:#d97706; color:#fff; }
+        .btn-sm.suspend { background:var(--slate-soft-2); color:var(--slate-dark); }
+        .btn-sm.suspend:hover { background:var(--slate-dark); color:#fff; }
+        .btn-sm.activate { background:var(--blue-soft); color:var(--primary); }
+        .btn-sm.activate:hover { background:var(--primary); color:#fff; }
+        .btn-sm.reports-on { background:var(--blue-soft-2); color:var(--primary); }
+        .btn-sm.reports-on:hover { background:var(--primary); color:#fff; }
+        .btn-sm.reports-off { background:var(--slate-soft); color:var(--slate); }
+        .btn-sm.reports-off:hover { background:var(--slate-dark); color:#fff; }
+        .btn-sm.transfer { background:var(--slate-soft); color:var(--slate-dark); }
+        .btn-sm.transfer:hover { background:var(--slate-dark); color:#fff; }
 
         .badge-reports { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:99px; font-size:10px; font-weight:600; }
-        .badge-reports.on { background:#dbeafe; color:#1d4ed8; }
-        .badge-reports.off { background:#f1f5f9; color:#94a3b8; }
+        .badge-reports.on { background:var(--blue-soft-2); color:var(--primary); }
+        .badge-reports.off { background:var(--slate-soft); color:var(--slate); }
 
         /* ─── Empty ─── */
         .empty-state { padding:60px 20px; text-align:center; color:var(--text-muted); }
@@ -138,8 +143,10 @@
         .modal-btn.primary:hover { opacity:.9; }
         .modal-btn.danger { background:#dc2626; color:#fff; border:none; }
         .modal-btn.danger:hover { background:#b91c1c; }
-        .modal-btn.success { background:#16a34a; color:#fff; border:none; }
-        .modal-btn.success:hover { background:#15803d; }
+        .modal-btn.warning { background:var(--slate-dark); color:#fff; border:none; }
+        .modal-btn.warning:hover { background:#243244; }
+        .modal-btn.success { background:var(--primary); color:#fff; border:none; }
+        .modal-btn.success:hover { background:var(--primary-dark); }
 
         /* ─── Toast ─── */
         .toast {
@@ -162,7 +169,7 @@
             transition: transform 0.3s ease;
         }
         .toast.show { transform: translateX(0); }
-        .toast.success { border-left: 3px solid #16a34a; }
+        .toast.success { border-left: 3px solid var(--primary); }
         .toast.error { border-left: 3px solid #dc2626; }
 
         /* ─── Inline field errors (matching site-wide style) ─── */
@@ -241,7 +248,9 @@
         <span class="nav-section">Management</span>
         <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
         <a href="/admin/offices" class="active"><i class="fas fa-building"></i> Offices</a>
+        @unless($user->isSuperAdmin())
         <a href="/admin/documents"><i class="fas fa-folder-open"></i> Documents</a>
+        @endunless
         @if($user->isSuperAdmin())
         <a href="/records/documents"><i class="fas fa-eye"></i> Records View</a>
         <span class="nav-section">ICT Unit</span>
@@ -285,10 +294,7 @@
 
         <div class="panel">
             <div class="panel-head">
-                <div class="panel-title">
-                    <i class="fas fa-building" style="color:var(--primary);margin-right:8px;"></i>
-                    Office Accounts ({{ $accounts->count() }})
-                </div>
+                <div class="panel-title">Office Accounts ({{ $accounts->count() }})</div>
             </div>
 
             @if($accounts->count() > 0)
@@ -509,7 +515,7 @@
     <div class="modal-overlay" id="transferModal">
         <div class="modal">
             <div class="modal-head">
-                <h3><i class="fas fa-exchange-alt" style="color:#d97706;margin-right:6px;"></i> Transfer Personnel</h3>
+                <h3><i class="fas fa-exchange-alt" style="color:var(--primary);margin-right:6px;"></i> Transfer Personnel</h3>
             </div>
             <div class="modal-body">
                 <p style="font-size:13px;color:var(--text-muted);margin-bottom:4px;">
@@ -730,10 +736,10 @@
 
             var isSuspend  = status === 'suspended';
             var title      = isSuspend ? 'Deactivate Office Account' : 'Activate Office Account';
-            var iconBg     = isSuspend ? '#fef2f2' : '#f0fdf4';
-            var iconColor  = isSuspend ? '#dc2626'  : '#16a34a';
+            var iconBg     = isSuspend ? 'var(--slate-soft)' : 'var(--blue-soft)';
+            var iconColor  = isSuspend ? 'var(--slate-dark)' : 'var(--primary)';
             var iconClass  = isSuspend ? 'fas fa-ban' : 'fas fa-check-circle';
-            var btnClass   = isSuspend ? 'danger'    : 'success';
+            var btnClass   = isSuspend ? 'warning'   : 'success';
             var btnLabel   = isSuspend ? 'Deactivate' : 'Activate';
             var msg        = isSuspend
                 ? 'Are you sure you want to deactivate <strong>' + escapeHtml(name) + '</strong>?'

@@ -206,6 +206,9 @@
                 return;
             }
 
+            window.dispatchEvent(new CustomEvent('spa:before-swap', {
+                detail: { url: url }
+            }));
             document.body.classList.add('spa-out');
             setTimeout(function () {
                 applySwap(html, url, push);

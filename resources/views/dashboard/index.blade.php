@@ -216,6 +216,7 @@
             display: grid;
             grid-template-columns: 1.7fr 1fr;
             gap: 20px;
+            align-items: start;
         }
 
         .panel {
@@ -224,6 +225,48 @@
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
             overflow: hidden;
+        }
+
+        .panel-fixed {
+            display: flex;
+            flex-direction: column;
+            align-self: start;
+            height: 560px;
+        }
+
+        .panel-scroll-body {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            overscroll-behavior: contain;
+        }
+
+        .panel-scroll-body .dtable th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .panel-actions {
+            display: flex;
+            flex-direction: column;
+            align-self: start;
+            height: 560px;
+        }
+
+        .panel-actions .actions-list {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            overscroll-behavior: contain;
+        }
+
+        .panel-fixed .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .panel-head {
@@ -390,6 +433,9 @@
         /* ─── Responsive ─── */
         @media (max-width: 1024px) {
             .grid { grid-template-columns: 1fr; }
+            .panel-fixed, .panel-actions { height: auto; }
+            .panel-scroll-body { max-height: none; }
+            .panel-actions .actions-list { overflow: visible; }
         }
 
         @media (max-width: 768px) {
@@ -417,6 +463,9 @@
             .panel-head { padding: 14px 16px; }
             .panel-title { font-size: 14px; }
             .panel-link { font-size: 12px; }
+            .panel-scroll-body { max-height: none; }
+            .panel-fixed, .panel-actions { height: auto; }
+            .panel-actions .actions-list { overflow: visible; }
         }
 
         @media (max-width: 400px) {
@@ -587,14 +636,14 @@
         <div class="grid">
 
             <!-- Recent Documents -->
-            <div class="panel anim">
+            <div class="panel panel-fixed anim">
                 <div class="panel-head">
                     <div class="panel-title">Recent Documents</div>
                     <a href="/my-documents" class="panel-link">View all <i class="fas fa-arrow-right" style="font-size:11px"></i></a>
                 </div>
 
                 @if($recentDocs->count() > 0)
-                <div class="dtable-wrap">
+                <div class="dtable-wrap panel-scroll-body">
                 <table class="dtable">
                     <thead>
                         <tr>
@@ -640,7 +689,7 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="panel anim">
+            <div class="panel panel-actions anim">
                 <div class="panel-head">
                     <div class="panel-title">Quick Actions</div>
                 </div>

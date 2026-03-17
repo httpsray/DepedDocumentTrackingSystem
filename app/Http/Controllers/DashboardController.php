@@ -12,13 +12,20 @@ use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
+    private function adminDashboardResponse(array $data)
+    {
+        return response()
+            ->view('admin.index', $data)
+            ->header('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(), payment=()');
+    }
+
     public function index()
     {
         $user = Auth::user();
 
         // SuperAdmin: show admin dashboard with extra link to records view
         if ($user->isSuperAdmin()) {
-            $recentDocs = Document::with('user', 'currentOffice')->latest()->take(10)->get();
+            $recentDocs = Document::with('user', 'currentOffice')->latest()->take(5)->get();
 
             $data = [
                 'user' => $user,
@@ -63,13 +70,13 @@ class DashboardController extends Controller
                 ];
             }
 
-            return view('admin.index', $data);
+            return $this->adminDashboardResponse($data);
         }
 
         if ($user->isAdmin()) {
-            $recentDocs = Document::with('user', 'currentOffice')->latest()->take(10)->get();
+            $recentDocs = Document::with('user', 'currentOffice')->latest()->take(5)->get();
 
-            return view('admin.index', [
+            return $this->adminDashboardResponse([
                 'user' => $user,
                 'stats' => [
                     'total_users'     => User::where('role', 'user')->count(),

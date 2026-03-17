@@ -52,7 +52,7 @@ class ProfileController extends Controller
         $newName = $request->name;
 
         $hasChanges = $user->name  !== $newName
-                   || $user->email !== $request->email
+                   || $user->email !== strtolower(trim($request->email))
                    || $user->mobile !== ($request->mobile ?: null);
 
         if (!$hasChanges) {
@@ -68,7 +68,7 @@ class ProfileController extends Controller
         }
 
         $user->name   = $newName;
-        $user->email  = $request->email;
+        $user->email  = strtolower(trim($request->email));
         $user->mobile = $request->mobile;
         $user->save();
 

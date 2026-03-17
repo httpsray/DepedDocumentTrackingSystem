@@ -30,8 +30,11 @@ class SecurityHeaders
         // Referrer policy — send origin only on cross-origin requests
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-        // Permissions policy — disable features the app doesn't use
-        $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+        // Permissions policy — disable features the app doesn't use by default,
+        // while allowing individual responses to opt in when needed.
+        if (!$response->headers->has('Permissions-Policy')) {
+            $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+        }
 
         // Content Security Policy — allow same-origin + trusted CDNs
         $response->headers->set('Content-Security-Policy', implode('; ', [

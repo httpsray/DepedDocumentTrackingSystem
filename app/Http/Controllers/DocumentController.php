@@ -36,12 +36,13 @@ class DocumentController extends Controller
             $rules['sender_first_name'] = ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\s.\-]+$/'];
             $rules['sender_last_name']  = ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\s.\-]+$/'];
             $rules['sender_contact'] = 'nullable|string|max:20';
-            $rules['sender_email'] = 'nullable|email|max:255';
+            $rules['sender_email'] = 'required|email|max:255';
         }
 
         $request->validate($rules, [
             'sender_first_name.regex' => 'First name may only contain letters, spaces, dots, and hyphens.',
             'sender_last_name.regex'  => 'Last name may only contain letters, spaces, dots, and hyphens.',
+            'sender_email.required'   => 'Email address is required so your submitted documents can be linked to your account later.',
         ]);
 
         if ($isAuth) {
@@ -56,13 +57,39 @@ class DocumentController extends Controller
             $senderContact = $request->sender_contact ?? null;
         } else {
             $senderName = trim($request->sender_first_name) . ' ' . trim($request->sender_last_name);
-            $senderEmail = $request->sender_email;
+            $senderEmail = strtolower(trim((string) $request->sender_email));
             $senderContact = $request->sender_contact;
         }
 
         try {
-            $result = $this->trackingNumberService->generate();
-            $referenceNumber = $this->referenceNumberService->generateUnique();
+            $normalizedSubject = strtolower(trim((string) $request->subject));
+            $normalizedType = strtolower(trim((string) $request->type));
+            $normalizedDescription = strtolower(trim((string) ($request->description ?? '')));
+
+            $recentDuplicateQuery = Document::query()
+                ->whereRaw('LOWER(TRIM(subject)) = ?', [$normalizedSubject])
+                ->whereRaw('LOWER(TRIM(type)) = ?', [$normalizedType])
+                ->where('created_at', '>=', now()->subMinutes(10))
+                ->whereIn('status', ['submitted', 'received', 'in_review', 'on_hold', 'for_pickup']);
+
+            if ($normalizedDescription !== '') {
+                $recentDuplicateQuery->whereRaw("LOWER(TRIM(COALESCE(description, ''))) = ?", [$normalizedDescription]);
+            } else {
+                $recentDuplicateQuery->where(function ($q) {
+                    $q->whereNull('description')
+                      ->orWhereRaw("TRIM(COALESCE(description, '')) = ''");
+                });
+            }
+
+            if ($isAuth && auth()->id()) {
+                $recentDuplicateQuery->where('user_id', auth()->id());
+            } else {
+                $recentDuplicateQuery
+                    ->whereRaw("LOWER(TRIM(COALESCE(sender_email, ''))) = ?", [strtolower(trim((string) $senderEmail))])
+                    ->whereRaw("LOWER(TRIM(COALESCE(sender_name, ''))) = ?", [strtolower(trim((string) $senderName))]);
+            }
+
+            $recentDuplicate = $recentDuplicateQuery->latest('created_at')->first();
 
             $recordsOffice = Office::query()
                 ->whereRaw('UPPER(code) = ?', ['RECORDS'])
@@ -82,6 +109,27 @@ class DocumentController extends Controller
                     'message' => 'Records Section office is not configured. Please contact the administrator.',
                 ], 500);
             }
+
+            if ($recentDuplicate) {
+                return response()->json([
+                    'success' => true,
+                    'duplicate' => true,
+                    'message' => 'A similar document was already submitted recently. Reusing the existing reference number.',
+                    'reference_number' => $recentDuplicate->reference_number,
+                    'tracking_number' => $recentDuplicate->tracking_number,
+                    'details' => [
+                        'sender_name'  => $recentDuplicate->sender_name,
+                        'type'         => $recentDuplicate->type,
+                        'subject'      => $recentDuplicate->subject,
+                        'description'  => $recentDuplicate->description ?: 'No remarks provided',
+                        'submitted_to' => $recordsOffice->name,
+                        'date'         => $recentDuplicate->created_at->setTimezone('Asia/Manila')->format('M d, Y â€” h:i A'),
+                    ],
+                ]);
+            }
+
+            $result = $this->trackingNumberService->generate();
+            $referenceNumber = $this->referenceNumberService->generateUnique();
 
             $document = new Document([
                 'submitted_to_office_id' => $recordsOffice->id,

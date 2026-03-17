@@ -114,6 +114,20 @@ Route::get('/qr/{tracking}', [DocumentController::class, 'qrCode'])
     ->middleware('throttle:60,1')
     ->where('tracking', '[A-Za-z0-9\-]+');
 
+// QR receive landing route (public entry with role-based behavior)
+Route::get('/receive/{tracking}', function ($tracking) {
+    $tracking = strtoupper(trim(strip_tags($tracking)));
+    $user = auth()->user();
+
+    // Only office representatives and superadmin can access the receive screen.
+    if ($user && ($user->isSuperAdmin() || ($user->isRepresentative() && $user->office_id))) {
+        return view('office.receive', compact('user', 'tracking'));
+    }
+
+    // Everyone else (guests/regular users) is redirected to tracking.
+    return redirect('/track?ref=' . urlencode($tracking));
+})->middleware('throttle:60,1')->where('tracking', '[A-Za-z0-9\-]+')->name('office.receive');
+
 // Public API Routes
 Route::post('/api/submit-document', [DocumentController::class, 'submit'])
     ->middleware('throttle:10,1');
@@ -150,14 +164,6 @@ Route::middleware(['auth', 'ensure-auth', 'no-cache'])->group(function () {
     })->name('help');
 
     // ─── Office account routes ───────────────────────────────────────────────
-    Route::get('/receive/{tracking}', function ($tracking) {
-        $user = auth()->user();
-        if (!$user->isSuperAdmin() && (!$user->isRepresentative() || !$user->office_id)) {
-            abort(403);
-        }
-        $tracking = strtoupper(trim(strip_tags($tracking)));
-        return view('office.receive', compact('user', 'tracking'));
-    })->where('tracking', '[A-Za-z0-9\-]+')->name('office.receive');
     Route::get('/office/dashboard', [RepresentativeController::class, 'dashboard'])
         ->name('office.dashboard');
     Route::get('/office/documents/{id}', [RepresentativeController::class, 'show'])

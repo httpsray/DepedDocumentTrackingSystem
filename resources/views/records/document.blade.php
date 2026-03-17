@@ -120,7 +120,6 @@
             <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</a>
             <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
             <a href="/admin/offices"><i class="fas fa-building"></i> Offices</a>
-            <a href="/admin/documents"><i class="fas fa-file-alt"></i> Manage Documents</a>
             <span class="nav-section">ICT Unit</span>
             <a href="/ict/documents"><i class="fas fa-network-wired"></i> ICT Documents</a>
         @endif
