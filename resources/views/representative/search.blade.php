@@ -52,6 +52,11 @@
         .btn-search{padding:10px 22px;background:var(--primary);color:#fff;border:none;border-radius:9px;font-family:Poppins,sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .2s;white-space:nowrap}
         .btn-search:hover{background:var(--primary-dark)}
         .table-card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.05);overflow:hidden}
+        .table-card.list-table-card.has-list{display:flex;flex-direction:column;max-height:clamp(520px,72vh,820px)}
+        .table-card.list-table-card.has-list .table-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+        .table-card.list-table-card.has-list .table-scroll th{position:sticky;top:0;z-index:2}
+        .table-card.list-table-card.has-list .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+        .table-card.list-table-card.has-list .pager-wrap{flex-shrink:0}
         .table-head{padding:16px 22px;border-bottom:1px solid var(--border)}
         .table-head h2{font-size:15px;font-weight:700;color:var(--text-dark)}
         table{width:100%;border-collapse:collapse}
@@ -59,15 +64,16 @@
         td{padding:12px 16px;font-size:13px;color:var(--text-dark);border-bottom:1px solid #f1f5f9;vertical-align:middle}
         tr:last-child td{border-bottom:none}
         tr:hover td{background:#fafbff}
+        .cell-ellipsis{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
-        .badge-submitted{background:#eff6ff;color:#2563eb}
-        .badge-received{background:#f0fdf4;color:#16a34a}
-        .badge-in_review{background:#fffbeb;color:#d97706}
-        .badge-forwarded{background:#f5f3ff;color:#7c3aed}
-        .badge-completed{background:#f0fdf4;color:#15803d}
-        .badge-for_pickup{background:#fff7ed;color:#c2410c}
-        .badge-returned{background:#fef2f2;color:#dc2626}
-        .badge-cancelled{background:#f8fafc;color:#64748b}
+        .badge-submitted,
+        .badge-received,
+        .badge-in_review,
+        .badge-forwarded,
+        .badge-completed,
+        .badge-for_pickup,
+        .badge-returned,
+        .badge-cancelled{background:#fff7ed;color:#c2410c}
         .btn-view{padding:5px 13px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:background .2s}
         .btn-view:hover{background:var(--primary-dark)}
         .empty-state{text-align:center;padding:50px 20px;color:var(--text-muted)}
@@ -85,7 +91,7 @@
         .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:199}
         .mob-overlay.open{display:block}
 
-        @media(max-width:900px){ .main{padding:68px 14px 50px} .site-footer{padding:16px 5%;flex-direction:column;gap:6px;text-align:center} }
+        @media(max-width:900px){ .main{padding:68px 14px 50px} .table-card.list-table-card.has-list{max-height:min(68vh,560px)} .site-footer{padding:16px 5%;flex-direction:column;gap:6px;text-align:center} }
         .site-footer{margin-left:0;width:100%;background:#fff;border-top:1px solid #e2e8f0;padding:20px 28px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#94a3b8}
         .site-footer .footer-left{display:flex;align-items:center;gap:6px}
         .site-footer .footer-right{font-size:11px;color:#b0b8c4}
@@ -137,7 +143,7 @@
     </div>
 
     <div class="search-bar-card">
-        <form method="GET" action="/representative/search" class="search-form">
+        <form method="GET" action="/representative/search" class="search-form" data-live-search>
             <input type="text" name="search" value="{{ request('search') }}" data-clearable data-no-capitalize
                    placeholder="Tracking number, subject, sender name...">
             <select name="status">
@@ -152,14 +158,14 @@
         </form>
     </div>
 
-    <div class="table-card">
+    <div class="table-card list-table-card{{ $documents->isNotEmpty() ? ' has-list' : '' }}">
         <div class="table-head">
             <h2>
                 <i class="fas fa-list" style="color:var(--primary);margin-right:6px"></i>
                 Results
                 @if(request('search') || request('status'))
                     <span style="font-size:12px;color:var(--text-muted);font-weight:400;margin-left:8px">
-                        — {{ $documents->total() }} document(s) found
+                        — {{ \App\Support\UiNumber::compact($documents->total()) }} document(s) found
                     </span>
                 @endif
             </h2>
@@ -172,6 +178,7 @@
                 <p>Try a different keyword or clear the filters.</p>
             </div>
         @else
+            <div class="table-scroll">
             <table>
                 <thead>
                     <tr>
@@ -192,10 +199,10 @@
                             {{ $doc->reference_number }}
                         </td>
                         <td style="max-width:180px">
-                            <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $doc->subject }}</div>
+                            <div class="cell-ellipsis" style="font-weight:600" title="{{ $doc->subject }}">{{ $doc->subject }}</div>
                         </td>
-                        <td style="font-size:12px">{{ $doc->type }}</td>
-                        <td style="font-size:12px">{{ $doc->sender_name }}</td>
+                        <td style="font-size:12px"><div class="cell-ellipsis" style="max-width:150px" title="{{ $doc->type }}">{{ $doc->type }}</div></td>
+                        <td style="font-size:12px"><div class="cell-ellipsis" style="max-width:160px" title="{{ $doc->sender_name }}">{{ $doc->sender_name }}</div></td>
                         <td>
                             <span class="badge badge-{{ $doc->status }}">{{ $doc->statusLabel() }}</span>
                         </td>
@@ -212,7 +219,8 @@
                 @endforeach
                 </tbody>
             </table>
-            <div style="padding:14px 22px;border-top:1px solid var(--border)">
+            </div>
+            <div class="pager-wrap" style="padding:14px 22px;border-top:1px solid var(--border)">
                 {{ $documents->withQueryString()->links() }}
             </div>
         @endif

@@ -22,6 +22,101 @@ class AdminController extends Controller
         private ActivationService $activationService
     ) {}
 
+    private function isRecordsOffice(?Office $office): bool
+    {
+        return $office && strtoupper((string) $office->code) === 'RECORDS';
+    }
+
+    private function applyOfficeQueueVisibility($query, User $user)
+    {
+        return $query->where(function ($q) use ($user) {
+            $q->whereNull('user_id')
+              ->orWhere('user_id', '!=', $user->id)
+              ->orWhere('current_handler_id', $user->id);
+        });
+    }
+
+    private function officeQueueBuilderForUser(User $user)
+    {
+        $office = $user->office;
+
+        if (!$office) {
+            return Document::with(['user', 'submittedToOffice', 'currentOffice'])
+                ->whereRaw('1 = 0');
+        }
+
+        $isRecordsOffice = $this->isRecordsOffice($office);
+
+        return $this->applyOfficeQueueVisibility(
+            Document::with(['user', 'submittedToOffice', 'currentOffice']),
+            $user
+        )->where(function ($q) use ($office, $isRecordsOffice) {
+            if ($isRecordsOffice) {
+                $q->where('current_office_id', $office->id);
+            } else {
+                $q->where('current_office_id', $office->id)
+                  ->orWhere(function ($sub) use ($office) {
+                      $sub->where('status', 'submitted')
+                          ->where('submitted_to_office_id', $office->id);
+                  });
+            }
+        })->when(
+            $isRecordsOffice,
+            fn ($q) => $q->whereNotIn('status', ['submitted', 'completed', 'returned', 'cancelled', 'archived']),
+            fn ($q) => $q->whereNotIn('status', ['completed', 'returned', 'cancelled', 'archived'])
+        );
+    }
+
+    private function officeQueueStatsForUser(User $user): array
+    {
+        $office = $user->office;
+
+        if (!$office) {
+            return [
+                'active' => 0,
+                'in_review' => 0,
+                'completed' => 0,
+            ];
+        }
+
+        $isRecordsOffice = $this->isRecordsOffice($office);
+
+        $active = $this->applyOfficeQueueVisibility(Document::query(), $user)
+            ->where(function ($q) use ($office, $isRecordsOffice) {
+                if ($isRecordsOffice) {
+                    $q->where('current_office_id', $office->id);
+                } else {
+                    $q->where('current_office_id', $office->id)
+                      ->orWhere(function ($sub) use ($office) {
+                          $sub->where('status', 'submitted')
+                              ->where('submitted_to_office_id', $office->id);
+                      });
+                }
+            })
+            ->when(
+                $isRecordsOffice,
+                fn ($q) => $q->whereIn('status', ['received', 'in_review']),
+                fn ($q) => $q->whereIn('status', ['submitted', 'received', 'in_review'])
+            )
+            ->count();
+
+        $inReview = $this->applyOfficeQueueVisibility(
+            Document::where('current_office_id', $office->id),
+            $user
+        )->whereIn('status', ['received', 'in_review'])->count();
+
+        $completed = $this->applyOfficeQueueVisibility(
+            Document::where('submitted_to_office_id', $office->id),
+            $user
+        )->whereIn('status', ['completed', 'for_pickup'])->count();
+
+        return [
+            'active' => $active,
+            'in_review' => $inReview,
+            'completed' => $completed,
+        ];
+    }
+
     /**
      * Ensure the current user is an admin.
      */
@@ -446,9 +541,12 @@ class AdminController extends Controller
             abort(403, 'Access restricted to Super Admin.');
         }
 
-        $query = Document::with(['user', 'submittedToOffice', 'currentOffice'])
-            ->where('current_handler_id', $user->id)
-            ->whereNotIn('status', ['completed', 'returned', 'cancelled', 'archived']);
+        $office = $user->office;
+        $query = $office
+            ? $this->officeQueueBuilderForUser($user)
+            : Document::with(['user', 'submittedToOffice', 'currentOffice'])
+                ->where('current_handler_id', $user->id)
+                ->whereNotIn('status', ['completed', 'returned', 'cancelled', 'archived']);
 
         $search = trim((string) $request->get('search', ''));
         $search = strip_tags($search);
@@ -470,14 +568,15 @@ class AdminController extends Controller
 
         $documents = $query->latest('last_action_at')->paginate(20)->withQueryString();
 
-        $handlerBase = Document::where('current_handler_id', $user->id);
-        $stats = [
-            'active'    => (clone $handlerBase)->whereNotIn('status', ['completed', 'for_pickup', 'archived', 'cancelled', 'returned'])->count(),
-            'in_review' => (clone $handlerBase)->whereIn('status', ['received', 'in_review'])->count(),
-            'completed' => (clone $handlerBase)->whereIn('status', ['completed', 'for_pickup'])->count(),
-        ];
+        $stats = $office
+            ? $this->officeQueueStatsForUser($user)
+            : [
+                'active'    => Document::where('current_handler_id', $user->id)->whereNotIn('status', ['completed', 'for_pickup', 'archived', 'cancelled', 'returned'])->count(),
+                'in_review' => Document::where('current_handler_id', $user->id)->whereIn('status', ['received', 'in_review'])->count(),
+                'completed' => Document::where('current_handler_id', $user->id)->whereIn('status', ['completed', 'for_pickup'])->count(),
+            ];
 
-        return view('ict.index', compact('user', 'documents', 'stats', 'search', 'status'));
+        return view('ict.index', compact('user', 'office', 'documents', 'stats', 'search', 'status'));
     }
 
     /**
@@ -628,14 +727,18 @@ class AdminController extends Controller
         if (!$user || !$user->isSuperAdmin()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        $stats = Cache::remember('ict_stats_' . $user->id, 15, function () use ($user) {
-            $base = Document::where('current_handler_id', $user->id);
-            return [
-                'active'    => (clone $base)->whereNotIn('status', ['completed', 'for_pickup', 'archived', 'cancelled', 'returned'])->count(),
-                'in_review' => (clone $base)->whereIn('status', ['received', 'in_review'])->count(),
-                'completed' => (clone $base)->whereIn('status', ['completed', 'for_pickup'])->count(),
-            ];
-        });
+
+        $stats = $user->office
+            ? $this->officeQueueStatsForUser($user)
+            : Cache::remember('ict_stats_' . $user->id, 15, function () use ($user) {
+                $base = Document::where('current_handler_id', $user->id);
+                return [
+                    'active'    => (clone $base)->whereNotIn('status', ['completed', 'for_pickup', 'archived', 'cancelled', 'returned'])->count(),
+                    'in_review' => (clone $base)->whereIn('status', ['received', 'in_review'])->count(),
+                    'completed' => (clone $base)->whereIn('status', ['completed', 'for_pickup'])->count(),
+                ];
+            });
+
         return response()->json($stats);
     }
 }

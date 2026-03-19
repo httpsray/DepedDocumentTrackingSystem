@@ -1,173 +1,323 @@
+@php
+    $activeFilters = [];
+
+    if ($searchLabel !== 'All') {
+        $activeFilters[] = 'Keyword: ' . $searchLabel;
+    }
+
+    if ($statusLabel !== 'All') {
+        $activeFilters[] = 'Status: ' . $statusLabel;
+    }
+
+    if ($dateFromLabel !== 'N/A' || $dateToLabel !== 'N/A') {
+        $activeFilters[] = 'Date Range: ' . $dateFromLabel . ' to ' . $dateToLabel;
+    }
+@endphp
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>User Activity Report</title>
     <style>
+        @page { size: A4 portrait; margin: 11mm 12mm 14mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 12px;
-            color: #1b263b;
-            padding: 30px 28px;
-            line-height: 1.5;
+            font-family: DejaVu Sans, Arial, Helvetica, sans-serif;
+            font-size: 8.8px;
+            color: #1e293b;
+            line-height: 1.32;
+            padding-bottom: 10mm;
         }
-
-        /* ── Header ── */
-        .header {
-            text-align: center;
-            margin-bottom: 22px;
-            padding-bottom: 16px;
-            border-bottom: 3px solid #0056b3;
+        .report-shell {
+            width: 96.5%;
+            margin: 0 auto;
         }
-        .header h1 {
-            font-size: 19px;
-            font-weight: 700;
-            color: #0056b3;
-            margin-bottom: 3px;
-            letter-spacing: 0.2px;
+        .head-table,
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
         }
-        .header .subtitle {
-            font-size: 12px;
-            color: #64748b;
-            font-weight: 400;
+        .report-head {
+            border-bottom: 1.5px solid #dbeafe;
+            padding-bottom: 7px;
+            margin-bottom: 6px;
         }
-
-        /* ── Filter Meta ── */
-        .meta-table { width: 100%; margin-bottom: 16px; border-collapse: collapse; }
-        .meta-table td {
-            padding: 4px 10px;
-            font-size: 11.5px;
+        .head-table td {
             vertical-align: top;
         }
-        .meta-table td.label { font-weight: 600; color: #475569; width: 130px; }
-        .meta-table td.value { color: #1b263b; }
-
-        /* ── Total Row ── */
-        .total-row {
-            margin-top: 10px;
-            margin-bottom: 4px;
-            font-size: 12px;
-            font-weight: 600;
+        .head-right {
+            width: 34%;
+            text-align: right;
+        }
+        .eyebrow {
+            font-size: 7.2px;
+            font-weight: 700;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: #1d4ed8;
+            margin-bottom: 2px;
+        }
+        .title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 2px;
+        }
+        .subtitle {
+            font-size: 9px;
+            color: #64748b;
+        }
+        .generated-label {
+            font-size: 7px;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 2px;
+        }
+        .generated-value {
+            font-size: 8.6px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .meta-line {
+            margin-bottom: 5px;
+            font-size: 8.2px;
             color: #475569;
         }
-
-        /* ── Data Table ── */
-        .data-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-        .data-table th {
-            background: #0056b3;
-            color: #fff;
-            padding: 8px 7px;
-            text-align: left;
-            font-size: 10px;
+        .meta-line strong {
+            color: #0f172a;
+        }
+        .meta-sep {
+            color: #94a3b8;
+            padding: 0 6px;
+        }
+        .filters-line {
+            margin-bottom: 7px;
+            padding: 5px 7px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: #f8fafc;
+            font-size: 8px;
+            color: #475569;
+        }
+        .filters-line strong {
+            color: #0f172a;
+        }
+        .section-title {
+            margin-bottom: 4px;
+            font-size: 7.2px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
+            letter-spacing: .16em;
+            color: #64748b;
+        }
+        .data-table {
+            table-layout: fixed;
+        }
+        .data-table thead {
+            display: table-header-group;
+        }
+        .data-table tr {
+            page-break-inside: avoid;
+        }
+        .data-table th {
+            background: #163d7a;
+            color: #fff;
+            padding: 5px 5px;
+            text-align: left;
+            font-size: 7px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            border-right: 1px solid rgba(255, 255, 255, .14);
+        }
+        .data-table th:last-child {
+            border-right: none;
         }
         .data-table td {
-            padding: 7px 7px;
+            padding: 5px;
             border-bottom: 1px solid #e2e8f0;
-            font-size: 11px;
             vertical-align: top;
+            font-size: 8px;
             word-break: break-word;
-            line-height: 1.45;
         }
-        .data-table tr:nth-child(even) td { background: #f8fafc; }
-
-        /* ── Status Badges ── */
+        .data-table tbody tr:nth-child(even) td {
+            background: #f8fafc;
+        }
+        .seq {
+            color: #64748b;
+            font-weight: 700;
+        }
+        .mono-ref,
+        .mono-track {
+            display: block;
+            font-weight: 700;
+            line-height: 1.23;
+        }
+        .mono-ref {
+            color: #0f172a;
+        }
+        .mono-track {
+            color: #1d4ed8;
+            margin-top: 2px;
+        }
+        .doc-title {
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 2px;
+        }
+        .doc-sub,
+        .muted {
+            color: #64748b;
+            font-size: 7.6px;
+        }
         .badge {
             display: inline-block;
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 9px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-size: 6.9px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: .05em;
+            white-space: nowrap;
+            background: #fff7ed;
+            color: #c2410c;
         }
-        .badge-submitted { background: #eff6ff; color: #2563eb; }
-        .badge-received { background: #f0fdf4; color: #16a34a; }
-        .badge-in_review { background: #fffbeb; color: #d97706; }
-        .badge-forwarded { background: #f5f3ff; color: #7c3aed; }
-        .badge-completed { background: #f0fdf4; color: #15803d; }
-        .badge-for_pickup { background: #fff7ed; color: #c2410c; }
-        .badge-returned { background: #fef2f2; color: #dc2626; }
-        .badge-cancelled { background: #f8fafc; color: #64748b; }
-        .badge-on_hold { background: #fefce8; color: #a16207; }
-        .badge-archived { background: #f1f5f9; color: #475569; }
-
-        .mono {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 10px;
+        .activity-line {
+            margin-bottom: 2px;
+            display: flex;
+            align-items: flex-start;
+            gap: 5px;
         }
-
-        /* ── Footer ── */
+        .activity-line:last-child {
+            margin-bottom: 0;
+        }
+        .activity-label {
+            display: inline-block;
+            min-width: 48px;
+            white-space: nowrap;
+            flex: 0 0 48px;
+            font-size: 6.9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: #64748b;
+        }
+        .activity-value {
+            font-size: 7.8px;
+            color: #0f172a;
+            flex: 1 1 auto;
+        }
+        .empty-state {
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 15px 14px;
+            text-align: center;
+            color: #64748b;
+            background: #f8fafc;
+        }
         .footer {
-            margin-top: 22px;
-            padding-top: 12px;
+            position: fixed;
+            left: 12mm;
+            right: 12mm;
+            bottom: -7mm;
+            padding-top: 4px;
             border-top: 1px solid #e2e8f0;
             text-align: center;
-            font-size: 10px;
+            font-size: 7.4px;
             color: #94a3b8;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>User Activity Report - {{ $displayName }}</h1>
-        <div class="subtitle">Generated: {{ $generatedAt }}</div>
-    </div>
-
-    <table class="meta-table">
-        <tr><td class="label">Name:</td><td class="value">{{ $displayName }}</td></tr>
-        <tr><td class="label">Office / Type:</td><td class="value">{{ $officeName }}</td></tr>
-        <tr><td class="label">Keyword:</td><td class="value">{{ $searchLabel }}</td></tr>
-        <tr><td class="label">Status:</td><td class="value">{{ $statusLabel }}</td></tr>
-        <tr><td class="label">Date Range:</td><td class="value">{{ $dateFromLabel }} - {{ $dateToLabel }}</td></tr>
-    </table>
-
-    <div class="total-row">Total Records: {{ $docs->count() }}</div>
-
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Reference</th>
-                <th>Subject</th>
-                <th>Type</th>
-                <th>Sender</th>
-                <th>Status</th>
-                <th>Current Office</th>
-                <th>Handler</th>
-                <th>Submitted At</th>
-                <th>Last Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($docs as $i => $doc)
-                @php
-                    $currentOffice = $doc->status === 'submitted'
-                        ? 'Awaiting: ' . ($doc->submittedToOffice?->name ?? 'Records')
-                        : ($doc->currentOffice?->name ?? $doc->submittedToOffice?->name ?? '-');
-                @endphp
+    <div class="report-shell">
+        <div class="report-head">
+            <table class="head-table">
                 <tr>
-                    <td>{{ $i + 1 }}</td>
-                    <td class="mono">{{ $doc->reference_number ?: $doc->tracking_number }}</td>
-                    <td>{{ $doc->subject }}</td>
-                    <td>{{ $doc->type }}</td>
-                    <td>{{ $doc->sender_name }}</td>
-                    <td><span class="badge badge-{{ $doc->status }}">{{ $doc->statusLabel() }}</span></td>
-                    <td>{{ $currentOffice }}</td>
-                    <td>{{ $doc->currentHandler?->name ?? 'Unassigned' }}</td>
-                    <td>{{ $doc->created_at?->copy()->setTimezone('Asia/Manila')->format('M d, Y h:i A') }}</td>
-                    <td>{{ $doc->last_action_at?->copy()->setTimezone('Asia/Manila')->format('M d, Y h:i A') ?? '-' }}</td>
+                    <td>
+                        <div class="eyebrow">DepEd DOCTRAX</div>
+                        <div class="title">User Activity Report</div>
+                        <div class="subtitle">{{ $displayName }} | {{ $officeName }}</div>
+                    </td>
+                    <td class="head-right">
+                        <div class="generated-label">Generated</div>
+                        <div class="generated-value">{{ $generatedAt }}</div>
+                    </td>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </table>
+        </div>
 
-    <div class="footer">
-        &copy; {{ date('Y') }} DepEd Document Tracking System - DOCTRAX | This report is system-generated.
+        <div class="meta-line">
+            <strong>{{ $docs->count() }}</strong> record(s)
+            @if($statusLabel !== 'All')
+                <span class="meta-sep">|</span>
+                Status: <strong>{{ $statusLabel }}</strong>
+            @endif
+            @if($dateFromLabel !== 'N/A' || $dateToLabel !== 'N/A')
+                <span class="meta-sep">|</span>
+                Date Range: <strong>{{ $dateFromLabel }} to {{ $dateToLabel }}</strong>
+            @endif
+        </div>
+
+        @if(!empty($activeFilters))
+            <div class="filters-line">
+                <strong>Applied Filters:</strong> {{ implode(' | ', $activeFilters) }}
+            </div>
+        @endif
+
+        <div class="section-title">Document Listing</div>
+
+        @if($docs->isEmpty())
+            <div class="empty-state">No document activity matched the selected filters for this PDF export.</div>
+        @else
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width:4%">#</th>
+                        <th style="width:18%">Reference / Tracking</th>
+                        <th style="width:24%">Document</th>
+                        <th style="width:10%">Status</th>
+                        <th style="width:18%">Office / Handler</th>
+                        <th style="width:26%">Activity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($docs as $i => $doc)
+                        @php
+                            $currentOffice = $doc->status === 'submitted'
+                                ? 'Awaiting: ' . ($doc->submittedToOffice?->name ?? 'Records')
+                                : ($doc->currentOffice?->name ?? $doc->submittedToOffice?->name ?? '-');
+                            $submittedAt = $doc->created_at?->copy()->setTimezone('Asia/Manila')->format('m/d/Y g:i A') ?? 'N/A';
+                            $updatedAt = $doc->last_action_at?->copy()->setTimezone('Asia/Manila')->format('m/d/Y g:i A') ?? 'N/A';
+                        @endphp
+                        <tr>
+                            <td class="seq">{{ $i + 1 }}</td>
+                            <td>
+                                <span class="mono-ref">{{ $doc->reference_number ?: 'N/A' }}</span>
+                                <span class="mono-track">{{ $doc->tracking_number ?: 'N/A' }}</span>
+                            </td>
+                            <td>
+                                <div class="doc-title">{{ $doc->subject ?: 'Untitled Document' }}</div>
+                                <div class="doc-sub">{{ $doc->type ?: 'No type specified' }}</div>
+                                <div class="muted">{{ $doc->sender_name ?: 'Guest' }}</div>
+                            </td>
+                            <td><span class="badge">{{ $doc->statusLabel() }}</span></td>
+                            <td>
+                                <div>{{ $currentOffice }}</div>
+                                <div class="muted">{{ $doc->currentHandler?->name ?? 'Unassigned' }}</div>
+                            </td>
+                            <td>
+                                <div class="activity-line"><span class="activity-label">Submitted</span><span class="activity-value">{{ $submittedAt }}</span></div>
+                                <div class="activity-line"><span class="activity-label">Updated</span><span class="activity-value">{{ $updatedAt }}</span></div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
     </div>
+
+    <div class="footer">This report is system-generated by DepEd DOCTRAX.</div>
 </body>
 </html>

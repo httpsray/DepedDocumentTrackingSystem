@@ -12,7 +12,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        :root{--primary:#0056b3;--primary-dark:#004494;--bg:#f0f2f5;--border:#e2e8f0;--text-dark:#1b263b;--text-muted:#64748b}
+        :root{--primary:#0056b3;--primary-dark:#004494;--blue-soft:#eff6ff;--slate-dark:#334155;--bg:#f0f2f5;--border:#e2e8f0;--text-dark:#1b263b;--text-muted:#64748b}
         *{margin:0;padding:0;box-sizing:border-box}
         body{background:var(--bg);font-family:Poppins,sans-serif;min-height:100vh;display:flex;flex-direction:column}
         /* Sidebar */
@@ -53,18 +53,18 @@
         .receive-strip{background:#fff;border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:24px}
         .receive-strip h2{font-size:20px;font-weight:700;color:var(--text-dark);margin:0 0 6px}
         .receive-strip p.rs-sub{font-size:13px;color:var(--text-muted);margin:0 0 18px}
-        .rs-main{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:0}
+        .rs-main{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;margin-bottom:0;min-width:0}
         .ref-boxes-row{display:flex;align-items:center;gap:7px;flex:1;min-width:0;flex-wrap:nowrap}
-        .ref-box{flex:1;min-width:0;height:clamp(60px,5.8vw,72px);text-align:center;font-size:clamp(21px,2.2vw,26px);font-weight:700;font-family:'Poppins',sans-serif;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;text-transform:uppercase;background:#f8fafc;transition:border-color .2s,box-shadow .2s,background .2s;color:#1e293b;padding:0;caret-color:#16a34a}
-        .ref-box:focus{border-color:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.13);background:#fff}
-        .ref-box.filled{background:#fff;border-color:#94a3b8}
+        .ref-box{flex:1;min-width:0;height:clamp(60px,5.8vw,72px);text-align:center;font-size:clamp(21px,2.2vw,26px);font-weight:700;font-family:'Poppins',sans-serif;border:1.5px solid #cbd5e1;border-radius:8px;outline:none;text-transform:uppercase;background:#f8fafc;transition:border-color .2s,box-shadow .2s,background .2s;color:#1e293b;padding:0;caret-color:var(--primary);box-shadow:0 0 0 1px rgba(203,213,225,.75)}
+        .ref-box:focus{border-color:var(--primary);box-shadow:0 0 0 1px rgba(0,86,179,.28),0 0 0 4px rgba(0,86,179,.13);background:#fff}
+        .ref-box.filled{background:#fff;border-color:#94a3b8;box-shadow:0 0 0 1px rgba(148,163,184,.42)}
         .ref-sep{font-size:18px;color:#cbd5e1;user-select:none;padding:0 2px}
         .btn-clear-x{width:36px;height:36px;border:1.5px solid #e2e8f0;border-radius:50%;background:#f8fafc;color:#94a3b8;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;padding:0}
         .rs-center{width:100%;margin:0 auto}
         .rs-btn-wrap{display:flex;justify-content:center;margin-top:18px;gap:12px}
-        .btn-receive{flex:1;height:clamp(54px,5.6vw,60px);padding:0 clamp(16px,2.8vw,32px);border:none;border-radius:8px;background:#16a34a;color:#fff;font-family:'Poppins',sans-serif;font-size:clamp(13px,1.7vw,14px);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s}
-        .btn-receive:hover{background:#15803d}
-        .btn-receive:active{background:#166534}
+        .btn-receive{flex:1;height:clamp(54px,5.6vw,60px);padding:0 clamp(16px,2.8vw,32px);border:none;border-radius:8px;background:var(--slate-dark);color:#fff;font-family:'Poppins',sans-serif;font-size:clamp(13px,1.7vw,14px);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s}
+        .btn-receive:hover{background:#243244}
+        .btn-receive:active{background:#1e293b}
         .btn-receive:disabled{opacity:.5;cursor:not-allowed}
         .btn-scan-qr{flex:1;height:clamp(54px,5.6vw,60px);padding:0 clamp(16px,2.8vw,32px);border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:'Poppins',sans-serif;font-size:clamp(13px,1.7vw,14px);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s;text-decoration:none}
         .btn-scan-qr:hover{background:var(--primary-dark)}
@@ -73,23 +73,25 @@
         .receive-alert{margin-top:12px;padding:8px 12px;border-radius:7px;font-size:12px;display:none;align-items:center;gap:8px;animation:rcvFadeIn .2s ease-out;width:100%}
         .receive-alert.show{display:flex}
         .receive-alert.err{background:#fef2f2;border-left:3px solid #dc2626;color:#b91c1c}
-        .receive-alert.ok{background:#f0fdf4;border-left:3px solid #16a34a;color:#15803d}
+        .receive-alert.ok{background:var(--blue-soft);border-left:3px solid var(--primary);color:var(--primary-dark)}
         .receive-alert i{font-size:13px;flex-shrink:0}
         .receive-alert span{line-height:1.4}
         @keyframes rcvFadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
         /* Stats */
         .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
-        .stat-card{background:#fff;border-radius:10px;padding:20px 22px;box-shadow:none;border:1px solid var(--border);position:relative;overflow:hidden}
-        .stat-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
-        .stat-card.c-blue::before{background:#3b82f6}
-        .stat-card.c-green::before{background:#22c55e}
-        .stat-card.c-amber::before{background:#f59e0b}
-        .stat-card.c-emerald::before{background:#10b981}
-        .stat-label{font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+        .stat-card{background:#fff;border-radius:12px;padding:20px 22px 18px;box-shadow:none;border:1px solid var(--border);position:relative;overflow:hidden}
+        .stat-label{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}
+        .stat-card.c-blue .stat-label{background:#eff6ff;color:#2563eb}
+        .stat-card.c-green .stat-label{background:#fffbeb;color:#d97706}
+        .stat-card.c-amber .stat-label{background:#fffbeb;color:#d97706}
+        .stat-card.c-emerald .stat-label{background:#f1f5f9;color:#64748b}
         .stat-num{font-size:32px;font-weight:800;color:var(--text-dark);line-height:1;letter-spacing:-1px}
         .stat-sub{font-size:11px;color:var(--text-muted);margin-top:6px}
         /* Table card */
         .table-card{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden}
+        .dashboard-table-card.has-list{display:flex;flex-direction:column;max-height:clamp(520px,72vh,820px)}
+        .dashboard-table-card.has-list .table-card-scroll{display:block;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+        .dashboard-table-card.has-list .table-card-scroll thead th{position:sticky;top:0;z-index:2}
         .table-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
         .table-title{font-size:17px;font-weight:700;color:var(--text-dark)}
         .table-doc-count{font-size:11px;color:#94a3b8;font-weight:500;margin-left:8px}
@@ -109,24 +111,41 @@
         tr:last-child td{border-bottom:none}
         tr:hover td{background:#f8faff}
         tr.doc-row{cursor:pointer}
-        .badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
-        .badge-submitted{background:#eff6ff;color:#2563eb}
-        .badge-received{background:#f0fdf4;color:#16a34a}
-        .badge-in_review{background:#fffbeb;color:#d97706}
-        .badge-forwarded{background:#f5f3ff;color:#7c3aed}
-        .badge-completed{background:#f0fdf4;color:#15803d}
-        .badge-for_pickup{background:#fff7ed;color:#c2410c}
-        .badge-returned{background:#fef2f2;color:#dc2626}
-        .badge-cancelled{background:#f8fafc;color:#64748b}
-        .btn-view{padding:5px 13px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:background .2s}
-        .btn-view:hover{background:var(--primary-dark)}
-        .btn-manage{background:#334155}
-        .btn-manage:hover{background:#1e293b}
+        .badge{display:inline-flex;align-items:center;justify-content:center;min-height:22px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;line-height:1;text-align:center;white-space:nowrap;vertical-align:middle}
+        .badge-submitted,
+        .badge-received,
+        .badge-in_review,
+        .badge-forwarded,
+        .badge-completed,
+        .badge-for_pickup,
+        .badge-returned,
+        .badge-cancelled{background:#fff7ed;color:#c2410c}
         .btn-accept{padding:5px 11px;background:#16a34a;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;transition:background .2s;display:inline-flex;align-items:center;gap:5px}
         .btn-accept:hover{background:#15803d}
         .td-action{width:44px;text-align:center}
         .row-arrow{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;color:#94a3b8;transition:all .15s}
         tr.doc-row:hover .row-arrow{background:var(--primary);color:#fff}
+        .cell-ellipsis{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .mob-cards{display:none;padding:12px}
+        .mob-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.04);cursor:pointer;transition:border-color .15s,box-shadow .15s}
+        .mob-card + .mob-card{margin-top:10px}
+        .mob-card:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(0,86,179,.08)}
+        .mob-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+        .mob-card-ids{min-width:0}
+        .mob-card-ref{font-size:11.5px;font-weight:700;color:var(--primary);font-family:monospace;line-height:1.25}
+        .mob-card-track{font-size:10px;color:var(--text-muted);font-family:monospace;margin-top:2px;line-height:1.25}
+        .mob-card-arrow{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;color:#94a3b8;font-size:11px;flex-shrink:0;background:#f8fafc}
+        .mob-card-subject{font-size:13.5px;font-weight:600;color:var(--text-dark);margin-bottom:8px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .mob-card-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+        .mob-card-status{display:inline-flex;align-items:center;gap:5px;min-width:0}
+        .mob-card-date{font-size:10.5px;color:var(--text-muted);display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+        .mob-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+        .mob-card-item{min-width:0;background:#f8fafc;border:1px solid #e8eef6;border-radius:10px;padding:8px 9px}
+        .mob-card-item.full{grid-column:1 / -1}
+        .mob-card-k{display:block;font-size:8.8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin-bottom:4px}
+        .mob-card-v{display:block;min-width:0;font-size:10.8px;font-weight:500;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+        .mob-card-actions{display:flex;gap:8px;margin-top:10px}
+        .mob-card-actions .btn-accept{flex:1;justify-content:center;padding:8px 10px;border-radius:10px;font-size:11px}
         .empty-state{text-align:center;padding:50px 20px;color:var(--text-muted)}
         .empty-state i{font-size:40px;color:#cbd5e1;margin-bottom:12px;display:block}
         .empty-state h3{font-size:15px;font-weight:600;color:#94a3b8;margin-bottom:6px}
@@ -190,15 +209,16 @@
             .dm-item{border-right:none}
             .receive-strip{padding:16px 18px}
             .receive-strip h2{font-size:15px}
-            .rs-main{gap:5px}
+            .rs-main{gap:0;grid-template-columns:minmax(0,1fr)}
             .ref-boxes-row{gap:3px}
             .ref-box{height:clamp(52px,13vw,58px);font-size:clamp(17px,4.4vw,19px)}
             .ref-sep{font-size:13px;padding:0 1px}
-            .btn-clear-x{width:32px;height:32px;font-size:12px}
+            .btn-clear-x{display:none}
             .rs-btn-wrap .btn-receive{flex:1 1 0;min-width:0;width:auto;height:48px;padding:0 12px;font-size:12.5px;white-space:nowrap}
             .rs-btn-wrap .btn-scan-qr{flex:1 1 0;min-width:0;width:auto;height:48px;padding:0 12px;font-size:12.5px;white-space:nowrap}
             .rs-btn-wrap{flex-direction:row;gap:8px}
             .stat-num{font-size:26px}
+            .dashboard-table-card.has-list{max-height:min(68vh,560px)}
             /* Header */
             .page-header-top{flex-direction:column;align-items:flex-start;gap:10px}
             .live-clock{display:none}
@@ -208,16 +228,20 @@
             .filters input{font-size:11px;padding:6px 8px 6px 26px}
             .filters input::placeholder{font-size:10px}
             .filters select{font-size:11px;padding:6px 22px 6px 8px;min-width:100px}
-            /* Hide Type(3), Sender(4), Last Action(6), arrow(8) on mobile */
-            th:nth-child(3),td:nth-child(3),
-            th:nth-child(4),td:nth-child(4),
-            th:nth-child(6),td:nth-child(6),
-            th:nth-child(8),td:nth-child(8){display:none}
-            td{padding:10px 12px;font-size:12px}
-            th{padding:9px 12px;font-size:9px}
+            .dashboard-table-card.has-list .table-card-scroll{display:none!important}
+            .dashboard-table-card.has-list .mob-cards{display:block!important;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:10px}
+            .mob-cards{display:block;padding:10px}
             .table-card{border-radius:10px}
-            /* Action buttons stack */
-            .btn-accept,.btn-manage{font-size:10px;padding:4px 8px}
+            .mob-card-actions .btn-accept{font-size:10.5px}
+        }
+        @media(max-width:1024px){
+            .dashboard-table-card.has-list .table-card-scroll{display:none!important}
+            .dashboard-table-card.has-list .mob-cards{display:block!important;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+        }
+        @media(max-width:420px){
+            .mob-card-grid{grid-template-columns:1fr}
+            .mob-card-item.full{grid-column:auto}
+            .mob-card-actions{flex-direction:column}
         }
         @keyframes spin{to{transform:rotate(360deg)}}
         @keyframes blink-pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.35}}
@@ -376,18 +400,18 @@
     <div class="stats-grid">
         <div class="stat-card c-amber">
             <div class="stat-label">Processing</div>
-            <div class="stat-num" id="stat-in-review">{{ $stats['in_review'] }}</div>
+            <div class="stat-num" id="stat-in-review">{{ \App\Support\UiNumber::compact($stats['in_review']) }}</div>
             <div class="stat-sub">Being processed</div>
         </div>
         <div class="stat-card c-emerald">
             <div class="stat-label">Completed</div>
-            <div class="stat-num" id="stat-completed">{{ $stats['completed'] }}</div>
+            <div class="stat-num" id="stat-completed">{{ \App\Support\UiNumber::compact($stats['completed']) }}</div>
             <div class="stat-sub">Completed and closed</div>
         </div>
     </div>
 
     <!-- Documents table -->
-    <div class="table-card">
+    <div class="table-card dashboard-table-card{{ $documents->isNotEmpty() ? ' has-list' : '' }}">
         <div class="table-head">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
                 <span class="table-title">Document Queue</span>
@@ -396,7 +420,7 @@
             <div class="filters">
                 <div class="search-wrap">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Search subject or sender..." oninput="filterTable()">
+                    <input type="text" id="searchInput" placeholder="Search subject or sender..." data-clearable data-no-capitalize oninput="filterTable()">
                 </div>
                 <select id="statusFilter" onchange="filterTable()">
                     <option value="">All Statuses</option>
@@ -415,6 +439,7 @@
                 <p>Documents submitted to or currently held by your office will appear here.</p>
             </div>
         @else
+            <div class="table-scroll table-card-scroll">
             <table id="docsTable">
                 <thead>
                     <tr>
@@ -424,7 +449,6 @@
                         <th>Type</th>
                         <th>Sender</th>
                         <th>Status</th>
-                        <th>Last Action</th>
                         <th>Actions</th>
                         <th class="td-action"></th>
                     </tr>
@@ -435,10 +459,10 @@
                         <td style="font-family:monospace;font-size:12px;font-weight:600;color:var(--primary);white-space:nowrap">{{ $doc->tracking_number }}</td>
                         <td style="font-family:monospace;font-size:12px;font-weight:600;white-space:nowrap">{{ $doc->reference_number ?: 'N/A' }}</td>
                         <td style="max-width:200px">
-                            <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $doc->subject }}</div>
+                            <div class="cell-ellipsis" style="font-weight:600" title="{{ $doc->subject }}">{{ $doc->subject }}</div>
                         </td>
-                        <td style="font-size:12px;white-space:nowrap">{{ $doc->type }}</td>
-                        <td style="font-size:12px">{{ $doc->sender_name }}</td>
+                        <td style="font-size:12px;white-space:nowrap"><div class="cell-ellipsis" style="max-width:150px" title="{{ $doc->type }}">{{ $doc->type }}</div></td>
+                        <td style="font-size:12px"><div class="cell-ellipsis" style="max-width:160px" title="{{ $doc->sender_name }}">{{ $doc->sender_name }}</div></td>
                         <td>
                             <span style="display:inline-flex;align-items:center;gap:5px">
                                 <span class="badge badge-{{ $doc->status }}">{{ $doc->statusLabel() }}</span>
@@ -447,9 +471,6 @@
                                 @endif
                             </span>
                         </td>
-                        <td style="font-size:11px;color:var(--text-muted)">
-                            {{ $doc->last_action_at ? \Carbon\Carbon::parse($doc->last_action_at)->diffForHumans() : $doc->created_at->diffForHumans() }}
-                        </td>
                         <td>
                             <div style="display:flex;gap:6px;align-items:center">
                                 @if($doc->status === 'submitted')
@@ -457,9 +478,6 @@
                                         <i class="fas fa-check"></i> Accept
                                     </button>
                                 @endif
-                                <a href="/office/documents/{{ $doc->id }}" class="btn-view btn-manage" onclick="event.stopPropagation()">
-                                    <i class="fas fa-sliders-h"></i> Manage
-                                </a>
                             </div>
                         </td>
                         <td class="td-action"><span class="row-arrow"><i class="fas fa-chevron-right"></i></span></td>
@@ -467,6 +485,52 @@
                 @endforeach
                 </tbody>
             </table>
+            </div>
+            <div class="mob-cards">
+                @foreach($documents as $doc)
+                    <div
+                        class="mob-card"
+                        onclick='openDocDetail(@json($doc->tracking_number))'
+                        data-status="{{ $doc->status }}"
+                        data-search="{{ strtolower($doc->tracking_number . ' ' . ($doc->reference_number ?? '') . ' ' . $doc->subject . ' ' . $doc->type . ' ' . $doc->sender_name) }}"
+                    >
+                        <div class="mob-card-top">
+                            <div class="mob-card-ids">
+                                <div class="mob-card-ref">{{ $doc->tracking_number }}</div>
+                                <div class="mob-card-track">Ref: {{ $doc->reference_number ?: 'N/A' }}</div>
+                            </div>
+                            <span class="mob-card-arrow"><i class="fas fa-chevron-right"></i></span>
+                        </div>
+                        <div class="mob-card-subject">{{ $doc->subject }}</div>
+                        <div class="mob-card-meta">
+                            <span class="mob-card-status">
+                                <span class="badge badge-{{ $doc->status }}">{{ $doc->statusLabel() }}</span>
+                                @if($doc->status === 'for_pickup')
+                                    <span class="blink-dot"></span>
+                                @endif
+                            </span>
+                            <span class="mob-card-date"><i class="fas fa-calendar"></i>{{ $doc->created_at->format('M d, Y') }}</span>
+                        </div>
+                        <div class="mob-card-grid">
+                            <div class="mob-card-item">
+                                <span class="mob-card-k">Type</span>
+                                <span class="mob-card-v" title="{{ $doc->type }}">{{ $doc->type }}</span>
+                            </div>
+                            <div class="mob-card-item">
+                                <span class="mob-card-k">Sender</span>
+                                <span class="mob-card-v" title="{{ $doc->sender_name }}">{{ $doc->sender_name }}</span>
+                            </div>
+                        </div>
+                        @if($doc->status === 'submitted')
+                        <div class="mob-card-actions">
+                            <button class="btn-accept" onclick="event.stopPropagation(); quickAccept({{ $doc->id }}, this)">
+                                <i class="fas fa-check"></i> Accept
+                            </button>
+                        </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
         @endif
     </div>
 </div>
@@ -493,11 +557,11 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
 function filterTable(){
     var q      = document.getElementById('searchInput').value.toLowerCase().trim();
     var status = document.getElementById('statusFilter').value;
-    document.querySelectorAll('#docsTable tbody tr').forEach(function(row){
-        var search = (row.dataset.search || '').toLowerCase();
+    document.querySelectorAll('#docsTable tbody tr, .mob-cards .mob-card').forEach(function(item){
+        var search = (item.dataset.search || '').toLowerCase();
         var matchSearch = !q || search.includes(q);
-        var matchStatus = !status || row.dataset.status === status;
-        row.style.display = (matchSearch && matchStatus) ? '' : 'none';
+        var matchStatus = !status || item.dataset.status === status;
+        item.style.display = (matchSearch && matchStatus) ? '' : 'none';
     });
 }
 
@@ -817,8 +881,9 @@ document.addEventListener('keydown', function(e){
             .then(function(r){ return r.ok ? r.json() : null; })
             .then(function(d){
                 if(!d) return;
-                document.getElementById('stat-in-review').textContent = d.in_review;
-                document.getElementById('stat-completed').textContent = d.completed;
+                var compactCount = window.formatCompactCount || function(v) { return String(v); };
+                document.getElementById('stat-in-review').textContent = compactCount(d.in_review);
+                document.getElementById('stat-completed').textContent = compactCount(d.completed);
                 // Toggle Reports sidebar link in real-time
                 var rlink = document.getElementById('reports-nav-link');
                 if (rlink) rlink.style.display = d.has_reports_access ? '' : 'none';

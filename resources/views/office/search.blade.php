@@ -157,6 +157,11 @@
             border-radius: 14px;
             box-shadow: 0 2px 12px rgba(0,0,0,.05);
         }
+        .table-card.report-table-card.has-list { display:flex; flex-direction:column; max-height:clamp(520px,72vh,820px); overflow:hidden; }
+        .table-card.report-table-card.has-list .table-scroll { flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
+        .table-card.report-table-card.has-list .table-scroll thead th { position:sticky; top:0; z-index:2; }
+        .table-card.report-table-card.has-list .mob-doc-cards { flex:1; min-height:0; }
+        .table-card.report-table-card.has-list .pager { flex-shrink:0; }
 
         .filters-card { padding: 16px 20px; margin-bottom: 16px; }
         .filters-row { display: flex; gap: 10px; align-items: center; flex-wrap: nowrap; }
@@ -225,13 +230,12 @@
         .btn-light { background: #eef2f7; color: #334155; }
         .btn-light:hover { background: #e2e8f0; }
         .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
-        .stat-card { background:#fff; border-radius:10px; padding:20px 22px; border:1px solid var(--border); position:relative; overflow:hidden; }
-        .stat-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:3px 0 0 3px; }
-        .stat-card.c-blue::before   { background:#3b82f6; }
-        .stat-card.c-green::before  { background:#22c55e; }
-        .stat-card.c-amber::before  { background:#f59e0b; }
-        .stat-card.c-emerald::before{ background:#10b981; }
-        .stat-label { font-size:11px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:.8px; margin-bottom:10px; }
+        .stat-card { background:#fff; border-radius:12px; padding:20px 22px 18px; border:1px solid var(--border); position:relative; overflow:hidden; }
+        .stat-label { display:inline-flex; align-items:center; padding:5px 10px; border-radius:999px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; margin-bottom:12px; }
+        .stat-card.c-blue .stat-label    { background:#eff6ff; color:#2563eb; }
+        .stat-card.c-green .stat-label   { background:#fffbeb; color:#d97706; }
+        .stat-card.c-amber .stat-label   { background:#fffbeb; color:#d97706; }
+        .stat-card.c-emerald .stat-label { background:#f1f5f9; color:#64748b; }
         .stat-num   { font-size:32px; font-weight:800; color:var(--text-dark); line-height:1; letter-spacing:-1px; }
         .stat-sub   { font-size:11px; color:var(--text-muted); margin-top:6px; }
 
@@ -291,31 +295,33 @@
             white-space: nowrap;
         }
 
-        .badge-submitted { background: #eff6ff; color: #2563eb; }
-        .badge-received { background: #f0fdf4; color: #16a34a; }
-        .badge-in_review { background: #fffbeb; color: #d97706; }
-        .badge-forwarded { background: #f5f3ff; color: #7c3aed; }
-        .badge-completed { background: #f0fdf4; color: #15803d; }
-        .badge-for_pickup { background: #fff7ed; color: #c2410c; }
-        .badge-returned { background: #fef2f2; color: #dc2626; }
-        .badge-cancelled { background: #f8fafc; color: #64748b; }
+        .badge-submitted,
+        .badge-received,
+        .badge-in_review,
+        .badge-forwarded,
+        .badge-completed,
+        .badge-for_pickup,
+        .badge-returned,
+        .badge-cancelled { background: #fff7ed; color: #c2410c; }
 
-        .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size: 11.5px; }
+        .mono { font-family: Poppins, sans-serif; font-size: 12px; font-weight: 600; letter-spacing: .2px; }
+        .mono.track { color: var(--primary); }
+        .mono.ref { color: var(--text-dark); }
         .muted-sm { color: var(--text-muted); font-size: 11px; }
 
-        .btn-manage {
-            padding: 5px 10px;
-            background: #334155;
-            color: #fff;
-            border-radius: 7px;
-            text-decoration: none;
-            font-size: 11px;
-            font-weight: 600;
+        .td-action { width: 44px; text-align: center; }
+        .row-arrow {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            color: #94a3b8;
+            transition: all .15s;
         }
-        .btn-manage:hover { background: #1e293b; }
+        tr.doc-row:hover .row-arrow { background: var(--primary); color: #fff; }
+        .cell-ellipsis { display:block; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
         .empty-state { text-align: center; padding: 46px 20px; color: var(--text-muted); }
         .empty-state i { font-size: 40px; color: #cbd5e1; margin-bottom: 10px; display: block; }
@@ -329,7 +335,7 @@
         .mob-doc-cards { display: none; padding: 12px 14px; }
         .mob-doc-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: box-shadow .15s; }
         .mob-doc-card:active { box-shadow: 0 0 0 2px var(--primary); }
-        .mob-doc-ref { font-family: monospace; font-size: 11.5px; color: var(--primary); font-weight: 600; letter-spacing: .3px; }
+        .mob-doc-ref { font-family: Poppins, sans-serif; font-size: 12px; color: var(--primary); font-weight: 600; letter-spacing: .2px; }
         .mob-doc-subject { font-size: 13px; font-weight: 600; color: var(--text-dark); margin: 4px 0; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .mob-doc-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
         .mob-doc-meta .badge { font-size: 9px; }
@@ -345,8 +351,8 @@
         .drawer-head { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 12px; }
         .drawer-head-info { flex: 1; min-width: 0; }
         .drawer-head h3 { font-size: 16px; font-weight: 700; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
-        .drawer-ref { font-size: 13px; color: var(--text-muted); font-family: monospace; letter-spacing: .4px; margin-bottom: 2px; }
-        .drawer-track { font-size: 11px; color: var(--text-muted); font-family: monospace; letter-spacing: .4px; margin-bottom: 4px; }
+        .drawer-ref { font-size: 13px; color: var(--text-muted); font-family: Poppins, sans-serif; font-weight: 600; letter-spacing: .2px; margin-bottom: 2px; }
+        .drawer-track { font-size: 11px; color: var(--text-muted); font-family: Poppins, sans-serif; font-weight: 500; letter-spacing: .2px; margin-bottom: 4px; }
         .drawer-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: #f8fafc; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 14px; flex-shrink: 0; transition: all .15s; }
         .drawer-close:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
         .drawer-body { flex: 1; overflow-y: auto; }
@@ -524,9 +530,10 @@
             .table-head > div:last-child { width: 100%; display: flex; gap: 6px; }
             .table-head > div:last-child > a,
             .table-head > div:last-child > button { flex: 1; justify-content: center; font-size: 11px; padding: 8px 10px; }
+            .table-card.report-table-card.has-list { max-height:min(68vh,560px); }
             /* Hide desktop table, show mobile cards */
             .table-scroll { display: none; }
-            .mob-doc-cards { display: block; }
+            .mob-doc-cards { display: block; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
             /* Drawer */
             .drawer { width: 100%; max-width: 100%; }
             .drawer-meta { grid-template-columns: 1fr; }
@@ -579,7 +586,7 @@
             .sidebar, .mob-topbar, .mob-overlay,
             .filters-card, .filters-actions,
             .stats-grid, .pager, .site-footer,
-            .btn-manage, .date-modal-overlay,
+            .row-arrow, .mob-doc-arrow, .date-modal-overlay,
             .users-grid,
             .section-divider { display: none !important; }
             .main { margin: 0 !important; padding: 0 !important; }
@@ -611,18 +618,17 @@
     <nav class="sb-nav">
         @if($user->isSuperAdmin())
         <span class="nav-section">Overview</span>
-        <a href="/dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
         <span class="nav-section">Management</span>
         <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
         <a href="/admin/offices"><i class="fas fa-building"></i> Offices</a>
         @unless($user->isSuperAdmin())
         <a href="/admin/documents"><i class="fas fa-folder-open"></i> Documents</a>
         @endunless
-        <a href="/records/documents"><i class="fas fa-eye"></i> Records View</a>
+        <a href="/records/documents"><i class="fas fa-folder-open"></i> All Documents</a>
         <span class="nav-section">ICT Unit</span>
         <a href="/ict/documents"><i class="fas fa-network-wired"></i> ICT Documents</a>
-        <span class="nav-section">Reports</span>
-        <a href="/office/search" class="active"><i class="fas fa-chart-line"></i> Reports Dashboard</a>
+        <a href="/office/search" class="active"><i class="fas fa-chart-line"></i> Reports</a>
         <span class="nav-section">My Documents</span>
         <a href="/submit"><i class="fas fa-paper-plane"></i> Submit Document</a>
         <a href="/my-documents"><i class="fas fa-folder"></i> My Documents</a>
@@ -694,7 +700,7 @@
     @endif
 
     <div class="filters-card">
-        <form method="GET" action="{{ route('office.search') }}" id="reportForm">
+        <form method="GET" action="{{ route('office.search') }}" id="reportForm" data-live-search>
             {{-- Hidden date fields — values set by modal --}}
             <input type="hidden" name="date_field" id="hDateField" value="{{ $filters['date_field'] ?: 'created_at' }}">
             <input type="hidden" name="date_from"  id="hDateFrom"  value="{{ $filters['date_from'] }}">
@@ -729,7 +735,7 @@
                 </button>
 
                 <div class="filters-actions">
-                    <button class="btn btn-primary" type="submit" data-no-auto-loading><i class="fas fa-filter"></i> Apply Filters</button>
+                    <button class="btn btn-primary" type="submit" data-no-auto-loading>@include('partials.filter-icon', ['size' => 16]) Apply Filters</button>
                     <a class="btn btn-light" href="{{ route('office.search') }}"><i class="fas fa-rotate-left"></i> Reset</a>
                 </div>
             </div>
@@ -775,26 +781,26 @@
     <div class="stats-grid">
         <div class="stat-card c-blue">
             <div class="stat-label">Total Results</div>
-            <div class="stat-num">{{ $reportStats['total'] }}</div>
+            <div class="stat-num">{{ \App\Support\UiNumber::compact($reportStats['total']) }}</div>
             <div class="stat-sub">Matching your filters</div>
         </div>
         <div class="stat-card c-green">
             <div class="stat-label">Processing</div>
-            <div class="stat-num">{{ $reportStats['processing'] }}</div>
+            <div class="stat-num">{{ \App\Support\UiNumber::compact($reportStats['processing']) }}</div>
             <div class="stat-sub">Being processed</div>
         </div>
         <div class="stat-card c-emerald">
             <div class="stat-label">Completed / Returned</div>
-            <div class="stat-num">{{ $reportStats['completed'] }}</div>
+            <div class="stat-num">{{ \App\Support\UiNumber::compact($reportStats['completed']) }}</div>
             <div class="stat-sub">Completed and closed</div>
         </div>
     </div>
 
-    <div class="table-card">
+    <div class="table-card report-table-card{{ $documents->isNotEmpty() ? ' has-list' : '' }}">
         <div class="table-head">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
                 <span class="table-title"><i class="fas fa-file-chart-column" style="color:var(--primary);margin-right:6px"></i>Processing Report</span>
-                <span class="table-doc-count">{{ $documents->total() }} row(s)</span>
+                <span class="table-doc-count">{{ \App\Support\UiNumber::compact($documents->total()) }} row(s)</span>
             </div>
             <div style="display:flex;gap:8px;align-items:center">
                 <button type="button" id="docPdfBtn" title="Download PDF Report" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;font-size:12px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:background .2s" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'" onclick="handleDocPdfClick()"><i class="fas fa-file-pdf"></i> Download PDF</button>
@@ -821,23 +827,32 @@
                     <th>Tagged To</th>
                     <th>Submitted At</th>
                     <th>Last Action</th>
-                    <th>Action</th>
+                    <th class="td-action"></th>
                 </tr>
                 </thead>
                 <tbody>
                 @foreach($documents as $doc)
-                    <tr class="doc-row" data-ref="{{ $doc->tracking_number }}" data-tracking="{{ $doc->tracking_number }}">
-                        <td><div class="mono">{{ $doc->tracking_number }}</div></td>
-                        <td><div class="mono">{{ $doc->reference_number ?: 'N/A' }}</div></td>
-                        <td style="max-width:200px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ $doc->subject }}">{{ $doc->subject }}</div></td>
-                        <td>{{ $doc->type }}</td>
-                        <td>{{ $doc->sender_name }}</td>
+                    <tr
+                        class="doc-row"
+                        data-ref="{{ $doc->reference_number ?: $doc->tracking_number }}"
+                        data-tracking="{{ $doc->tracking_number }}"
+                        tabindex="0"
+                        role="button"
+                        aria-label="View routing details"
+                        onclick="openDocDetail(@json($doc->reference_number ?: $doc->tracking_number), @json($doc->tracking_number))"
+                        onkeydown="if(event.key==='Enter'||event.key===' '){ event.preventDefault(); openDocDetail(@json($doc->reference_number ?: $doc->tracking_number), @json($doc->tracking_number)); }"
+                    >
+                        <td><div class="mono track">{{ $doc->tracking_number }}</div></td>
+                        <td><div class="mono ref">{{ $doc->reference_number ?: 'N/A' }}</div></td>
+                        <td style="max-width:200px"><div class="cell-ellipsis" title="{{ $doc->subject }}">{{ $doc->subject }}</div></td>
+                        <td><div class="cell-ellipsis" style="max-width:160px" title="{{ $doc->type }}">{{ $doc->type }}</div></td>
+                        <td><div class="cell-ellipsis" style="max-width:170px" title="{{ $doc->sender_name }}">{{ $doc->sender_name }}</div></td>
                         <td><span class="badge badge-{{ $doc->status }}">{{ $doc->statusLabel() }}</span></td>
                         <td>{{ $doc->currentHandler?->name ?? 'Unassigned' }}</td>
                         <td class="muted-sm">{{ $doc->created_at?->copy()->setTimezone('Asia/Manila')->format('M d, Y h:i A') }}</td>
                         <td class="muted-sm">{{ $doc->last_action_at ? $doc->last_action_at->copy()->setTimezone('Asia/Manila')->format('M d, Y h:i A') : '-' }}</td>
-                        <td>
-                            <a href="/office/documents/{{ $doc->id }}?from=reports" class="btn-manage" onclick="event.stopPropagation()"><i class="fas fa-sliders-h"></i> Manage</a>
+                        <td class="td-action">
+                            <span class="row-arrow" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
                         </td>
                     </tr>
                 @endforeach
@@ -848,9 +863,9 @@
             {{-- Mobile document cards (visible < 900px) --}}
             <div class="mob-doc-cards">
                 @foreach($documents as $doc)
-                    <div class="mob-doc-card" onclick="openDocDetail('{{ $doc->tracking_number }}')">
+                    <div class="mob-doc-card" onclick="openDocDetail(@json($doc->reference_number ?: $doc->tracking_number), @json($doc->tracking_number))">
                         <div class="mob-doc-ref">{{ $doc->tracking_number }}</div>
-                        <div style="font-size:11px;color:var(--text-muted);font-family:monospace;margin-top:2px">Ref: {{ $doc->reference_number ?: 'N/A' }}</div>
+                        <div style="font-size:11px;color:var(--text-muted);font-family:Poppins,sans-serif;font-weight:500;margin-top:2px">Ref: {{ $doc->reference_number ?: 'N/A' }}</div>
                         <div class="mob-doc-subject">{{ $doc->subject }}</div>
                         <div class="mob-doc-meta">
                             <span class="badge badge-{{ $doc->status }}">{{ $doc->statusLabel() }}</span>
@@ -858,7 +873,7 @@
                         </div>
                         <div class="mob-doc-row">
                             <span class="mob-doc-sender"><i class="fas fa-user" style="margin-right:4px;opacity:.5"></i>{{ $doc->sender_name }}</span>
-                            <a href="/office/documents/{{ $doc->id }}?from=reports" class="btn-manage" onclick="event.stopPropagation()" style="font-size:11px;padding:5px 10px"><i class="fas fa-sliders-h"></i> Manage</a>
+                            <span class="mob-doc-arrow" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
                         </div>
                     </div>
                 @endforeach
@@ -914,15 +929,15 @@
                     {{-- Handled documents performance --}}
                     <div class="u-stats-row">
                         <div class="u-stat">
-                            <div class="u-stat-num" style="color:#0891b2">{{ number_format($u->handled_received_count) }}</div>
+                            <div class="u-stat-num" style="color:#0891b2">{{ \App\Support\UiNumber::compact($u->handled_received_count) }}</div>
                             <div class="u-stat-lbl">Processing</div>
                         </div>
                         <div class="u-stat">
-                            <div class="u-stat-num" style="color:#f59e0b">{{ number_format($u->handled_pending_count) }}</div>
+                            <div class="u-stat-num" style="color:#f59e0b">{{ \App\Support\UiNumber::compact($u->handled_pending_count) }}</div>
                             <div class="u-stat-lbl">Pending</div>
                         </div>
                         <div class="u-stat">
-                            <div class="u-stat-num" style="color:#16a34a">{{ number_format($u->handled_processed_count) }}</div>
+                            <div class="u-stat-num" style="color:#16a34a">{{ \App\Support\UiNumber::compact($u->handled_processed_count) }}</div>
                             <div class="u-stat-lbl">Processed</div>
                         </div>
                     </div>
@@ -983,7 +998,7 @@
                 <input id="uaFFrom" type="hidden" />
                 <input id="uaFTo" type="hidden" />
                 <div class="ua-drop-actions">
-                    <button onclick="applyUaFilters()" class="ua-btn ua-btn-primary"><i class="fas fa-filter" style="margin-right:4px"></i>Apply</button>
+                    <button onclick="applyUaFilters()" class="ua-btn ua-btn-primary">@include('partials.filter-icon', ['size' => 15]) Apply</button>
                     <button id="uaPdfBtn" onclick="" class="ua-btn ua-btn-pdf" title="Download PDF"><i class="fas fa-file-pdf" style="margin-right:4px"></i>PDF</button>
                 </div>
             </div>
@@ -1260,12 +1275,13 @@ function renderUserActivity(data) {
     badge.textContent = u.is_rep ? 'Office Rep' : 'Individual';
     badge.className = 'u-type-badge ' + (u.is_rep ? 'rep' : 'ind');
 
+    var compactCount = window.formatCompactCount || function(v) { return String(v); };
     var statsHtml =
-        '<div class="ua-stat"><div class="ua-stat-num" style="color:#f59e0b">' + stats.pending + '</div><div class="ua-stat-lbl">Pending</div></div>' +
-        '<div class="ua-stat"><div class="ua-stat-num" style="color:#16a34a">' + stats.processed + '</div><div class="ua-stat-lbl">Processed</div></div>' +
-        '<div class="ua-stat"><div class="ua-stat-num">' + stats.total_docs + '</div><div class="ua-stat-lbl">Total Handled</div></div>';
+        '<div class="ua-stat"><div class="ua-stat-num" style="color:#f59e0b">' + compactCount(stats.pending) + '</div><div class="ua-stat-lbl">Pending</div></div>' +
+        '<div class="ua-stat"><div class="ua-stat-num" style="color:#16a34a">' + compactCount(stats.processed) + '</div><div class="ua-stat-lbl">Processed</div></div>' +
+        '<div class="ua-stat"><div class="ua-stat-num">' + compactCount(stats.total_docs) + '</div><div class="ua-stat-lbl">Total Handled</div></div>';
     document.getElementById('uaStats').innerHTML = statsHtml;
-    document.getElementById('uaDocCount').textContent = '— ' + docs.length + ' record(s)';
+    document.getElementById('uaDocCount').textContent = '— ' + compactCount(docs.length) + ' record(s)';
     _uaDocCount = docs.length;
 
     var bodyHtml = '';
@@ -1281,7 +1297,7 @@ function renderUserActivity(data) {
             + '</tr></thead><tbody>';
         docs.forEach(function(doc) {
             bodyHtml += '<tr style="border-bottom:1px solid #f1f5f9;cursor:pointer" onclick="window.location.href=\'/office/documents/' + doc.id + '?from=reports\'" title="Open document">'
-                + '<td style="padding:9px 14px;font-size:11.5px;font-family:monospace;color:var(--text-dark)">' + escapeHtml(doc.reference) + '</td>'
+                + '<td style="padding:9px 14px;font-size:12px;font-family:Poppins,sans-serif;font-weight:600;color:var(--primary)">' + escapeHtml(doc.reference) + '</td>'
                 + '<td style="padding:9px 14px;font-size:12px;color:var(--text-dark);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + escapeHtml(doc.subject) + '">' + escapeHtml(doc.subject) + '</td>'
                 + '<td style="padding:9px 14px"><span class="badge badge-' + escapeHtml(doc.status) + '">' + escapeHtml(doc.status_label) + '</span></td>'
                 + '<td style="padding:9px 14px;font-size:11px;color:var(--text-muted);white-space:nowrap">' + escapeHtml(doc.last_action) + '</td>'
@@ -1314,7 +1330,9 @@ function applyDateModal() {
     // update trigger button style
     var hasDate = document.getElementById('hDateFrom').value || document.getElementById('hDateTo').value;
     document.getElementById('dateRangeBtn').classList.toggle('has-dates', !!hasDate);
-    document.getElementById('reportForm').submit();
+    var form = document.getElementById('reportForm');
+    if (form && typeof form.requestSubmit === 'function') form.requestSubmit();
+    else if (form) form.submit();
 }
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') { closeDateModal(); closeDrawer(); closeUserActivity(); }

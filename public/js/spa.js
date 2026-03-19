@@ -58,9 +58,68 @@
 
     function init() {
 
+        function cssEscapeValue(value) {
+            if (window.CSS && typeof window.CSS.escape === 'function') {
+                return window.CSS.escape(value);
+            }
+            return String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        }
+
+        function captureFocusState(options) {
+            if (!options || !options.preserveFocus) return null;
+
+            var active = document.activeElement;
+            if (!active || !active.tagName) return null;
+
+            var tag = active.tagName.toLowerCase();
+            if (tag !== 'input' && tag !== 'textarea' && tag !== 'select') return null;
+
+            var selector = '';
+            if (active.id) {
+                selector = '#' + cssEscapeValue(active.id);
+            } else if (active.name) {
+                selector = tag + '[name="' + cssEscapeValue(active.name) + '"]';
+            } else {
+                return null;
+            }
+
+            return {
+                selector: selector,
+                value: typeof active.value === 'string' ? active.value : '',
+                selectionStart: typeof active.selectionStart === 'number' ? active.selectionStart : null,
+                selectionEnd: typeof active.selectionEnd === 'number' ? active.selectionEnd : null
+            };
+        }
+
+        function restoreFocusState(snapshot) {
+            if (!snapshot || !snapshot.selector) return;
+
+            requestAnimationFrame(function () {
+                var el = document.querySelector(snapshot.selector);
+                if (!el || typeof el.focus !== 'function') return;
+
+                el.focus({ preventScroll: true });
+
+                if (typeof el.value === 'string' && snapshot.value && el.value !== snapshot.value) {
+                    el.value = snapshot.value;
+                }
+
+                if (typeof el.setSelectionRange === 'function' && snapshot.selectionStart !== null) {
+                    var max = (el.value || '').length;
+                    var start = Math.min(snapshot.selectionStart, max);
+                    var end = Math.min(snapshot.selectionEnd === null ? start : snapshot.selectionEnd, max);
+                    try { el.setSelectionRange(start, end); } catch (e) {}
+                }
+            });
+        }
+
         /* Perform the actual DOM swap (head sync + body replace + script re-exec) */
-        function applySwap(html, url, push) {
+        function applySwap(html, url, historyMode, options) {
+            options = options || {};
             var doc = new DOMParser().parseFromString(html, 'text/html');
+            var scrollX = window.scrollX || window.pageXOffset || 0;
+            var scrollY = window.scrollY || window.pageYOffset || 0;
+            var focusSnapshot = captureFocusState(options);
 
             /* -- Title -- */
             document.title = doc.title;
@@ -188,12 +247,21 @@
                 old.parentNode.replaceChild(s, old);
             });
 
-            if (push) history.pushState({ spa: true }, '', url);
-            window.scrollTo(0, 0);
+            if (historyMode === 'push') history.pushState({ spa: true }, '', url);
+            else if (historyMode === 'replace') history.replaceState({ spa: true }, '', url);
+
+            if (options.preserveScroll) {
+                window.scrollTo(scrollX, scrollY);
+            } else {
+                window.scrollTo(0, 0);
+            }
+
+            restoreFocusState(focusSnapshot);
         }
 
         /* Fade out (120 ms) -> swap content -> fade in */
-        function swap(html, url, push) {
+        function swap(html, url, historyMode, options) {
+            options = options || {};
             // Detect layout mismatch: sidebar layout <-> navbar layout.
             // Crossing layouts causes visual glitches.
             // Force a real navigation instead so the user sees a clean context switch.
@@ -209,9 +277,15 @@
             window.dispatchEvent(new CustomEvent('spa:before-swap', {
                 detail: { url: url }
             }));
+
+            if (options.silent) {
+                applySwap(html, url, historyMode, options);
+                return;
+            }
+
             document.body.classList.add('spa-out');
             setTimeout(function () {
-                applySwap(html, url, push);
+                applySwap(html, url, historyMode, options);
                 // Double rAF: first commit new DOM, second ensures browser painted before fade-in
                 requestAnimationFrame(function () {
                     requestAnimationFrame(function () {
@@ -222,6 +296,57 @@
         }
 
         /* ── Intercept internal link clicks ── */
+        var _navSeq = 0;
+
+        function fetchAndSwap(url, historyMode, fallbackUrl, options) {
+            options = options || {};
+            var reqId = ++_navSeq;
+            if (!options.silent) _barStart();
+
+            return fetch(url, {
+                credentials: 'same-origin',
+                signal: options.signal
+            })
+                .then(function (r) {
+                    if (shouldFullReload(r.url)) {
+                        if (reqId !== _navSeq) return null;
+                        if (!options.silent) _barDone();
+                        window.location.href = r.url;
+                        return null;
+                    }
+
+                    return r.text().then(function (h) {
+                        return { html: h, url: r.url };
+                    });
+                })
+                .then(function (r) {
+                    if (!r || reqId !== _navSeq) return false;
+                    swap(r.html, r.url, historyMode || 'push', options);
+                    if (!options.silent) _barDone();
+                    return true;
+                })
+                .catch(function (err) {
+                    if (err && err.name === 'AbortError') return false;
+                    if (reqId !== _navSeq) return false;
+                    if (!options.silent) _barDone();
+                    window.location.href = fallbackUrl || url;
+                    return false;
+                });
+        }
+
+        window.spaNavigate = function (url, opts) {
+            opts = opts || {};
+
+            if (!url) return Promise.resolve(false);
+
+            if (shouldFullReload(url) || shouldFullReload(location.href)) {
+                window.location.href = url;
+                return Promise.resolve(false);
+            }
+
+            return fetchAndSwap(url, opts.historyMode || 'push', opts.fallbackUrl || url, opts);
+        };
+
         document.addEventListener('click', function (e) {
             var a = e.target.closest('a');
             if (!a || !a.href || a.target) return;
@@ -238,32 +363,14 @@
             }
 
             e.preventDefault();
-            _barStart();
-
-            fetch(a.href, { credentials: 'same-origin' })
-                .then(function (r) {
-                    // Server redirected to a login page (session expired etc.)
-                    if (shouldFullReload(r.url)) {
-                        _barDone();
-                        window.location.href = r.url;
-                        return null;
-                    }
-                    return r.text().then(function (h) { return { html: h, url: r.url }; });
-                })
-                .then(function (r) {
-                    if (r) { swap(r.html, r.url, true); _barDone(); }
-                })
-                .catch(function () { _barDone(); window.location.href = a.href; });
+            window.spaNavigate(a.href, { historyMode: 'push', fallbackUrl: a.href });
         });
 
         /* ── Browser back / forward ── */
         window.addEventListener('popstate', function () {
             if (shouldFullReload(location.href)) { location.reload(); return; }
-            _barStart();
-            fetch(location.href, { credentials: 'same-origin' })
-                .then(function (r) { return r.text(); })
-                .then(function (h) { swap(h, location.href, false); _barDone(); })
-                .catch(function () { _barDone(); location.reload(); });
+            fetchAndSwap(location.href, 'none', location.href, { preserveScroll: true })
+                .catch(function () { location.reload(); });
         });
 
         history.replaceState({ spa: true }, '', location.href);

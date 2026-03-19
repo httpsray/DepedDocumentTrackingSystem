@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class Document extends Model
 {
@@ -95,20 +96,29 @@ class Document extends Model
     ];
 
     const STATUS_COLORS = [
-        'submitted'  => '#2563eb',
-        'received'   => '#0891b2',
-        'in_review'  => '#7c3aed',
-        'on_hold'    => '#f59e0b',
-        'completed'  => '#16a34a',
-        'for_pickup' => '#ea580c',
-        'returned'   => '#dc2626',
-        'cancelled'  => '#6b7280',
-        'archived'   => '#9ca3af',
+        'submitted'  => '#c2410c',
+        'received'   => '#c2410c',
+        'in_review'  => '#c2410c',
+        'on_hold'    => '#c2410c',
+        'completed'  => '#c2410c',
+        'for_pickup' => '#c2410c',
+        'returned'   => '#c2410c',
+        'cancelled'  => '#c2410c',
+        'archived'   => '#c2410c',
     ];
 
     public function statusLabel(): string
     {
         return self::STATUSES[$this->status] ?? ucfirst($this->status);
+    }
+
+    public function getSubjectAttribute($value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        return Str::upper((string) $value);
     }
 
     public function statusColor(): string

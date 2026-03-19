@@ -111,27 +111,74 @@
             display: flex;
             gap: 12px;
             margin-bottom: 20px;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
             align-items: center;
         }
 
+        .filter-search-wrap {
+            position: relative;
+            flex: 1 1 360px;
+            min-width: min(100%, 360px);
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-search-wrap .clearable-wrap {
+            width: 100%;
+        }
+
+        .filter-search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
         .filter-input {
-            padding: 9px 14px;
+            width: 100%;
+            padding: 10px 14px 10px 38px;
             border: 1px solid var(--border);
             border-radius: 8px;
             font-family: inherit;
             font-size: 13px;
             background: var(--white);
             color: var(--text-dark);
-            flex: 1;
-            min-width: 0;
             outline: none;
-            transition: border-color 0.15s;
+            transition: border-color 0.15s, box-shadow 0.15s;
         }
-        .filter-input:focus { border-color: var(--primary); }
+        .filter-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.08); }
+
+        .filter-select-wrap {
+            position: relative;
+            flex: 0 0 190px;
+            min-width: 180px;
+        }
+
+        .filter-select-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .filter-select-icon svg {
+            width: 14px;
+            height: 14px;
+            display: block;
+        }
 
         .filter-select {
-            padding: 9px 14px;
+            width: 100%;
+            padding: 10px 34px 10px 38px;
             border: 1px solid var(--border);
             border-radius: 8px;
             font-family: inherit;
@@ -140,9 +187,9 @@
             color: var(--text-dark);
             outline: none;
             cursor: pointer;
-            transition: border-color 0.15s;
+            transition: border-color 0.15s, box-shadow 0.15s;
         }
-        .filter-select:focus { border-color: var(--primary); }
+        .filter-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.08); }
 
         .filter-btn {
             padding: 9px 18px;
@@ -162,8 +209,8 @@
         .filter-btn:hover { background: var(--primary-dark); }
 
         .filter-clear {
-            padding: 9px 14px;
-            background: none;
+            padding: 10px 14px;
+            background: var(--white);
             border: 1px solid var(--border);
             border-radius: 8px;
             font-family: inherit;
@@ -171,6 +218,12 @@
             color: var(--text-muted);
             cursor: pointer;
             transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+            min-height: 42px;
         }
         .filter-clear:hover { background: #f8fafc; color: var(--text-dark); }
 
@@ -181,6 +234,36 @@
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
             overflow: hidden;
+        }
+
+        .panel.list-panel.has-list {
+            display: flex;
+            flex-direction: column;
+            max-height: clamp(520px, 72vh, 820px);
+        }
+
+        .panel.list-panel.has-list .dtable-wrap {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .panel.list-panel.has-list .dtable-wrap .dtable th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .panel.list-panel.has-list .mob-cards,
+        .panel.list-panel.has-list .empty-state {
+            flex: 1;
+            min-height: 0;
+        }
+
+        .panel.list-panel.has-list .pagination-bar {
+            flex-shrink: 0;
         }
 
         .panel-head {
@@ -490,12 +573,16 @@
             .page-header p { font-size:12px; }
             .back-link { font-size:12px; padding:6px 12px; }
             .filters { gap: 8px; }
-            .filter-input { font-size: 12px; padding: 8px 10px; }
-            .filter-select { font-size: 12px; padding: 8px 6px; }
+            .filter-search-wrap,
+            .filter-select-wrap,
+            .filter-clear { flex: 1 1 100%; min-width: 0; }
+            .filter-input { font-size: 12px; padding: 9px 10px 9px 34px; }
+            .filter-select { font-size: 12px; padding: 9px 28px 9px 34px; }
             .filter-btn { font-size: 12px; padding: 8px 12px; }
             .filter-clear { font-size: 12px; padding: 8px 10px; }
+            .panel.list-panel.has-list { max-height: min(68vh, 560px); }
             .panel .dtable-wrap { display:none; }
-            .mob-cards { display:block; padding:12px; }
+            .mob-cards { display:block; padding:12px; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
             .modal { max-width:95vw; }
             .modal-body { padding:16px; }
             .modal-head { padding:16px 16px 0; }
@@ -530,7 +617,7 @@
     </div>
     <nav class="sb-nav">
         <span class="nav-section">Overview</span>
-        <a href="/dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
         <span class="nav-section">Management</span>
         <a href="/admin/users" class="active"><i class="fas fa-users"></i> Users</a>
         <a href="/admin/offices"><i class="fas fa-building"></i> Offices</a>
@@ -538,13 +625,10 @@
         <a href="/admin/documents"><i class="fas fa-folder-open"></i> Documents</a>
         @endunless
         @if($user->isSuperAdmin())
-        <a href="/records/documents"><i class="fas fa-eye"></i> Records View</a>
+        <a href="/records/documents"><i class="fas fa-folder-open"></i> All Documents</a>
         <span class="nav-section">ICT Unit</span>
         <a href="/ict/documents"><i class="fas fa-network-wired"></i> ICT Documents</a>
-        @endif
-        @if($user->isSuperAdmin())
-        <span class="nav-section">Reports</span>
-        <a href="/office/search"><i class="fas fa-chart-line"></i> Reports Dashboard</a>
+        <a href="/office/search"><i class="fas fa-chart-line"></i> Reports</a>
         @endif
         <span class="nav-section">My Documents</span>
         <a href="/submit"><i class="fas fa-paper-plane"></i> Submit Document</a>
@@ -578,25 +662,30 @@
         </div>
 
         <!-- Filters -->
-        <form class="filters anim" method="GET" action="/admin/users" id="searchForm">
-            <input type="text" name="search" class="filter-input" placeholder="Search name, email, or mobile..." value="{{ $filters['search'] }}">
-            <select name="status" class="filter-select">
-                <option value="">All Status</option>
-                <option value="active" {{ $filters['status'] === 'active' ? 'selected' : '' }}>Active</option>
-                <option value="pending" {{ $filters['status'] === 'pending' ? 'selected' : '' }}>Pending</option>
-                <option value="suspended" {{ $filters['status'] === 'suspended' ? 'selected' : '' }}>Suspended</option>
-            </select>
-            <button type="submit" class="filter-btn" id="searchBtn" data-no-auto-loading><i class="fas fa-search"></i> Search</button>
+        <form class="filters anim" method="GET" action="/admin/users" id="searchForm" data-live-search>
+            <div class="filter-search-wrap">
+                <i class="fas fa-search filter-search-icon" aria-hidden="true"></i>
+                <input type="text" id="usersSearch" name="search" class="filter-input" placeholder="Search name, email, or mobile..." value="{{ $filters['search'] }}" data-clearable data-no-capitalize>
+            </div>
+            <div class="filter-select-wrap">
+                <span class="filter-select-icon" aria-hidden="true">@include('partials.filter-icon', ['size' => 14])</span>
+                <select name="status" class="filter-select" id="usersStatus">
+                    <option value="">All Status</option>
+                    <option value="active" {{ $filters['status'] === 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="pending" {{ $filters['status'] === 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="suspended" {{ $filters['status'] === 'suspended' ? 'selected' : '' }}>Suspended</option>
+                </select>
+            </div>
             @if($filters['search'] || $filters['status'])
-                <a href="/admin/users" class="filter-clear">Clear</a>
+                <button type="button" class="filter-clear" onclick="clearUserFilters()"><i class="fas fa-rotate-left"></i> Clear</button>
             @endif
         </form>
 
         <!-- Users Table -->
-        <div class="panel anim">
+        <div class="panel list-panel{{ $users->count() ? ' has-list' : '' }} anim">
             <div class="panel-head">
                 <div class="panel-title">Registered Users</div>
-                <span class="panel-badge">{{ $users->total() }} total</span>
+                <span class="panel-badge">{{ \App\Support\UiNumber::compact($users->total()) }} total</span>
             </div>
 
             @if($users->count() > 0)
@@ -1114,6 +1203,17 @@
             document.body.style.overflow = '';
             var btn = document.getElementById('mobHamBtn'); if (btn) btn.classList.remove('toggle');
         };
+        window.clearUserFilters = function() {
+            var form = document.getElementById('searchForm');
+            if (!form) return;
+            var search = document.getElementById('usersSearch');
+            var status = document.getElementById('usersStatus');
+            if (search) search.value = '';
+            if (status) status.value = '';
+            if (typeof form.requestSubmit === 'function') form.requestSubmit();
+            else form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+            if (search) search.focus();
+        };
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeSidebar(); });
 
         // ─── Logout ───
@@ -1129,7 +1229,7 @@
         (function() {
             var form = document.getElementById('searchForm');
             var btn = document.getElementById('searchBtn');
-            if (!form || !btn) return;
+            if (!form || !btn || form.hasAttribute('data-live-search')) return;
             var lastSubmit = 0;
             var cooldown = 2000; // 2 seconds between searches
             form.addEventListener('submit', function(e) {

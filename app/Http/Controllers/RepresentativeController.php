@@ -521,7 +521,7 @@ class RepresentativeController extends Controller
                 'dateFieldLabel' => $dateFieldLabel,
                 'dateFromLabel'  => $dateFrom !== '' ? $dateFrom : 'N/A',
                 'dateToLabel'    => $dateTo !== '' ? $dateTo : 'N/A',
-            ])->setPaper('legal', 'landscape');
+            ])->setPaper('a4', 'portrait');
 
             return $pdf->download($fileName);
         }
@@ -809,7 +809,7 @@ class RepresentativeController extends Controller
                 'statusLabel'   => $status ? (Document::STATUSES[$status] ?? $status) : 'All',
                 'dateFromLabel' => $dateFrom ?: 'N/A',
                 'dateToLabel'   => $dateTo ?: 'N/A',
-            ])->setPaper('legal', 'landscape');
+            ])->setPaper('a4', 'portrait');
 
             return $pdf->download($fileName);
         }

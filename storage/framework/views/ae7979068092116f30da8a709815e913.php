@@ -12,7 +12,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        :root{--primary:#0056b3;--primary-dark:#004494;--bg:#f0f2f5;--border:#e2e8f0;--text-dark:#1b263b;--text-muted:#64748b}
+        :root{--primary:#0056b3;--primary-dark:#004494;--blue-soft:#eff6ff;--slate-dark:#334155;--bg:#f0f2f5;--border:#e2e8f0;--text-dark:#1b263b;--text-muted:#64748b}
         *{margin:0;padding:0;box-sizing:border-box}
         body{background:var(--bg);font-family:Poppins,sans-serif;min-height:100vh;display:flex;flex-direction:column}
         /* Sidebar */
@@ -53,42 +53,45 @@
         .receive-strip{background:#fff;border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:24px}
         .receive-strip h2{font-size:20px;font-weight:700;color:var(--text-dark);margin:0 0 6px}
         .receive-strip p.rs-sub{font-size:13px;color:var(--text-muted);margin:0 0 18px}
-        .rs-main{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:0}
+        .rs-main{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;margin-bottom:0;min-width:0}
         .ref-boxes-row{display:flex;align-items:center;gap:7px;flex:1;min-width:0;flex-wrap:nowrap}
-        .ref-box{flex:1;min-width:0;height:60px;text-align:center;font-size:24px;font-weight:700;font-family:'Poppins',sans-serif;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;text-transform:uppercase;background:#f8fafc;transition:border-color .2s,box-shadow .2s,background .2s;color:#1e293b;padding:0;caret-color:#16a34a}
-        .ref-box:focus{border-color:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.13);background:#fff}
-        .ref-box.filled{background:#fff;border-color:#94a3b8}
+        .ref-box{flex:1;min-width:0;height:clamp(60px,5.8vw,72px);text-align:center;font-size:clamp(21px,2.2vw,26px);font-weight:700;font-family:'Poppins',sans-serif;border:1.5px solid #cbd5e1;border-radius:8px;outline:none;text-transform:uppercase;background:#f8fafc;transition:border-color .2s,box-shadow .2s,background .2s;color:#1e293b;padding:0;caret-color:var(--primary);box-shadow:0 0 0 1px rgba(203,213,225,.75)}
+        .ref-box:focus{border-color:var(--primary);box-shadow:0 0 0 1px rgba(0,86,179,.28),0 0 0 4px rgba(0,86,179,.13);background:#fff}
+        .ref-box.filled{background:#fff;border-color:#94a3b8;box-shadow:0 0 0 1px rgba(148,163,184,.42)}
         .ref-sep{font-size:18px;color:#cbd5e1;user-select:none;padding:0 2px}
         .btn-clear-x{width:36px;height:36px;border:1.5px solid #e2e8f0;border-radius:50%;background:#f8fafc;color:#94a3b8;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;padding:0}
         .rs-center{width:100%;margin:0 auto}
         .rs-btn-wrap{display:flex;justify-content:center;margin-top:18px;gap:12px}
-        .btn-receive{flex:1;height:60px;padding:0 32px;border:none;border-radius:8px;background:#16a34a;color:#fff;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s}
-        .btn-receive:hover{background:#15803d}
-        .btn-receive:active{background:#166534}
+        .btn-receive{flex:1;height:clamp(54px,5.6vw,60px);padding:0 clamp(16px,2.8vw,32px);border:none;border-radius:8px;background:var(--slate-dark);color:#fff;font-family:'Poppins',sans-serif;font-size:clamp(13px,1.7vw,14px);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s}
+        .btn-receive:hover{background:#243244}
+        .btn-receive:active{background:#1e293b}
         .btn-receive:disabled{opacity:.5;cursor:not-allowed}
-        .btn-scan-qr{flex:1;height:60px;padding:0 32px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s;text-decoration:none}
+        .btn-scan-qr{flex:1;height:clamp(54px,5.6vw,60px);padding:0 clamp(16px,2.8vw,32px);border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:'Poppins',sans-serif;font-size:clamp(13px,1.7vw,14px);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s;text-decoration:none}
         .btn-scan-qr:hover{background:var(--primary-dark)}
         .btn-scan-qr:active{background:#003976}
+        .btn-scan-qr svg{width:18px;height:18px;flex-shrink:0}
         .receive-alert{margin-top:12px;padding:8px 12px;border-radius:7px;font-size:12px;display:none;align-items:center;gap:8px;animation:rcvFadeIn .2s ease-out;width:100%}
         .receive-alert.show{display:flex}
         .receive-alert.err{background:#fef2f2;border-left:3px solid #dc2626;color:#b91c1c}
-        .receive-alert.ok{background:#f0fdf4;border-left:3px solid #16a34a;color:#15803d}
+        .receive-alert.ok{background:var(--blue-soft);border-left:3px solid var(--primary);color:var(--primary-dark)}
         .receive-alert i{font-size:13px;flex-shrink:0}
         .receive-alert span{line-height:1.4}
         @keyframes rcvFadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
         /* Stats */
         .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px}
-        .stat-card{background:#fff;border-radius:10px;padding:20px 22px;box-shadow:none;border:1px solid var(--border);position:relative;overflow:hidden}
-        .stat-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
-        .stat-card.c-blue::before{background:#3b82f6}
-        .stat-card.c-green::before{background:#22c55e}
-        .stat-card.c-amber::before{background:#f59e0b}
-        .stat-card.c-emerald::before{background:#10b981}
-        .stat-label{font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+        .stat-card{background:#fff;border-radius:12px;padding:20px 22px 18px;box-shadow:none;border:1px solid var(--border);position:relative;overflow:hidden}
+        .stat-label{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}
+        .stat-card.c-blue .stat-label{background:#eff6ff;color:#2563eb}
+        .stat-card.c-green .stat-label{background:#fffbeb;color:#d97706}
+        .stat-card.c-amber .stat-label{background:#fffbeb;color:#d97706}
+        .stat-card.c-emerald .stat-label{background:#f1f5f9;color:#64748b}
         .stat-num{font-size:32px;font-weight:800;color:var(--text-dark);line-height:1;letter-spacing:-1px}
         .stat-sub{font-size:11px;color:var(--text-muted);margin-top:6px}
         /* Table card */
         .table-card{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden}
+        .dashboard-table-card.has-list{display:flex;flex-direction:column;max-height:clamp(520px,72vh,820px)}
+        .dashboard-table-card.has-list .table-card-scroll{display:block;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+        .dashboard-table-card.has-list .table-card-scroll thead th{position:sticky;top:0;z-index:2}
         .table-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
         .table-title{font-size:17px;font-weight:700;color:var(--text-dark)}
         .table-doc-count{font-size:11px;color:#94a3b8;font-weight:500;margin-left:8px}
@@ -108,24 +111,41 @@
         tr:last-child td{border-bottom:none}
         tr:hover td{background:#f8faff}
         tr.doc-row{cursor:pointer}
-        .badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
-        .badge-submitted{background:#eff6ff;color:#2563eb}
-        .badge-received{background:#f0fdf4;color:#16a34a}
-        .badge-in_review{background:#fffbeb;color:#d97706}
-        .badge-forwarded{background:#f5f3ff;color:#7c3aed}
-        .badge-completed{background:#f0fdf4;color:#15803d}
-        .badge-for_pickup{background:#fff7ed;color:#c2410c}
-        .badge-returned{background:#fef2f2;color:#dc2626}
-        .badge-cancelled{background:#f8fafc;color:#64748b}
-        .btn-view{padding:5px 13px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:background .2s}
-        .btn-view:hover{background:var(--primary-dark)}
-        .btn-manage{background:#334155}
-        .btn-manage:hover{background:#1e293b}
+        .badge{display:inline-flex;align-items:center;justify-content:center;min-height:22px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;line-height:1;text-align:center;white-space:nowrap;vertical-align:middle}
+        .badge-submitted,
+        .badge-received,
+        .badge-in_review,
+        .badge-forwarded,
+        .badge-completed,
+        .badge-for_pickup,
+        .badge-returned,
+        .badge-cancelled{background:#fff7ed;color:#c2410c}
         .btn-accept{padding:5px 11px;background:#16a34a;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;transition:background .2s;display:inline-flex;align-items:center;gap:5px}
         .btn-accept:hover{background:#15803d}
         .td-action{width:44px;text-align:center}
         .row-arrow{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;color:#94a3b8;transition:all .15s}
         tr.doc-row:hover .row-arrow{background:var(--primary);color:#fff}
+        .cell-ellipsis{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .mob-cards{display:none;padding:12px}
+        .mob-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.04);cursor:pointer;transition:border-color .15s,box-shadow .15s}
+        .mob-card + .mob-card{margin-top:10px}
+        .mob-card:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(0,86,179,.08)}
+        .mob-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+        .mob-card-ids{min-width:0}
+        .mob-card-ref{font-size:11.5px;font-weight:700;color:var(--primary);font-family:monospace;line-height:1.25}
+        .mob-card-track{font-size:10px;color:var(--text-muted);font-family:monospace;margin-top:2px;line-height:1.25}
+        .mob-card-arrow{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;color:#94a3b8;font-size:11px;flex-shrink:0;background:#f8fafc}
+        .mob-card-subject{font-size:13.5px;font-weight:600;color:var(--text-dark);margin-bottom:8px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .mob-card-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+        .mob-card-status{display:inline-flex;align-items:center;gap:5px;min-width:0}
+        .mob-card-date{font-size:10.5px;color:var(--text-muted);display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+        .mob-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+        .mob-card-item{min-width:0;background:#f8fafc;border:1px solid #e8eef6;border-radius:10px;padding:8px 9px}
+        .mob-card-item.full{grid-column:1 / -1}
+        .mob-card-k{display:block;font-size:8.8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin-bottom:4px}
+        .mob-card-v{display:block;min-width:0;font-size:10.8px;font-weight:500;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+        .mob-card-actions{display:flex;gap:8px;margin-top:10px}
+        .mob-card-actions .btn-accept{flex:1;justify-content:center;padding:8px 10px;border-radius:10px;font-size:11px}
         .empty-state{text-align:center;padding:50px 20px;color:var(--text-muted)}
         .empty-state i{font-size:40px;color:#cbd5e1;margin-bottom:12px;display:block}
         .empty-state h3{font-size:15px;font-weight:600;color:#94a3b8;margin-bottom:6px}
@@ -188,15 +208,17 @@
             .drawer-meta{grid-template-columns:1fr}
             .dm-item{border-right:none}
             .receive-strip{padding:16px 18px}
-            .rs-main{gap:5px}
+            .receive-strip h2{font-size:15px}
+            .rs-main{gap:0;grid-template-columns:minmax(0,1fr)}
             .ref-boxes-row{gap:3px}
-            .ref-box{height:40px;font-size:14px}
+            .ref-box{height:clamp(52px,13vw,58px);font-size:clamp(17px,4.4vw,19px)}
             .ref-sep{font-size:13px;padding:0 1px}
-            .btn-clear-x{width:32px;height:32px;font-size:12px}
-            .btn-receive{min-width:auto;width:100%;height:44px;font-size:13px}
-            .btn-scan-qr{min-width:auto;width:100%;height:44px;font-size:13px}
-            .rs-btn-wrap{flex-direction:column;gap:8px}
+            .btn-clear-x{display:none}
+            .rs-btn-wrap .btn-receive{flex:1 1 0;min-width:0;width:auto;height:48px;padding:0 12px;font-size:12.5px;white-space:nowrap}
+            .rs-btn-wrap .btn-scan-qr{flex:1 1 0;min-width:0;width:auto;height:48px;padding:0 12px;font-size:12.5px;white-space:nowrap}
+            .rs-btn-wrap{flex-direction:row;gap:8px}
             .stat-num{font-size:26px}
+            .dashboard-table-card.has-list{max-height:min(68vh,560px)}
             /* Header */
             .page-header-top{flex-direction:column;align-items:flex-start;gap:10px}
             .live-clock{display:none}
@@ -206,16 +228,20 @@
             .filters input{font-size:11px;padding:6px 8px 6px 26px}
             .filters input::placeholder{font-size:10px}
             .filters select{font-size:11px;padding:6px 22px 6px 8px;min-width:100px}
-            /* Hide Type(3), Sender(4), Last Action(6), arrow(8) on mobile */
-            th:nth-child(3),td:nth-child(3),
-            th:nth-child(4),td:nth-child(4),
-            th:nth-child(6),td:nth-child(6),
-            th:nth-child(8),td:nth-child(8){display:none}
-            td{padding:10px 12px;font-size:12px}
-            th{padding:9px 12px;font-size:9px}
+            .dashboard-table-card.has-list .table-card-scroll{display:none!important}
+            .dashboard-table-card.has-list .mob-cards{display:block!important;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:10px}
+            .mob-cards{display:block;padding:10px}
             .table-card{border-radius:10px}
-            /* Action buttons stack */
-            .btn-accept,.btn-manage{font-size:10px;padding:4px 8px}
+            .mob-card-actions .btn-accept{font-size:10.5px}
+        }
+        @media(max-width:1024px){
+            .dashboard-table-card.has-list .table-card-scroll{display:none!important}
+            .dashboard-table-card.has-list .mob-cards{display:block!important;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+        }
+        @media(max-width:420px){
+            .mob-card-grid{grid-template-columns:1fr}
+            .mob-card-item.full{grid-column:auto}
+            .mob-card-actions{flex-direction:column}
         }
         @keyframes spin{to{transform:rotate(360deg)}}
         @keyframes blink-pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.35}}
@@ -246,16 +272,17 @@
         .scanner-overlay.show{display:flex}
         .scanner-modal{background:#fff;border-radius:16px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:modalIn .18s ease;max-height:90vh;overflow-y:auto}
         .scanner-modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)}
-        .scanner-modal-head h3{font-size:15px;font-weight:700;color:var(--text-dark);display:flex;align-items:center;gap:8px}
-        .scanner-modal-head h3 i{color:var(--primary)}
+        .scanner-modal-head h3{font-size:15px;font-weight:700;color:var(--text-dark)}
         .scanner-close{width:32px;height:32px;border:none;background:#f1f5f9;border-radius:8px;font-size:16px;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
         .scanner-close:hover{background:#e2e8f0}
         .scanner-body{padding:20px 22px}
-        .scanner-hint{font-size:12px;color:var(--text-muted);margin-bottom:14px;display:flex;align-items:center;gap:6px}
-        .scanner-hint i{color:#94a3b8}
+        .scanner-hint{font-size:12px;color:var(--text-muted);margin-bottom:14px;text-align:left}
         #qr-reader{width:100%;border-radius:8px;overflow:hidden}
         #qr-reader video{border-radius:8px}
-        .camera-status{text-align:center;padding:10px 0 4px;font-size:12px;color:var(--text-muted)}
+        .camera-status{text-align:left;padding:10px 0 4px;font-size:12px;color:var(--text-muted)}
+        .camera-status .cam-steps{margin:4px 0 8px;padding-left:16px;font-size:11.5px;line-height:1.7}
+        .btn-cam-retry{margin-top:6px;padding:6px 16px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600}
+        .btn-cam-retry:hover{background:var(--primary-dark)}
     </style>
     <script src="/js/spa.js" defer></script>
     <script src="/js/form-utils.js" defer></script>
@@ -345,7 +372,7 @@
 
     <div class="receive-strip">
         <h2>Receive Document</h2>
-        <p class="rs-sub">Enter the 8-character tracking number</p>
+        <p class="rs-sub">Enter the 8-character reference number</p>
         <div class="rs-center">
             <div class="rs-main">
                 <div class="ref-boxes-row" id="refBoxes">
@@ -365,7 +392,7 @@
         </div>
         <div class="rs-btn-wrap">
             <button class="btn-receive" id="receiveRefBtn" onclick="receiveByReference()"><i class="fas fa-check"></i> Receive</button>
-            <button class="btn-scan-qr" id="scanQrBtn" onclick="openScanner()"><i class="fas fa-qrcode"></i> Scan Document</button>
+            <button class="btn-scan-qr" id="scanQrBtn" onclick="openScanner()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 8v-2a2 2 0 0 1 2 -2h2"/><path d="M4 16v2a2 2 0 0 0 2 2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M16 20h2a2 2 0 0 0 2 -2v-2"/><path d="M11 12h6"/><path d="M8 8h5"/><path d="M9 16h5"/></svg> Scan Document</button>
         </div>
     </div>
 
@@ -373,18 +400,18 @@
     <div class="stats-grid">
         <div class="stat-card c-amber">
             <div class="stat-label">Processing</div>
-            <div class="stat-num" id="stat-in-review"><?php echo e($stats['in_review']); ?></div>
+            <div class="stat-num" id="stat-in-review"><?php echo e(\App\Support\UiNumber::compact($stats['in_review'])); ?></div>
             <div class="stat-sub">Being processed</div>
         </div>
         <div class="stat-card c-emerald">
             <div class="stat-label">Completed</div>
-            <div class="stat-num" id="stat-completed"><?php echo e($stats['completed']); ?></div>
+            <div class="stat-num" id="stat-completed"><?php echo e(\App\Support\UiNumber::compact($stats['completed'])); ?></div>
             <div class="stat-sub">Completed and closed</div>
         </div>
     </div>
 
     <!-- Documents table -->
-    <div class="table-card">
+    <div class="table-card dashboard-table-card<?php echo e($documents->isNotEmpty() ? ' has-list' : ''); ?>">
         <div class="table-head">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
                 <span class="table-title">Document Queue</span>
@@ -393,7 +420,7 @@
             <div class="filters">
                 <div class="search-wrap">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Search subject or sender..." oninput="filterTable()">
+                    <input type="text" id="searchInput" placeholder="Search subject or sender..." data-clearable data-no-capitalize oninput="filterTable()">
                 </div>
                 <select id="statusFilter" onchange="filterTable()">
                     <option value="">All Statuses</option>
@@ -412,6 +439,7 @@
                 <p>Documents submitted to or currently held by your office will appear here.</p>
             </div>
         <?php else: ?>
+            <div class="table-scroll table-card-scroll">
             <table id="docsTable">
                 <thead>
                     <tr>
@@ -421,7 +449,6 @@
                         <th>Type</th>
                         <th>Sender</th>
                         <th>Status</th>
-                        <th>Last Action</th>
                         <th>Actions</th>
                         <th class="td-action"></th>
                     </tr>
@@ -432,10 +459,10 @@
                         <td style="font-family:monospace;font-size:12px;font-weight:600;color:var(--primary);white-space:nowrap"><?php echo e($doc->tracking_number); ?></td>
                         <td style="font-family:monospace;font-size:12px;font-weight:600;white-space:nowrap"><?php echo e($doc->reference_number ?: 'N/A'); ?></td>
                         <td style="max-width:200px">
-                            <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?php echo e($doc->subject); ?></div>
+                            <div class="cell-ellipsis" style="font-weight:600" title="<?php echo e($doc->subject); ?>"><?php echo e($doc->subject); ?></div>
                         </td>
-                        <td style="font-size:12px;white-space:nowrap"><?php echo e($doc->type); ?></td>
-                        <td style="font-size:12px"><?php echo e($doc->sender_name); ?></td>
+                        <td style="font-size:12px;white-space:nowrap"><div class="cell-ellipsis" style="max-width:150px" title="<?php echo e($doc->type); ?>"><?php echo e($doc->type); ?></div></td>
+                        <td style="font-size:12px"><div class="cell-ellipsis" style="max-width:160px" title="<?php echo e($doc->sender_name); ?>"><?php echo e($doc->sender_name); ?></div></td>
                         <td>
                             <span style="display:inline-flex;align-items:center;gap:5px">
                                 <span class="badge badge-<?php echo e($doc->status); ?>"><?php echo e($doc->statusLabel()); ?></span>
@@ -444,10 +471,6 @@
                                 <?php endif; ?>
                             </span>
                         </td>
-                        <td style="font-size:11px;color:var(--text-muted)">
-                            <?php echo e($doc->last_action_at ? \Carbon\Carbon::parse($doc->last_action_at)->diffForHumans() : $doc->created_at->diffForHumans()); ?>
-
-                        </td>
                         <td>
                             <div style="display:flex;gap:6px;align-items:center">
                                 <?php if($doc->status === 'submitted'): ?>
@@ -455,9 +478,6 @@
                                         <i class="fas fa-check"></i> Accept
                                     </button>
                                 <?php endif; ?>
-                                <a href="/office/documents/<?php echo e($doc->id); ?>" class="btn-view btn-manage" onclick="event.stopPropagation()">
-                                    <i class="fas fa-sliders-h"></i> Manage
-                                </a>
                             </div>
                         </td>
                         <td class="td-action"><span class="row-arrow"><i class="fas fa-chevron-right"></i></span></td>
@@ -465,6 +485,52 @@
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </tbody>
             </table>
+            </div>
+            <div class="mob-cards">
+                <?php $__currentLoopData = $documents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $doc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div
+                        class="mob-card"
+                        onclick='openDocDetail(<?php echo json_encode($doc->tracking_number, 15, 512) ?>)'
+                        data-status="<?php echo e($doc->status); ?>"
+                        data-search="<?php echo e(strtolower($doc->tracking_number . ' ' . ($doc->reference_number ?? '') . ' ' . $doc->subject . ' ' . $doc->type . ' ' . $doc->sender_name)); ?>"
+                    >
+                        <div class="mob-card-top">
+                            <div class="mob-card-ids">
+                                <div class="mob-card-ref"><?php echo e($doc->tracking_number); ?></div>
+                                <div class="mob-card-track">Ref: <?php echo e($doc->reference_number ?: 'N/A'); ?></div>
+                            </div>
+                            <span class="mob-card-arrow"><i class="fas fa-chevron-right"></i></span>
+                        </div>
+                        <div class="mob-card-subject"><?php echo e($doc->subject); ?></div>
+                        <div class="mob-card-meta">
+                            <span class="mob-card-status">
+                                <span class="badge badge-<?php echo e($doc->status); ?>"><?php echo e($doc->statusLabel()); ?></span>
+                                <?php if($doc->status === 'for_pickup'): ?>
+                                    <span class="blink-dot"></span>
+                                <?php endif; ?>
+                            </span>
+                            <span class="mob-card-date"><i class="fas fa-calendar"></i><?php echo e($doc->created_at->format('M d, Y')); ?></span>
+                        </div>
+                        <div class="mob-card-grid">
+                            <div class="mob-card-item">
+                                <span class="mob-card-k">Type</span>
+                                <span class="mob-card-v" title="<?php echo e($doc->type); ?>"><?php echo e($doc->type); ?></span>
+                            </div>
+                            <div class="mob-card-item">
+                                <span class="mob-card-k">Sender</span>
+                                <span class="mob-card-v" title="<?php echo e($doc->sender_name); ?>"><?php echo e($doc->sender_name); ?></span>
+                            </div>
+                        </div>
+                        <?php if($doc->status === 'submitted'): ?>
+                        <div class="mob-card-actions">
+                            <button class="btn-accept" onclick="event.stopPropagation(); quickAccept(<?php echo e($doc->id); ?>, this)">
+                                <i class="fas fa-check"></i> Accept
+                            </button>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </div>
         <?php endif; ?>
     </div>
 </div>
@@ -491,11 +557,11 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
 function filterTable(){
     var q      = document.getElementById('searchInput').value.toLowerCase().trim();
     var status = document.getElementById('statusFilter').value;
-    document.querySelectorAll('#docsTable tbody tr').forEach(function(row){
-        var search = (row.dataset.search || '').toLowerCase();
+    document.querySelectorAll('#docsTable tbody tr, .mob-cards .mob-card').forEach(function(item){
+        var search = (item.dataset.search || '').toLowerCase();
         var matchSearch = !q || search.includes(q);
-        var matchStatus = !status || row.dataset.status === status;
-        row.style.display = (matchSearch && matchStatus) ? '' : 'none';
+        var matchStatus = !status || item.dataset.status === status;
+        item.style.display = (matchSearch && matchStatus) ? '' : 'none';
     });
 }
 
@@ -572,29 +638,27 @@ function clearRefBoxes(){
     showReceiveMsg('', '');
 }
 
-async function receiveByReference(){
-    var btn = document.getElementById('receiveRefBtn');
-    var ref = getRefValue();
+async function submitReceiveLookup(lookupValue, pendingMessage){
+    var receiveBtn = document.getElementById('receiveRefBtn');
+    var scanBtn = document.getElementById('scanQrBtn');
+    var lookup = String(lookupValue || '').trim().toUpperCase();
 
-    if(ref.length < 8){
-        showReceiveMsg('Please enter all 8 characters of the tracking number.', 'err');
-        var boxes = document.querySelectorAll('#refBoxes .ref-box');
-        for(var i=0;i<boxes.length;i++){
-            if(!boxes[i].value){ boxes[i].focus(); break; }
-        }
-        return;
+    if(!lookup){
+        showReceiveMsg('Reference number is required.', 'err');
+        return false;
     }
 
-    showReceiveMsg('', '');
-    btn.disabled = true;
+    showReceiveMsg(pendingMessage || 'Receiving document...', '');
+    if(receiveBtn) receiveBtn.disabled = true;
+    if(scanBtn) scanBtn.disabled = true;
 
     try{
         var res = await fetch('/api/office/documents/receive-by-reference', {
             method: 'POST',
             headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
             body: JSON.stringify({
-                reference_number: ref,
-                tracking_number: ref
+                reference_number: lookup,
+                tracking_number: lookup
             })
         });
         var data = await res.json();
@@ -602,7 +666,7 @@ async function receiveByReference(){
         if(data.success){
             showReceiveMsg(data.message || 'Document received successfully.', 'ok');
             setTimeout(function(){ location.reload(); }, 700);
-            return;
+            return true;
         }
 
         showReceiveMsg(data.message || 'Failed to receive document.', 'err');
@@ -610,7 +674,24 @@ async function receiveByReference(){
         showReceiveMsg('Network error. Please try again.', 'err');
     }
 
-    btn.disabled = false;
+    if(receiveBtn) receiveBtn.disabled = false;
+    if(scanBtn) scanBtn.disabled = false;
+    return false;
+}
+
+async function receiveByReference(){
+    var ref = getRefValue();
+
+    if(ref.length < 8){
+        showReceiveMsg('Please enter all 8 characters of the reference number.', 'err');
+        var boxes = document.querySelectorAll('#refBoxes .ref-box');
+        for(var i=0;i<boxes.length;i++){
+            if(!boxes[i].value){ boxes[i].focus(); break; }
+        }
+        return;
+    }
+
+    return submitReceiveLookup(ref, 'Receiving document...');
 }
 
 var _pendingAcceptId = null, _pendingAcceptBtn = null;
@@ -800,8 +881,9 @@ document.addEventListener('keydown', function(e){
             .then(function(r){ return r.ok ? r.json() : null; })
             .then(function(d){
                 if(!d) return;
-                document.getElementById('stat-in-review').textContent = d.in_review;
-                document.getElementById('stat-completed').textContent = d.completed;
+                var compactCount = window.formatCompactCount || function(v) { return String(v); };
+                document.getElementById('stat-in-review').textContent = compactCount(d.in_review);
+                document.getElementById('stat-completed').textContent = compactCount(d.completed);
                 // Toggle Reports sidebar link in real-time
                 var rlink = document.getElementById('reports-nav-link');
                 if (rlink) rlink.style.display = d.has_reports_access ? '' : 'none';
@@ -844,100 +926,410 @@ document.addEventListener('keydown', function(e){
     <div class="scanner-overlay" id="scannerOverlay" onclick="if(event.target===this)closeScanner()">
         <div class="scanner-modal">
             <div class="scanner-modal-head">
-                <h3><i class="fas fa-qrcode"></i> Scan Document QR Code</h3>
+                <h3>Scan Document QR Code</h3>
                 <button class="scanner-close" onclick="closeScanner()">&#10005;</button>
             </div>
             <div class="scanner-body">
-                <div class="scanner-hint"><i class="fas fa-info-circle"></i> Point your camera at the document's QR code to auto-fill the tracking number.</div>
+                <div class="scanner-hint">Point your camera at the document's QR code to receive it automatically.</div>
                 <div id="qr-reader"></div>
                 <p class="camera-status" id="cameraStatus">Initializing camera...</p>
             </div>
         </div>
     </div>
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="/js/html5-qrcode.min.js"></script>
+    <script src="/js/jsqr.js"></script>
     <script>
     (function(){
         var html5QrCode = null;
         var scannerRunning = false;
+        var activeStream = null;
+        var scanLoopTimer = null;
+        var barcodeDetector = null;
+        var previewVideo = null;
         var scanCooldown = false;
+        var scanBuffer = '';
+        var scanTimer = null;
+        var SCAN_IDLE_MS = 80;
+
+        function scannerOverlay(){
+            return document.getElementById('scannerOverlay');
+        }
+
+        function statusEl(){
+            return document.getElementById('cameraStatus');
+        }
+
+        function showStatus(message, isHtml){
+            var el = statusEl();
+            if (!el) return;
+            if (isHtml) { el.innerHTML = message; } else { el.textContent = message; }
+            el.style.display = 'block';
+        }
+
+        function showPermissionDenied(){
+            var localhostUrl = (location.hostname === '127.0.0.1')
+                ? location.href.replace('127.0.0.1', 'localhost')
+                : null;
+            var msg = '<strong style="color:#dc2626;">&#9888; Camera blocked.</strong> ';
+            if (localhostUrl) {
+                msg += 'Your browser blocked camera for <strong>127.0.0.1</strong>. '
+                    + '<a href="' + localhostUrl + '" style="color:#0056b3;font-weight:700;">Open on localhost instead</a> '
+                    + '(same app, camera will work there).';
+            } else {
+                msg += 'Click the <strong>lock icon</strong> in the address bar → Camera → <strong>Allow</strong>, then '
+                    + '<button class="btn-cam-retry" onclick="window.retryCamera()" style="padding:2px 10px;">Retry</button>.';
+            }
+            showStatus(msg, true);
+        }
+
+        function isScannerOpen(){
+            var overlay = scannerOverlay();
+            return !!(overlay && overlay.classList.contains('show'));
+        }
+
+        function onDecodeSuccess(decodedText) {
+            if (scanCooldown) return;
+            scanCooldown = true;
+            setTimeout(function(){ scanCooldown = false; }, 2000);
+            processScannedText(decodedText);
+        }
+
+        function fillRefBoxes(tracking){
+            if (!/^[A-Z0-9]{1,8}$/.test(tracking)) return;
+            var boxes = document.querySelectorAll('#refBoxes .ref-box');
+            if (!boxes.length) return;
+            for (var i = 0; i < boxes.length; i++) {
+                boxes[i].value = '';
+                boxes[i].classList.remove('filled');
+            }
+            for (var j = 0; j < boxes.length && j < tracking.length; j++) {
+                boxes[j].value = tracking[j];
+                boxes[j].classList.add('filled');
+            }
+        }
+
+        function normalizeScannedLookup(text) {
+            var raw = String(text || '').trim();
+            if (!raw) return '';
+
+            try {
+                var parsed = new URL(raw, window.location.origin);
+                var receiveMatch = parsed.pathname.match(/\/receive\/([A-Za-z0-9\-]+)/i);
+                if (receiveMatch) {
+                    raw = receiveMatch[1];
+                } else {
+                    var lookupParam = parsed.searchParams.get('ref')
+                        || parsed.searchParams.get('tracking')
+                        || parsed.searchParams.get('reference');
+                    if (lookupParam) raw = lookupParam;
+                }
+            } catch (e) {}
+
+            var fallbackMatch = raw.match(/\/receive\/([A-Za-z0-9\-]+)/i);
+            if (fallbackMatch) raw = fallbackMatch[1];
+
+            raw = raw.trim().toUpperCase();
+            if (!raw) return '';
+
+            var compact = raw.replace(/[^A-Z0-9]/g, '');
+            if (/^[A-Z0-9]{8}$/.test(compact)) {
+                return compact;
+            }
+
+            return raw.replace(/[^A-Z0-9\-]/g, '').replace(/^-+|-+$/g, '');
+        }
+
+        function processScannedText(text) {
+            var lookup = normalizeScannedLookup(text);
+            if (!lookup || lookup.length < 8) return;
+
+            window.closeScanner();
+            fillRefBoxes(lookup);
+            submitReceiveLookup(lookup, 'QR detected. Receiving document...');
+        }
 
         window.openScanner = function() {
-            document.getElementById('scannerOverlay').classList.add('show');
+            var overlay = scannerOverlay();
+            if (!overlay) return;
+            overlay.classList.add('show');
             document.body.style.overflow = 'hidden';
+            scanBuffer = '';
+            if (scanTimer) {
+                clearTimeout(scanTimer);
+                scanTimer = null;
+            }
             startCamera();
         };
 
         window.closeScanner = function() {
-            document.getElementById('scannerOverlay').classList.remove('show');
+            var overlay = scannerOverlay();
+            if (overlay) overlay.classList.remove('show');
             document.body.style.overflow = '';
             stopCamera();
         };
 
-        function startCamera() {
-            if (scannerRunning) return;
-            var statusEl = document.getElementById('cameraStatus');
-            statusEl.textContent = 'Initializing camera...';
-            statusEl.style.display = 'block';
+        function readerEl() {
+            return document.getElementById('qr-reader');
+        }
 
-            try {
-                html5QrCode = new Html5Qrcode('qr-reader');
-                html5QrCode.start(
-                    { facingMode: 'environment' },
-                    { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
-                    function(decodedText) {
-                        if (scanCooldown) return;
-                        scanCooldown = true;
-                        setTimeout(function(){ scanCooldown = false; }, 2000);
-                        onQrScanned(decodedText);
-                    },
-                    function() {}
-                ).then(function() {
-                    scannerRunning = true;
-                    statusEl.textContent = 'Point your camera at a QR code';
-                }).catch(function() {
-                    statusEl.textContent = 'Camera not available. Please enter the tracking number manually.';
-                });
-            } catch(e) {
-                statusEl.textContent = 'Camera not available. Please enter the tracking number manually.';
+        function clearReader() {
+            var el = readerEl();
+            if (el) el.innerHTML = '';
+            previewVideo = null;
+        }
+
+        function isPermDenied(e) {
+            var s = String(e || '').toLowerCase();
+            return s.indexOf('notallowed') !== -1 || s.indexOf('permission') !== -1 || s.indexOf('denied') !== -1;
+        }
+
+        function normalizeCameraError(err) {
+            var raw = String((err && (err.name || err.message)) || err || '').toLowerCase();
+            if (raw.indexOf('notallowed') !== -1 || raw.indexOf('permission') !== -1 || raw.indexOf('denied') !== -1) return 'denied';
+            if (raw.indexOf('notfound') !== -1 || raw.indexOf('devicesnotfound') !== -1 || raw.indexOf('overconstrained') !== -1 || raw.indexOf('constraint') !== -1) return 'notfound';
+            if (raw.indexOf('notreadable') !== -1 || raw.indexOf('trackstart') !== -1 || raw.indexOf('could not start') !== -1 || raw.indexOf('device in use') !== -1 || raw.indexOf('in use') !== -1) return 'busy';
+            if (raw.indexOf('security') !== -1 || raw.indexOf('secure') !== -1) return 'security';
+            return raw || 'unknown';
+        }
+
+        function getCameraStream(constraints) {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                return Promise.reject(new Error('GET_USER_MEDIA_UNAVAILABLE'));
             }
+            return navigator.mediaDevices.getUserMedia({ video: constraints, audio: false });
+        }
+
+        function listVideoInputs() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+                return Promise.resolve([]);
+            }
+            return navigator.mediaDevices.enumerateDevices()
+                .then(function(devices) {
+                    return (devices || []).filter(function(device) {
+                        return device && device.kind === 'videoinput';
+                    });
+                })
+                .catch(function() {
+                    return [];
+                });
+        }
+
+        function cameraScore(device, isMobile) {
+            var label = String((device && device.label) || '').toLowerCase();
+            var score = 0;
+
+            if (isMobile) {
+                if (/back|rear|environment|world|traseira|trasera|externa/.test(label)) score += 50;
+                if (/front|user|selfie|facetime|integrated|frontal|frente/.test(label)) score -= 25;
+            } else {
+                if (/usb|external|rear|back|environment/.test(label)) score += 20;
+                if (/integrated|front|facetime|user/.test(label)) score += 5;
+            }
+
+            return score;
+        }
+
+        function buildCameraAttempts(isMobile, devices) {
+            var attempts = [];
+            var seen = {};
+            var hdHint = { width: { ideal: 1280 }, height: { ideal: 720 } };
+
+            function addAttempt(constraints) {
+                var key = typeof constraints === 'boolean'
+                    ? ('bool:' + constraints)
+                    : JSON.stringify(constraints);
+                if (seen[key]) return;
+                seen[key] = true;
+                attempts.push(constraints);
+            }
+
+            if (isMobile) {
+                addAttempt({
+                    facingMode: { ideal: 'environment' },
+                    width: hdHint.width,
+                    height: hdHint.height
+                });
+            }
+
+            (devices || []).slice().sort(function(a, b) {
+                return cameraScore(b, isMobile) - cameraScore(a, isMobile);
+            }).forEach(function(device) {
+                if (!device.deviceId) return;
+                addAttempt({
+                    deviceId: { exact: device.deviceId },
+                    width: hdHint.width,
+                    height: hdHint.height
+                });
+            });
+
+            addAttempt(true);
+            addAttempt({
+                facingMode: 'user',
+                width: hdHint.width,
+                height: hdHint.height
+            });
+
+            return attempts;
+        }
+
+
+        function attachPreview(stream) {
+            clearReader();
+            var el = readerEl();
+            if (!el) return Promise.reject(new Error('QR_READER_MISSING'));
+            var video = document.createElement('video');
+            video.setAttribute('autoplay', '');
+            video.setAttribute('muted', '');
+            video.setAttribute('playsinline', '');
+            video.muted = true;
+            video.srcObject = stream;
+            video.style.width = '100%';
+            video.style.display = 'block';
+            video.style.borderRadius = '8px';
+            el.appendChild(video);
+            previewVideo = video;
+            return video.play().catch(function() {}).then(function(){ return video; });
+        }
+
+        function startDetectLoop() {
+            if (typeof jsQR === 'undefined') {
+                showStatus('QR library not loaded. Please refresh the page.');
+                return;
+            }
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            function scanFrame() {
+                if (!scannerRunning || !previewVideo) return;
+                if (previewVideo.readyState < 2 || !previewVideo.videoWidth) {
+                    if (scannerRunning) scanLoopTimer = setTimeout(scanFrame, 200);
+                    return;
+                }
+                try {
+                    canvas.width = previewVideo.videoWidth;
+                    canvas.height = previewVideo.videoHeight;
+                    ctx.drawImage(previewVideo, 0, 0);
+                    var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    var code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+                    if (code && code.data) {
+                        onDecodeSuccess(code.data);
+                        return;
+                    }
+                } catch (e) {}
+                if (scannerRunning) scanLoopTimer = setTimeout(scanFrame, 150);
+            }
+            scanLoopTimer = setTimeout(scanFrame, 600);
+        }
+
+        window.retryCamera = function() {
+            stopCamera();
+            startCamera();
+        };
+
+        function startCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showStatus('Camera not available. Please use Chrome or Edge.');
+                return;
+            }
+
+            function doStart() {
+                showStatus('Requesting camera access...');
+                var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                listVideoInputs().then(function(devices) {
+                    var attempts = buildCameraAttempts(isMobile, devices);
+                    var seenFailures = {};
+
+                    function finishFailure() {
+                        if (seenFailures.security) {
+                            showStatus('Camera access requires HTTPS or localhost. Open this app on localhost or HTTPS and try again.');
+                            return;
+                        }
+                        if (seenFailures.notfound) {
+                            showStatus('No available camera was found on this device. Allow camera access, then reopen the scanner to try another camera.');
+                            return;
+                        }
+                        showStatus('Camera could not start. Close any app using your webcam (Zoom, Teams, OBS), then reload the page.');
+                    }
+
+                    function tryNext(idx) {
+                        if (idx >= attempts.length) {
+                            finishFailure();
+                            return;
+                        }
+
+                        getCameraStream(attempts[idx])
+                            .then(function(stream) {
+                                activeStream = stream;
+                                return attachPreview(stream);
+                            })
+                            .then(function() {
+                                scannerRunning = true;
+                                showStatus('Camera live. Point it at a QR code.');
+                                startDetectLoop();
+                            })
+                            .catch(function(err) {
+                                var kind = normalizeCameraError(err);
+                                seenFailures[kind] = true;
+                                if (kind === 'denied') { showPermissionDenied(); return; }
+                                if (kind === 'busy') { showStatus('Camera is in use by another app. Close Zoom, Teams, or OBS and retry.'); return; }
+                                tryNext(idx + 1);
+                            });
+                    }
+
+                    tryNext(0);
+                });
+            }
+
+            doStart();
         }
 
         function stopCamera() {
-            if (html5QrCode && scannerRunning) {
-                html5QrCode.stop().then(function() {
-                    scannerRunning = false;
-                    html5QrCode.clear();
-                }).catch(function() {
-                    scannerRunning = false;
-                });
+            scannerRunning = false;
+            if (scanLoopTimer) {
+                clearTimeout(scanLoopTimer);
+                scanLoopTimer = null;
             }
-        }
-
-        function onQrScanned(text) {
-            // Extract tracking number from URL or plain text
-            var tracking = text.trim();
-            var match = tracking.match(/\/receive\/([A-Za-z0-9]+)/);
-            if (match) {
-                tracking = match[1];
+            if (activeStream) {
+                activeStream.getTracks().forEach(function(track) { track.stop(); });
+                activeStream = null;
             }
-            tracking = tracking.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            if (!tracking || tracking.length < 4) return;
-
-            // Fill the ref boxes with the scanned tracking number
-            closeScanner();
-            var boxes = document.querySelectorAll('#refBoxes .ref-box');
-            for (var i = 0; i < boxes.length && i < tracking.length; i++) {
-                boxes[i].value = tracking[i];
-                boxes[i].classList.add('filled');
+            if (html5QrCode) {
+                try { html5QrCode.stop(); } catch (e) {}
+                try { html5QrCode.clear(); } catch (e2) {}
             }
-            // Auto-trigger receive
-            receiveByReference();
+            clearReader();
         }
 
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                var scannerOpen = document.getElementById('scannerOverlay').classList.contains('show');
-                if (scannerOpen) closeScanner();
+            if (e.key === 'Escape' && isScannerOpen()) {
+                e.preventDefault();
+                window.closeScanner();
+                return;
+            }
+
+            if (!isScannerOpen()) return;
+            if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+            if (e.key === 'Enter') {
+                if (scanBuffer.length) {
+                    var payload = scanBuffer;
+                    scanBuffer = '';
+                    if (scanTimer) {
+                        clearTimeout(scanTimer);
+                        scanTimer = null;
+                    }
+                    processScannedText(payload);
+                }
+                return;
+            }
+
+            if (e.key.length === 1) {
+                scanBuffer += e.key;
+                if (scanTimer) clearTimeout(scanTimer);
+                scanTimer = setTimeout(function(){
+                    if (scanBuffer.length >= 6) processScannedText(scanBuffer);
+                    scanBuffer = '';
+                    scanTimer = null;
+                }, SCAN_IDLE_MS);
             }
         });
     })();
@@ -973,4 +1365,4 @@ document.addEventListener('keydown', function(e){
 </body>
 </html>
 
-<?php /**PATH C:\Users\iamra\Desktop\DepedDocumentTrackingSystem\resources\views/office/dashboard.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\Users\iamra\Desktop\DepedDocumentTrackingSystem\resources\views\office\dashboard.blade.php ENDPATH**/ ?>

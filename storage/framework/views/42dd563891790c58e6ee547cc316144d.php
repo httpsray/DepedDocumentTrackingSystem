@@ -197,9 +197,9 @@
             flex-shrink: 0;
         }
 
-        .s-icon.blue { background: rgba(0, 86, 179, 0.1); color: var(--primary); }
-        .s-icon.orange { background: rgba(252, 163, 17, 0.12); color: #d97706; }
-        .s-icon.green { background: rgba(22, 163, 74, 0.1); color: #16a34a; }
+        .s-icon.blue,
+        .s-icon.orange,
+        .s-icon.green { background: rgba(0, 86, 179, 0.1); color: var(--primary); }
 
         .s-num {
             font-size: 22px;
@@ -216,6 +216,7 @@
             display: grid;
             grid-template-columns: 1.7fr 1fr;
             gap: 20px;
+            align-items: start;
         }
 
         .panel {
@@ -224,6 +225,48 @@
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
             overflow: hidden;
+        }
+
+        .panel-fixed {
+            display: flex;
+            flex-direction: column;
+            align-self: start;
+            height: 560px;
+        }
+
+        .panel-scroll-body {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .panel-scroll-body .dtable th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .panel-actions {
+            display: flex;
+            flex-direction: column;
+            align-self: start;
+            height: auto;
+        }
+
+        .panel-actions .actions-list {
+            flex: none;
+            min-height: auto;
+            overflow: visible;
+        }
+
+        .panel-fixed .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .panel-head {
@@ -287,11 +330,11 @@
             font-weight: 500;
         }
 
-        .pill.pending { background: #fff7ed; color: #9a3412; }
-        .pill.forwarded { background: #eff6ff; color: #1e40af; }
-        .pill.processing { background: #fffbeb; color: #d97706; }
-        .pill.completed { background: #f0fdf4; color: #166534; }
-        .pill.other { background: #f3f4f6; color: #4b5563; }
+        .pill.pending,
+        .pill.forwarded,
+        .pill.processing,
+        .pill.completed,
+        .pill.other { background: #fff7ed; color: #c2410c; }
 
         .t-date { font-size: 12px; color: #94a3b8; }
 
@@ -390,6 +433,9 @@
         /* ─── Responsive ─── */
         @media (max-width: 1024px) {
             .grid { grid-template-columns: 1fr; }
+            .panel-fixed { height: min(72vh, 560px); }
+            .panel-scroll-body { max-height: none; }
+            .panel-actions .actions-list { overflow: visible; }
         }
 
         @media (max-width: 768px) {
@@ -417,6 +463,9 @@
             .panel-head { padding: 14px 16px; }
             .panel-title { font-size: 14px; }
             .panel-link { font-size: 12px; }
+            .panel-scroll-body { max-height: none; }
+            .panel-fixed { height: min(68vh, 520px); }
+            .panel-actions .actions-list { overflow: visible; }
         }
 
         @media (max-width: 400px) {
@@ -542,21 +591,21 @@
             <div class="stat-card blue anim">
                 <div class="s-icon blue"><i class="fas fa-folder-open"></i></div>
                 <div class="s-data">
-                    <div class="s-num" id="stat-total"><?php echo e($stats['total']); ?></div>
+                    <div class="s-num" id="stat-total"><?php echo e(\App\Support\UiNumber::compact($stats['total'])); ?></div>
                     <div class="s-label">Total Documents</div>
                 </div>
             </div>
             <div class="stat-card orange anim">
                 <div class="s-icon orange"><i class="fas fa-clock"></i></div>
                 <div class="s-data">
-                    <div class="s-num" id="stat-pending"><?php echo e($stats['pending']); ?></div>
+                    <div class="s-num" id="stat-pending"><?php echo e(\App\Support\UiNumber::compact($stats['pending'])); ?></div>
                     <div class="s-label">Pending</div>
                 </div>
             </div>
             <div class="stat-card green anim">
                 <div class="s-icon green"><i class="fas fa-check-circle"></i></div>
                 <div class="s-data">
-                    <div class="s-num" id="stat-completed"><?php echo e($stats['completed']); ?></div>
+                    <div class="s-num" id="stat-completed"><?php echo e(\App\Support\UiNumber::compact($stats['completed'])); ?></div>
                     <div class="s-label">Completed</div>
                 </div>
             </div>
@@ -565,7 +614,7 @@
         <?php if(!empty($pickupDocs) && $pickupDocs->isNotEmpty()): ?>
         <div class="pickup-banner anim">
             <div class="pickup-banner-title">
-                Ready for Pickup <span class="pickup-count"><?php echo e($pickupDocs->count()); ?></span>
+                Ready for Pickup <span class="pickup-count"><?php echo e(\App\Support\UiNumber::compact($pickupDocs->count())); ?></span>
             </div>
             <div class="pickup-doc-list">
                 <?php $__currentLoopData = $pickupDocs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pDoc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
@@ -587,14 +636,14 @@
         <div class="grid">
 
             <!-- Recent Documents -->
-            <div class="panel anim">
+            <div class="panel panel-fixed anim">
                 <div class="panel-head">
                     <div class="panel-title">Recent Documents</div>
                     <a href="/my-documents" class="panel-link">View all <i class="fas fa-arrow-right" style="font-size:11px"></i></a>
                 </div>
 
                 <?php if($recentDocs->count() > 0): ?>
-                <div class="dtable-wrap">
+                <div class="dtable-wrap panel-scroll-body">
                 <table class="dtable">
                     <thead>
                         <tr>
@@ -640,7 +689,7 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="panel anim">
+            <div class="panel panel-actions anim">
                 <div class="panel-head">
                     <div class="panel-title">Quick Actions</div>
                 </div>
@@ -654,7 +703,7 @@
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
                     <a href="/track" class="act">
-                        <div class="act-icon" style="background:rgba(252,163,17,0.1);color:#d97706;"><i class="fas fa-search"></i></div>
+                        <div class="act-icon" style="background:rgba(0,86,179,0.1);color:var(--primary);"><i class="fas fa-search"></i></div>
                         <div class="act-body">
                             <div class="act-title">Track Document</div>
                             <div class="act-desc">Check document status</div>
@@ -662,7 +711,7 @@
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
                     <a href="/profile" class="act">
-                        <div class="act-icon" style="background:#f1f5f9;color:#475569;"><i class="fas fa-user-cog"></i></div>
+                        <div class="act-icon" style="background:rgba(0,86,179,0.1);color:var(--primary);"><i class="fas fa-user-cog"></i></div>
                         <div class="act-body">
                             <div class="act-title">Account Settings</div>
                             <div class="act-desc">Profile &amp; password</div>
@@ -670,7 +719,7 @@
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
                     <a href="/help" class="act">
-                        <div class="act-icon" style="background:#f1f5f9;color:#475569;"><i class="fas fa-question-circle"></i></div>
+                        <div class="act-icon" style="background:rgba(0,86,179,0.1);color:var(--primary);"><i class="fas fa-question-circle"></i></div>
                         <div class="act-body">
                             <div class="act-title">Help</div>
                             <div class="act-desc">System guide &amp; FAQs</div>
@@ -766,9 +815,10 @@
                 .then(function(r) { return r.ok ? r.json() : null; })
                 .then(function(d) {
                     if (!d) return;
-                    document.getElementById('stat-total').textContent     = d.total;
-                    document.getElementById('stat-pending').textContent   = d.pending;
-                    document.getElementById('stat-completed').textContent = d.completed;
+                    var compactCount = window.formatCompactCount || function(v) { return String(v); };
+                    document.getElementById('stat-total').textContent     = compactCount(d.total);
+                    document.getElementById('stat-pending').textContent   = compactCount(d.pending);
+                    document.getElementById('stat-completed').textContent = compactCount(d.completed);
                 })
                 .catch(function() {});
         }
@@ -821,4 +871,4 @@
     </script>
 </body>
 </html>
-<?php /**PATH C:\Users\iamra\Desktop\DepedDocumentTrackingSystem\resources\views/dashboard/index.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\Users\iamra\Desktop\DepedDocumentTrackingSystem\resources\views\dashboard\index.blade.php ENDPATH**/ ?>

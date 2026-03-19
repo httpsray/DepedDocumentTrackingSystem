@@ -202,9 +202,9 @@
             flex-shrink: 0;
         }
 
-        .s-icon.blue { background: var(--blue-soft); color: var(--primary); }
-        .s-icon.orange { background: var(--blue-soft-2); color: var(--primary); }
-        .s-icon.green { background: var(--blue-soft-3); color: var(--primary); }
+        .s-icon.blue,
+        .s-icon.orange,
+        .s-icon.green,
         .s-icon.purple { background: var(--blue-soft); color: var(--primary); }
 
         .s-num {
@@ -234,21 +234,140 @@
         }
 
         .panel-fixed {
+            display: flex;
+            flex-direction: column;
             align-self: start;
+            height: 560px;
         }
 
         .panel-scroll-body {
-            overflow: visible;
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
         }
 
         .panel-actions {
+            display: flex;
+            flex-direction: column;
             align-self: start;
+            height: auto;
+        }
+
+        .panel-actions .actions-list {
+            flex: none;
+            min-height: auto;
+            overflow: visible;
+        }
+
+        .panel-fixed .empty-state,
+        .panel-fixed .mob-cards {
+            flex: 1;
+            min-height: 0;
+        }
+
+        .panel-fixed .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .recent-panel .panel-scroll-body .dtable th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .recent-panel {
+            border-radius: 12px;
+        }
+
+        .recent-panel .panel-head {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .recent-panel .panel-head-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .table-doc-count {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .recent-panel .dtable th {
+            text-align: left;
+            padding: 10px 18px;
+            font-size: 10.5px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .recent-panel .dtable td {
+            padding: 13px 18px;
+            font-size: 13px;
+            color: var(--text-dark);
+            border-top: none;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .recent-panel .dtable tbody tr:hover td {
+            background: #f8faff;
+        }
+
+        .recent-panel .dtable tbody tr:last-child td {
+            border-bottom: none;
         }
 
         .recent-panel .dtable th,
         .recent-panel .dtable td {
             padding-top: 11px;
             padding-bottom: 11px;
+        }
+
+        .recent-panel .pill {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+        .recent-panel .td-action {
+            width: 44px;
+            text-align: center;
+        }
+
+        .recent-panel .row-arrow {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            color: #94a3b8;
+            transition: all .15s;
+        }
+
+        .recent-panel .dtable tbody tr:hover .row-arrow {
+            background: var(--primary);
+            color: #fff;
         }
 
         .panel-head {
@@ -312,14 +431,15 @@
             font-weight: 500;
         }
 
-        .pill.pending { background: var(--slate-soft); color: var(--slate-dark); }
-        .pill.forwarded { background: var(--blue-soft); color: var(--primary); }
-        .pill.processing { background: var(--blue-soft-3); color: #335a8a; }
-        .pill.completed { background: var(--blue-soft-2); color: var(--blue-deep); }
-        .pill.other { background: #f3f4f6; color: #4b5563; }
+        .pill.pending,
+        .pill.forwarded,
+        .pill.processing,
+        .pill.completed,
+        .pill.other { background: #fff7ed; color: #c2410c; }
 
         .t-date { font-size: 12px; color: #94a3b8; }
         .t-user { font-size: 12px; color: var(--text-muted); }
+        .cell-ellipsis { display:block; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
         .empty-state {
             padding: 48px 24px;
@@ -411,6 +531,7 @@
             margin-bottom: 6px;
         }
         .mob-card-ref { font-size: 12px; font-weight: 600; color: var(--primary); font-family: monospace; }
+        .mob-card-track { font-size: 10px; color: var(--text-muted); font-family: monospace; margin-top: 2px; }
         .mob-card-subject {
             font-size: 14px;
             font-weight: 600;
@@ -431,6 +552,16 @@
             align-items: center;
         }
         .mob-card-meta i { margin-right: 4px; font-size: 11px; }
+        .mob-card-date { display: inline-flex; align-items: center; gap: 4px; }
+        .mob-card-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .mob-card-row i { font-size: 11px; opacity: .75; flex-shrink: 0; }
         .mob-card-arrow {
             display: inline-flex;
             align-items: center;
@@ -455,6 +586,7 @@
         @media (max-width: 1024px) {
             .grid { grid-template-columns: 1fr; }
             .stats { grid-template-columns: repeat(2, 1fr); }
+            .panel-fixed { height: min(72vh, 560px); }
         }
 
         @media (max-width: 900px) {
@@ -462,9 +594,15 @@
             .top-bar{flex-direction:column;align-items:flex-start;gap:14px}
             .greeting-section h1{font-size:20px}
             .live-clock{width:100%}
-            .stats{grid-template-columns:1fr 1fr}
+            .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:16px}
+            .stat-card{min-width:0;padding:13px 12px 12px;gap:10px;flex-direction:column;align-items:flex-start}
+            .s-icon{width:34px;height:34px;border-radius:8px;font-size:14px}
+            .s-data{min-width:0;width:100%}
+            .s-num{font-size:24px;letter-spacing:-.6px}
+            .s-label{font-size:11px;line-height:1.2}
+            .panel-fixed { height: min(68vh, 520px); }
             .dtable-wrap { display: none; }
-            .mob-cards { display: block; }
+            .mob-cards { display: block; padding: 10px 12px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
             .drawer { width: 100%; max-width: 100%; }
             .drawer-meta { grid-template-columns: 1fr; }
             .dm-item { border-right: none; }
@@ -473,22 +611,26 @@
 
         @media (max-width: 400px) {
             .greeting-section h1 { font-size: 18px; }
+            .stat-card{padding:12px 10px 10px;gap:8px}
+            .s-icon{width:30px;height:30px;font-size:13px}
+            .s-num{font-size:22px}
+            .s-label{font-size:10px}
         }
 
         /* Badge colors for office docs */
-        .badge-submitted{background:var(--blue-soft);color:var(--primary)}
-        .badge-received{background:var(--slate-soft);color:var(--slate-dark)}
-        .badge-in_review{background:var(--blue-soft-3);color:#335a8a}
+        .badge-submitted,
+        .badge-received,
+        .badge-in_review{background:#fff7ed;color:#c2410c}
 
         /* ─── Receive strip (office style) ─── */
         .receive-strip{background:#fff;border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:24px}
         .receive-strip h2{font-size:20px;font-weight:700;color:var(--text-dark);margin:0 0 6px}
         .receive-strip p.rs-sub{font-size:13px;color:var(--text-muted);margin:0 0 18px}
-        .rs-main{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:0}
+        .rs-main{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;margin-bottom:0;min-width:0}
         .ref-boxes-row{display:flex;align-items:center;gap:7px;flex:1;min-width:0;flex-wrap:nowrap}
-        .ref-box{flex:1;min-width:0;height:clamp(60px,5.8vw,72px);text-align:center;font-size:clamp(21px,2.2vw,26px);font-weight:700;font-family:'Poppins',sans-serif;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;text-transform:uppercase;background:#f8fafc;transition:border-color .2s,box-shadow .2s,background .2s;color:#1e293b;padding:0;caret-color:var(--primary)}
-        .ref-box:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,86,179,.13);background:#fff}
-        .ref-box.filled{background:#fff;border-color:#94a3b8}
+        .ref-box{flex:1;min-width:0;height:clamp(60px,5.8vw,72px);text-align:center;font-size:clamp(21px,2.2vw,26px);font-weight:700;font-family:'Poppins',sans-serif;border:1.5px solid #cbd5e1;border-radius:8px;outline:none;text-transform:uppercase;background:#f8fafc;transition:border-color .2s,box-shadow .2s,background .2s;color:#1e293b;padding:0;caret-color:var(--primary);box-shadow:0 0 0 1px rgba(203,213,225,.75)}
+        .ref-box:focus{border-color:var(--primary);box-shadow:0 0 0 1px rgba(0,86,179,.28),0 0 0 4px rgba(0,86,179,.13);background:#fff}
+        .ref-box.filled{background:#fff;border-color:#94a3b8;box-shadow:0 0 0 1px rgba(148,163,184,.42)}
         .ref-sep{font-size:18px;color:#cbd5e1;user-select:none;padding:0 2px}
         .btn-clear-x{width:36px;height:36px;border:1.5px solid #e2e8f0;border-radius:50%;background:#f8fafc;color:#94a3b8;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;padding:0}
         .rs-center{width:100%;margin:0 auto}
@@ -511,11 +653,11 @@
         @media(max-width:900px){
             .receive-strip{padding:16px 18px}
             .receive-strip h2{font-size:15px}
-            .rs-main{gap:5px}
+            .rs-main{gap:0;grid-template-columns:minmax(0,1fr)}
             .ref-boxes-row{gap:3px}
             .ref-box{height:clamp(52px,13vw,58px);font-size:clamp(17px,4.4vw,19px)}
             .ref-sep{font-size:13px;padding:0 1px}
-            .btn-clear-x{width:32px;height:32px;font-size:12px}
+            .btn-clear-x{display:none}
             .rs-btn-wrap .btn-receive{flex:1 1 0;min-width:0;width:auto;height:48px;padding:0 12px;font-size:12.5px;white-space:nowrap}
             .rs-btn-wrap .btn-scan-qr{flex:1 1 0;min-width:0;width:auto;height:48px;padding:0 12px;font-size:12.5px;white-space:nowrap}
             .rs-btn-wrap{flex-direction:row;gap:8px}
@@ -544,8 +686,8 @@
         .drawer-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
         .drawer-head-info{flex:1;min-width:0}
         .drawer-head h3{font-size:16px;font-weight:700;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
-        .drawer-ref{font-size:13px;color:var(--text-muted);font-family:monospace;letter-spacing:.4px;margin-bottom:2px}
-        .drawer-track{font-size:11px;color:var(--text-muted);font-family:monospace;letter-spacing:.4px;margin-bottom:4px}
+        .drawer-ref{font-size:13px;color:var(--text-muted);font-family:Poppins,sans-serif;font-weight:600;letter-spacing:.2px;margin-bottom:2px}
+        .drawer-track{font-size:11px;color:var(--text-muted);font-family:Poppins,sans-serif;font-weight:500;letter-spacing:.2px;margin-bottom:4px}
         .drawer-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#f8fafc;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px;flex-shrink:0;transition:all .15s}
         .drawer-close:hover{background:#fee2e2;color:#dc2626;border-color:#fca5a5}
         .drawer-body{flex:1;overflow-y:auto}
@@ -561,21 +703,22 @@
         .tl-item{position:relative;margin-bottom:20px;padding-left:24px}
         .tl-item:last-child{margin-bottom:0}
         .tl-dot{width:16px;height:16px;border-radius:50%;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
-        .tl-dot.c-active{background:var(--primary);box-shadow:0 0 0 2px var(--primary)}
-        .tl-dot.c-done{background:var(--primary);box-shadow:0 0 0 2px var(--primary)}
-        .tl-dot.c-warn{background:var(--primary);box-shadow:0 0 0 2px var(--primary)}
-        .tl-dot.c-danger{background:var(--primary);box-shadow:0 0 0 2px var(--primary)}
-        .tl-dot.c-latest{background:var(--blue-deep);box-shadow:0 0 0 2px var(--blue-deep)}
+        .tl-dot.c-active{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
+        .tl-dot.c-done{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
+        .tl-dot.c-warn{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
+        .tl-dot.c-danger{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
+        .tl-dot.c-latest{background:#f59e0b;box-shadow:0 0 0 2px #f59e0b}
         .tl-action{font-size:12px;font-weight:500;color:#64748b}
         .tl-meta{font-size:12px;color:#64748b;margin:2px 0}
         .tl-remarks{font-size:12px;color:#64748b;background:#f8fafc;border-left:3px solid var(--border);padding:5px 9px;border-radius:4px;margin-top:5px}
         .tl-office-hdr{display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--text-dark);text-transform:none;letter-spacing:0;margin:18px 0 8px -7px;padding-left:7px;padding-bottom:6px;position:relative}
         .tl-office-hdr::after{content:'';position:absolute;left:21px;right:0;bottom:0;height:1.5px;background:var(--border)}
         .tl-office-hdr:first-child{margin-top:0}
+        .tl-dur{font-size:10px;font-weight:600;color:#6366f1;background:#eef2ff;border:1px solid #c7d2fe;border-radius:20px;padding:1px 8px;text-transform:none;letter-spacing:0;white-space:nowrap;flex-shrink:0;margin-left:auto}
         .drawer-loader{display:flex;align-items:center;justify-content:center;padding:48px;flex-direction:column;gap:12px;color:var(--text-muted);font-size:13px}
-        .badge-forwarded{background:var(--slate-soft);color:var(--slate-dark)}
-        .badge-for_pickup{background:var(--slate-soft-2);color:var(--slate-dark)}
-        .badge-completed{background:var(--blue-soft-2);color:var(--blue-deep)}
+        .badge-forwarded,
+        .badge-for_pickup,
+        .badge-completed{background:#fff7ed;color:#c2410c}
     </style>
     <script src="/js/spa.js" defer></script>
     <script src="/js/form-utils.js" defer></script>
@@ -602,7 +745,7 @@
     </div>
     <nav class="sb-nav">
         <span class="nav-section">Overview</span>
-        <a href="/dashboard" class="active"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="/dashboard" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
         <span class="nav-section">Management</span>
         <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
         <a href="/admin/offices"><i class="fas fa-building"></i> Offices</a>
@@ -610,13 +753,10 @@
         <a href="/admin/documents"><i class="fas fa-folder-open"></i> Documents</a>
         @endunless
         @if($user->isSuperAdmin())
-        <a href="/records/documents"><i class="fas fa-eye"></i> Records View</a>
+        <a href="/records/documents"><i class="fas fa-folder-open"></i> All Documents</a>
         <span class="nav-section">ICT Unit</span>
         <a href="/ict/documents"><i class="fas fa-network-wired"></i> ICT Documents</a>
-        @endif
-        @if($user->isSuperAdmin())
-        <span class="nav-section">Reports</span>
-        <a href="/office/search"><i class="fas fa-chart-line"></i> Reports Dashboard</a>
+        <a href="/office/search"><i class="fas fa-chart-line"></i> Reports</a>
         @endif
         <span class="nav-section">My Documents</span>
         <a href="/submit"><i class="fas fa-paper-plane"></i> Submit Document</a>
@@ -649,9 +789,11 @@
                 $adminWelcomeName = $user->name ?? 'Admin';
                 $adminQueueLabel = $user->office?->name
                     ?? ($user->isSuperAdmin() ? 'Super Admin' : 'Admin');
-                $adminQueueCopy = $user->office_id
-                    ? $adminQueueLabel . " &mdash; here's your document queue."
-                    : $adminQueueLabel . " &mdash; here's your system overview.";
+                $adminQueueCopy = $user->isSuperAdmin()
+                    ? "DepEd DOCTRAX &mdash; here's your system overview."
+                    : ($user->office_id
+                        ? $adminQueueLabel . " &mdash; here's your document queue."
+                        : $adminQueueLabel . " &mdash; here's your system overview.");
             @endphp
             <div class="greeting-section">
                 <h1>Welcome back, {{ $adminWelcomeName }}!</h1>
@@ -671,62 +813,33 @@
             </div>
         </div>
 
-        <!-- Receive Strip (SuperAdmin with office) -->
-        @if($user->isSuperAdmin() && $user->office_id)
-        <div class="receive-strip">
-            <h2>Receive Document</h2>
-            <p class="rs-sub">Enter the 8-character reference number</p>
-            <div class="rs-center">
-                <div class="rs-main">
-                    <div class="ref-boxes-row" id="refBoxes">
-                        <input type="text" maxlength="1" class="ref-box" data-idx="0" data-no-clearable data-no-capitalize autocomplete="off">
-                        <input type="text" maxlength="1" class="ref-box" data-idx="1" data-no-clearable data-no-capitalize autocomplete="off">
-                        <input type="text" maxlength="1" class="ref-box" data-idx="2" data-no-clearable data-no-capitalize autocomplete="off">
-                        <input type="text" maxlength="1" class="ref-box" data-idx="3" data-no-clearable data-no-capitalize autocomplete="off">
-                        <span class="ref-sep">&mdash;</span>
-                        <input type="text" maxlength="1" class="ref-box" data-idx="4" data-no-clearable data-no-capitalize autocomplete="off">
-                        <input type="text" maxlength="1" class="ref-box" data-idx="5" data-no-clearable data-no-capitalize autocomplete="off">
-                        <input type="text" maxlength="1" class="ref-box" data-idx="6" data-no-clearable data-no-capitalize autocomplete="off">
-                        <input type="text" maxlength="1" class="ref-box" data-idx="7" data-no-clearable data-no-capitalize autocomplete="off">
-                    </div>
-                    <button type="button" class="btn-clear-x" onclick="window.clearRefBoxes()" title="Clear">&#10005;</button>
-                </div>
-                <div class="receive-alert" id="receiveRefMsg"><i class="fas fa-exclamation-circle"></i><span></span></div>
-            </div>
-            <div class="rs-btn-wrap">
-                <button class="btn-receive" id="receiveRefBtn" onclick="window.receiveByReference()"><i class="fas fa-check"></i> Receive</button>
-                <button class="btn-scan-qr" id="scanQrBtn" onclick="openScanner()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 8v-2a2 2 0 0 1 2 -2h2"/><path d="M4 16v2a2 2 0 0 0 2 2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M16 20h2a2 2 0 0 0 2 -2v-2"/><path d="M11 12h6"/><path d="M8 8h5"/><path d="M9 16h5"/></svg> Scan Document</button>
-            </div>
-        </div>
-        @endif
-
         <!-- Stats -->
         <div class="stats">
             <div class="stat-card anim">
                 <div class="s-icon blue"><i class="fas fa-users"></i></div>
                 <div class="s-data">
-                    <div class="s-num" id="stat-users">{{ $stats['total_users'] }}</div>
+                    <div class="s-num" id="stat-users">{{ \App\Support\UiNumber::compact($stats['total_users']) }}</div>
                     <div class="s-label">Total Users</div>
                 </div>
             </div>
             <div class="stat-card anim">
                 <div class="s-icon purple"><i class="fas fa-file-alt"></i></div>
                 <div class="s-data">
-                    <div class="s-num" id="stat-docs">{{ $stats['total_documents'] }}</div>
+                    <div class="s-num" id="stat-docs">{{ \App\Support\UiNumber::compact($stats['total_documents']) }}</div>
                     <div class="s-label">Total Documents</div>
                 </div>
             </div>
             <div class="stat-card anim">
                 <div class="s-icon orange"><i class="fas fa-clock"></i></div>
                 <div class="s-data">
-                    <div class="s-num" id="stat-pending">{{ $stats['pending_docs'] }}</div>
+                    <div class="s-num" id="stat-pending">{{ \App\Support\UiNumber::compact($stats['pending_docs']) }}</div>
                     <div class="s-label">Pending</div>
                 </div>
             </div>
             <div class="stat-card anim">
                 <div class="s-icon green"><i class="fas fa-check-circle"></i></div>
                 <div class="s-data">
-                    <div class="s-num" id="stat-completed">{{ $stats['completed_docs'] }}</div>
+                    <div class="s-num" id="stat-completed">{{ \App\Support\UiNumber::compact($stats['completed_docs']) }}</div>
                     <div class="s-label">Completed</div>
                 </div>
             </div>
@@ -738,7 +851,10 @@
             <!-- Recent Submissions -->
             <div class="panel panel-fixed recent-panel anim" id="recentSubmissionsPanel">
                 <div class="panel-head">
-                    <div class="panel-title">Recent Submissions</div>
+                    <div class="panel-head-left">
+                        <div class="panel-title">Recent Submissions</div>
+                        <span class="table-doc-count">{{ \App\Support\UiNumber::compact($recentDocs->count()) }} showing</span>
+                    </div>
                     <a href="{{ $user->isSuperAdmin() ? '/records/documents' : '/admin/documents' }}" class="panel-link">View all <i class="fas fa-arrow-right" style="font-size:11px"></i></a>
                 </div>
 
@@ -753,15 +869,16 @@
                             <th>Submitted By</th>
                             <th>Status</th>
                             <th>Date</th>
+                            <th class="td-action"></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($recentDocs as $doc)
                         <tr class="doc-row" style="cursor:pointer;" onclick='openDocDetail(@json($doc->tracking_number))'>
-                            <td><span class="t-num">{{ $doc->tracking_number }}</span></td>
-                            <td><span class="t-num" style="color:var(--text-dark)">{{ $doc->reference_number ?: 'N/A' }}</span></td>
-                            <td style="max-width:200px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ $doc->subject }}">{{ $doc->subject }}</div></td>
-                            <td class="t-user">{{ $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest') }}</td>
+                            <td style="font-family:monospace;font-size:12px;font-weight:600;color:var(--primary);white-space:nowrap">{{ $doc->tracking_number }}</td>
+                            <td style="font-family:monospace;font-size:12px;font-weight:600;color:var(--text-dark);white-space:nowrap">{{ $doc->reference_number ?: 'N/A' }}</td>
+                            <td style="max-width:200px"><div class="cell-ellipsis" style="font-weight:600" title="{{ $doc->subject }}">{{ $doc->subject }}</div></td>
+                            <td class="t-user"><div class="cell-ellipsis" style="max-width:170px" title="{{ $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest') }}">{{ $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest') }}</div></td>
                             <td>
                                 @php
                                     $sc = match($doc->status) {
@@ -777,6 +894,7 @@
                                 </span>
                             </td>
                             <td class="t-date">{{ $doc->created_at->format('M d, Y') }}</td>
+                            <td class="td-action"><span class="row-arrow"><i class="fas fa-chevron-right"></i></span></td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -788,8 +906,10 @@
                     @foreach($recentDocs as $doc)
                     <div class="mob-card" onclick='openDocDetail(@json($doc->tracking_number))'>
                         <div class="mob-card-top">
-                            <div class="mob-card-ref">{{ $doc->tracking_number }}</div>
-                        <div style="font-size:10px;color:var(--text-muted);font-family:monospace;margin-top:1px">Ref: {{ $doc->reference_number ?: 'N/A' }}</div>
+                            <div>
+                                <div class="mob-card-ref">{{ $doc->tracking_number }}</div>
+                                <div class="mob-card-track">Ref: {{ $doc->reference_number ?: 'N/A' }}</div>
+                            </div>
                             <span class="mob-card-arrow"><i class="fas fa-chevron-right"></i></span>
                         </div>
                         <div class="mob-card-subject">{{ $doc->subject }}</div>
@@ -803,8 +923,11 @@
                                 };
                             @endphp
                             <span class="pill {{ $sc }}">{{ $doc->statusLabel() }}</span>
-                            <span><i class="fas fa-user"></i>{{ $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest') }}</span>
-                            <span><i class="fas fa-calendar"></i>{{ $doc->created_at->format('M d, Y') }}</span>
+                            <span class="mob-card-date"><i class="fas fa-calendar"></i>{{ $doc->created_at->format('M d, Y') }}</span>
+                        </div>
+                        <div class="mob-card-row">
+                            <i class="fas fa-user"></i>
+                            <span class="cell-ellipsis" title="{{ $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest') }}">{{ $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest') }}</span>
                         </div>
                     </div>
                     @endforeach
@@ -876,10 +999,10 @@
                     </a>
                     @if($user->isSuperAdmin())
                     <a href="/records/documents" class="act">
-                        <div class="act-icon"><i class="fas fa-eye"></i></div>
+                        <div class="act-icon"><i class="fas fa-folder-open"></i></div>
                         <div class="act-body">
-                            <div class="act-title">Records View</div>
-                            <div class="act-desc">View all incoming documents (Records Section)</div>
+                            <div class="act-title">All Documents</div>
+                            <div class="act-desc">View all documents in Records Section</div>
                         </div>
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
@@ -922,15 +1045,8 @@
     (function() {
         function syncRecentPanelHeight() {
             var recentPanel = document.getElementById('recentSubmissionsPanel');
-            var actionsPanel = document.getElementById('quickActionsPanel');
-            if (!recentPanel || !actionsPanel) return;
-
-            if (window.innerWidth <= 1024) {
-                recentPanel.style.minHeight = '';
-                return;
-            }
-
-            recentPanel.style.minHeight = actionsPanel.offsetHeight + 'px';
+            if (!recentPanel) return;
+            recentPanel.style.minHeight = '';
         }
         // ─── Clock ───
         function tick() {
@@ -989,10 +1105,11 @@
                     .then(function(r) { return r.ok ? r.json() : null; })
                     .then(function(d) {
                         if (!d) return;
-                        document.getElementById('stat-users').textContent     = d.total_users;
-                        document.getElementById('stat-docs').textContent      = d.total_documents;
-                        document.getElementById('stat-pending').textContent   = d.pending_docs;
-                        document.getElementById('stat-completed').textContent = d.completed_docs;
+                        var compactCount = window.formatCompactCount || function(v) { return String(v); };
+                        document.getElementById('stat-users').textContent     = compactCount(d.total_users);
+                        document.getElementById('stat-docs').textContent      = compactCount(d.total_documents);
+                        document.getElementById('stat-pending').textContent   = compactCount(d.pending_docs);
+                        document.getElementById('stat-completed').textContent = compactCount(d.completed_docs);
                     })
                     .catch(function() {});
 
@@ -1002,8 +1119,9 @@
                     .then(function(d) {
                         if (!d) return;
                         var el;
-                        el = document.getElementById('os-incoming');  if (el) el.textContent = d.incoming;
-                        el = document.getElementById('os-review');    if (el) el.textContent = d.in_review;
+                        var compactCount = window.formatCompactCount || function(v) { return String(v); };
+                        el = document.getElementById('os-incoming');  if (el) el.textContent = compactCount(d.incoming);
+                        el = document.getElementById('os-review');    if (el) el.textContent = compactCount(d.in_review);
                     })
                     .catch(function() {});
             }
@@ -1013,8 +1131,6 @@
 
         // ─── Office document actions (SuperAdmin with office) ───
         syncRecentPanelHeight();
-        window.addEventListener('load', syncRecentPanelHeight);
-        window.addEventListener('resize', syncRecentPanelHeight);
 
         var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
@@ -1221,23 +1337,39 @@
             document.getElementById('drTitle').textContent = doc.subject || '-';
             document.getElementById('drRef').textContent = 'TN · ' + ref;
             document.getElementById('drTrack').textContent = (trackingNo && trackingNo !== ref) ? ('Ref · ' + trackingNo) : '';
+            document.getElementById('drRef').textContent = 'Ref · ' + ref;
+            document.getElementById('drTrack').textContent = (trackingNo && trackingNo !== ref) ? ('TN · ' + trackingNo) : '';
             var logs = Array.isArray(doc.routing_logs) ? doc.routing_logs : [];
             var tlHtml = '';
             if (!logs.length) {
                 tlHtml = '<div style="color:var(--text-muted);font-size:13px;padding:4px 0">No routing history yet.</div>';
             } else {
+                function _gk(log) {
+                    return (log.action === 'submitted') ? '__pending__' :
+                                   (log.action === 'forwarded' ? (log.from_office || 'Unknown') :
+                                   (log.to_office || log.from_office || 'Unknown'));
+                }
+                var segDurations = [];
+                logs.forEach(function(log) {
+                    if (log.office_duration_human != null) {
+                        segDurations.push({ key: _gk(log), dur: log.office_duration_human });
+                    }
+                });
+                var segDurIdx = segDurations.length - 1;
                 var prevGroupKey = null;
                 logs.slice().reverse().forEach(function(log, idx) {
                     var isLatest = idx === 0;
                     var dc = isLatest ? 'c-latest' : dotClass(log.status_after);
                     var dotIcon = isLatest ? 'fa-arrow-up' : 'fa-check';
-                    var groupKey = (log.action === 'submitted') ? '__pending__' :
-                                   (log.action === 'forwarded' ? (log.from_office || 'Unknown') :
-                                   (log.to_office || log.from_office || 'Unknown'));
+                    var groupKey = _gk(log);
                     var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Acceptance' : groupKey;
                     if (groupKey !== prevGroupKey) {
                         prevGroupKey = groupKey;
-                        tlHtml += '<div class="tl-office-hdr"><div class="tl-dot ' + dc + '" style="margin-right:5px"><i class="fas ' + dotIcon + '" style="font-size:5px"></i></div><span>' + escapeHtml(groupLabel) + '</span></div>';
+                        var dur = null;
+                        if (segDurIdx >= 0 && segDurations[segDurIdx] && segDurations[segDurIdx].key === groupKey) {
+                            dur = segDurations[segDurIdx--].dur;
+                        }
+                        tlHtml += '<div class="tl-office-hdr"><div class="tl-dot ' + dc + '" style="margin-right:5px"><i class="fas ' + dotIcon + '" style="font-size:5px"></i></div><span>' + escapeHtml(groupLabel) + '</span>' + (dur ? '<span class="tl-dur"><i class="fas fa-hourglass-half" style="margin-right:4px;font-size:9px"></i>' + escapeHtml(dur) + '</span>' : '') + '</div>';
                     }
                     tlHtml += '<div class="tl-item">' +
                         (log.performed_by ? '<div class="tl-action">' + escapeHtml(log.performed_by) + '</div>' : '') +

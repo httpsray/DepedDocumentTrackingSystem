@@ -17,7 +17,14 @@
             --primary: #0056b3;
             --primary-dark: #004494;
             --primary-gradient: linear-gradient(135deg, #0056b3 0%, #004494 100%);
-            --accent: #fca311;
+            --blue-soft: #eff6ff;
+            --blue-soft-2: #dbeafe;
+            --blue-soft-3: #e8f1fb;
+            --blue-deep: #1d4ed8;
+            --slate-soft: #f1f5f9;
+            --slate-soft-2: #e2e8f0;
+            --slate: #475569;
+            --slate-dark: #334155;
             --text-dark: #1b263b;
             --text-muted: #64748b;
             --white: #ffffff;
@@ -195,10 +202,10 @@
             flex-shrink: 0;
         }
 
-        .s-icon.blue { background: rgba(0, 86, 179, 0.1); color: var(--primary); }
-        .s-icon.orange { background: rgba(252, 163, 17, 0.12); color: #d97706; }
-        .s-icon.green { background: rgba(22, 163, 74, 0.1); color: #16a34a; }
-        .s-icon.purple { background: rgba(139, 92, 246, 0.1); color: #7c3aed; }
+        .s-icon.blue,
+        .s-icon.orange,
+        .s-icon.green,
+        .s-icon.purple { background: var(--blue-soft); color: var(--primary); }
 
         .s-num {
             font-size: 22px;
@@ -215,6 +222,7 @@
             display: grid;
             grid-template-columns: 1.7fr 1fr;
             gap: 20px;
+            align-items: start;
         }
 
         .panel {
@@ -223,6 +231,143 @@
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
             overflow: hidden;
+        }
+
+        .panel-fixed {
+            display: flex;
+            flex-direction: column;
+            align-self: start;
+            height: 560px;
+        }
+
+        .panel-scroll-body {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .panel-actions {
+            display: flex;
+            flex-direction: column;
+            align-self: start;
+            height: auto;
+        }
+
+        .panel-actions .actions-list {
+            flex: none;
+            min-height: auto;
+            overflow: visible;
+        }
+
+        .panel-fixed .empty-state,
+        .panel-fixed .mob-cards {
+            flex: 1;
+            min-height: 0;
+        }
+
+        .panel-fixed .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .recent-panel .panel-scroll-body .dtable th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .recent-panel {
+            border-radius: 12px;
+        }
+
+        .recent-panel .panel-head {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .recent-panel .panel-head-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .table-doc-count {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .recent-panel .dtable th {
+            text-align: left;
+            padding: 10px 18px;
+            font-size: 10.5px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .recent-panel .dtable td {
+            padding: 13px 18px;
+            font-size: 13px;
+            color: var(--text-dark);
+            border-top: none;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .recent-panel .dtable tbody tr:hover td {
+            background: #f8faff;
+        }
+
+        .recent-panel .dtable tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .recent-panel .dtable th,
+        .recent-panel .dtable td {
+            padding-top: 11px;
+            padding-bottom: 11px;
+        }
+
+        .recent-panel .pill {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+        .recent-panel .td-action {
+            width: 44px;
+            text-align: center;
+        }
+
+        .recent-panel .row-arrow {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            color: #94a3b8;
+            transition: all .15s;
+        }
+
+        .recent-panel .dtable tbody tr:hover .row-arrow {
+            background: var(--primary);
+            color: #fff;
         }
 
         .panel-head {
@@ -286,14 +431,15 @@
             font-weight: 500;
         }
 
-        .pill.pending { background: #fff7ed; color: #9a3412; }
-        .pill.forwarded { background: #eff6ff; color: #1e40af; }
-        .pill.processing { background: #fffbeb; color: #d97706; }
-        .pill.completed { background: #f0fdf4; color: #166534; }
-        .pill.other { background: #f3f4f6; color: #4b5563; }
+        .pill.pending,
+        .pill.forwarded,
+        .pill.processing,
+        .pill.completed,
+        .pill.other { background: #fff7ed; color: #c2410c; }
 
         .t-date { font-size: 12px; color: #94a3b8; }
         .t-user { font-size: 12px; color: var(--text-muted); }
+        .cell-ellipsis { display:block; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
         .empty-state {
             padding: 48px 24px;
@@ -331,6 +477,8 @@
             justify-content: center;
             font-size: 15px;
             flex-shrink: 0;
+            background: var(--blue-soft);
+            color: var(--primary);
         }
 
         .act-body { flex: 1; }
@@ -383,6 +531,7 @@
             margin-bottom: 6px;
         }
         .mob-card-ref { font-size: 12px; font-weight: 600; color: var(--primary); font-family: monospace; }
+        .mob-card-track { font-size: 10px; color: var(--text-muted); font-family: monospace; margin-top: 2px; }
         .mob-card-subject {
             font-size: 14px;
             font-weight: 600;
@@ -403,6 +552,16 @@
             align-items: center;
         }
         .mob-card-meta i { margin-right: 4px; font-size: 11px; }
+        .mob-card-date { display: inline-flex; align-items: center; gap: 4px; }
+        .mob-card-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .mob-card-row i { font-size: 11px; opacity: .75; flex-shrink: 0; }
         .mob-card-arrow {
             display: inline-flex;
             align-items: center;
@@ -427,6 +586,7 @@
         @media (max-width: 1024px) {
             .grid { grid-template-columns: 1fr; }
             .stats { grid-template-columns: repeat(2, 1fr); }
+            .panel-fixed { height: min(72vh, 560px); }
         }
 
         @media (max-width: 900px) {
@@ -434,9 +594,15 @@
             .top-bar{flex-direction:column;align-items:flex-start;gap:14px}
             .greeting-section h1{font-size:20px}
             .live-clock{width:100%}
-            .stats{grid-template-columns:1fr 1fr}
+            .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:16px}
+            .stat-card{min-width:0;padding:13px 12px 12px;gap:10px;flex-direction:column;align-items:flex-start}
+            .s-icon{width:34px;height:34px;border-radius:8px;font-size:14px}
+            .s-data{min-width:0;width:100%}
+            .s-num{font-size:24px;letter-spacing:-.6px}
+            .s-label{font-size:11px;line-height:1.2}
+            .panel-fixed { height: min(68vh, 520px); }
             .dtable-wrap { display: none; }
-            .mob-cards { display: block; }
+            .mob-cards { display: block; padding: 10px 12px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
             .drawer { width: 100%; max-width: 100%; }
             .drawer-meta { grid-template-columns: 1fr; }
             .dm-item { border-right: none; }
@@ -445,45 +611,73 @@
 
         @media (max-width: 400px) {
             .greeting-section h1 { font-size: 18px; }
+            .stat-card{padding:12px 10px 10px;gap:8px}
+            .s-icon{width:30px;height:30px;font-size:13px}
+            .s-num{font-size:22px}
+            .s-label{font-size:10px}
         }
 
         /* Badge colors for office docs */
-        .badge-submitted{background:#eff6ff;color:#2563eb}
-        .badge-received{background:#f0fdf4;color:#16a34a}
-        .badge-in_review{background:#fffbeb;color:#d97706}
+        .badge-submitted,
+        .badge-received,
+        .badge-in_review{background:#fff7ed;color:#c2410c}
 
         /* ─── Receive strip (office style) ─── */
-        .receive-strip{background:#fff;border:1px solid var(--border);border-radius:0;padding:22px 24px}
+        .receive-strip{background:#fff;border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:24px}
         .receive-strip h2{font-size:20px;font-weight:700;color:var(--text-dark);margin:0 0 6px}
         .receive-strip p.rs-sub{font-size:13px;color:var(--text-muted);margin:0 0 18px}
-        .rs-main{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:0}
-        .ref-boxes-row{display:flex;align-items:center;gap:7px;flex:0 1 auto;flex-wrap:nowrap}
-        .ref-box{width:76px;height:60px;text-align:center;font-size:24px;font-weight:700;font-family:'Poppins',sans-serif;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;text-transform:uppercase;background:#f8fafc;transition:border-color .2s,box-shadow .2s,background .2s;color:#1e293b;padding:0;caret-color:#16a34a}
-        .ref-box:focus{border-color:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.13);background:#fff}
-        .ref-box.filled{background:#fff;border-color:#94a3b8}
+        .rs-main{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;margin-bottom:0;min-width:0}
+        .ref-boxes-row{display:flex;align-items:center;gap:7px;flex:1;min-width:0;flex-wrap:nowrap}
+        .ref-box{flex:1;min-width:0;height:clamp(60px,5.8vw,72px);text-align:center;font-size:clamp(21px,2.2vw,26px);font-weight:700;font-family:'Poppins',sans-serif;border:1.5px solid #cbd5e1;border-radius:8px;outline:none;text-transform:uppercase;background:#f8fafc;transition:border-color .2s,box-shadow .2s,background .2s;color:#1e293b;padding:0;caret-color:var(--primary);box-shadow:0 0 0 1px rgba(203,213,225,.75)}
+        .ref-box:focus{border-color:var(--primary);box-shadow:0 0 0 1px rgba(0,86,179,.28),0 0 0 4px rgba(0,86,179,.13);background:#fff}
+        .ref-box.filled{background:#fff;border-color:#94a3b8;box-shadow:0 0 0 1px rgba(148,163,184,.42)}
         .ref-sep{font-size:18px;color:#cbd5e1;user-select:none;padding:0 2px}
         .btn-clear-x{width:36px;height:36px;border:1.5px solid #e2e8f0;border-radius:50%;background:#f8fafc;color:#94a3b8;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;padding:0}
-        .rs-center{width:fit-content;margin:0 auto}
-        .rs-btn-wrap{display:flex;justify-content:center;margin-top:18px}
-        .btn-receive{width:auto;min-width:600px;height:60px;padding:0 32px;border:none;border-radius:8px;background:#16a34a;color:#fff;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s}
-        .btn-receive:hover{background:#15803d}
-        .btn-receive:active{background:#166534}
+        .rs-center{width:100%;margin:0 auto}
+        .rs-btn-wrap{display:flex;justify-content:center;margin-top:18px;gap:12px}
+        .btn-receive{flex:1;height:clamp(54px,5.6vw,60px);padding:0 clamp(16px,2.8vw,32px);border:none;border-radius:8px;background:var(--slate-dark);color:#fff;font-family:'Poppins',sans-serif;font-size:clamp(13px,1.7vw,14px);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s}
+        .btn-receive:hover{background:#243244}
+        .btn-receive:active{background:#1e293b}
         .btn-receive:disabled{opacity:.5;cursor:not-allowed}
+        .btn-scan-qr{flex:1;height:clamp(54px,5.6vw,60px);padding:0 clamp(16px,2.8vw,32px);border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:'Poppins',sans-serif;font-size:clamp(13px,1.7vw,14px);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s;text-decoration:none}
+        .btn-scan-qr:hover{background:var(--primary-dark)}
+        .btn-scan-qr:active{background:#003976}
+        .btn-scan-qr svg{width:18px;height:18px;flex-shrink:0}
         .receive-alert{margin-top:12px;padding:8px 12px;border-radius:7px;font-size:12px;display:none;align-items:center;gap:8px;animation:rcvFadeIn .2s ease-out;width:100%}
         .receive-alert.show{display:flex}
         .receive-alert.err{background:#fef2f2;border-left:3px solid #dc2626;color:#b91c1c}
-        .receive-alert.ok{background:#f0fdf4;border-left:3px solid #16a34a;color:#15803d}
+        .receive-alert.ok{background:var(--blue-soft);border-left:3px solid var(--primary);color:var(--primary-dark)}
         .receive-alert i{font-size:13px;flex-shrink:0}
         .receive-alert span{line-height:1.4}
         @keyframes rcvFadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
-        @media(max-width:768px){
+        @media(max-width:900px){
             .receive-strip{padding:16px 18px}
-            .rs-main{gap:5px}
-            .ref-boxes-row{gap:4px}
-            .ref-box{width:38px;height:44px;font-size:17px}
-            .btn-clear-x{width:32px;height:32px;font-size:12px}
-            .btn-receive{min-width:auto;width:100%;height:44px;font-size:13px}
+            .receive-strip h2{font-size:15px}
+            .rs-main{gap:0;grid-template-columns:minmax(0,1fr)}
+            .ref-boxes-row{gap:3px}
+            .ref-box{height:clamp(52px,13vw,58px);font-size:clamp(17px,4.4vw,19px)}
+            .ref-sep{font-size:13px;padding:0 1px}
+            .btn-clear-x{display:none}
+            .rs-btn-wrap .btn-receive{flex:1 1 0;min-width:0;width:auto;height:48px;padding:0 12px;font-size:12.5px;white-space:nowrap}
+            .rs-btn-wrap .btn-scan-qr{flex:1 1 0;min-width:0;width:auto;height:48px;padding:0 12px;font-size:12.5px;white-space:nowrap}
+            .rs-btn-wrap{flex-direction:row;gap:8px}
         }
+        /* ─── QR Scanner Modal ─── */
+        .scanner-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center;padding:16px}
+        .scanner-overlay.show{display:flex}
+        .scanner-modal{background:#fff;border-radius:16px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:modalIn .18s ease;max-height:90vh;overflow-y:auto}
+        .scanner-modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)}
+        .scanner-modal-head h3{font-size:15px;font-weight:700;color:var(--text-dark)}
+        .scanner-close{width:32px;height:32px;border:none;background:#f1f5f9;border-radius:8px;font-size:16px;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+        .scanner-close:hover{background:#e2e8f0}
+        .scanner-body{padding:20px 22px}
+        .scanner-hint{font-size:12px;color:var(--text-muted);margin-bottom:14px;text-align:left}
+        #qr-reader{width:100%;border-radius:8px;overflow:hidden}
+        #qr-reader video{border-radius:8px}
+        .camera-status{text-align:left;padding:10px 0 4px;font-size:12px;color:var(--text-muted)}
+        .camera-status .cam-steps{margin:4px 0 8px;padding-left:16px;font-size:11.5px;line-height:1.7}
+        .btn-cam-retry{margin-top:6px;padding:6px 16px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600}
+        .btn-cam-retry:hover{background:var(--primary-dark)}
         /* ─── Tracking Drawer ─── */
         .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:400;opacity:0;pointer-events:none;transition:opacity .25s}
         .drawer-overlay.open{opacity:1;pointer-events:all}
@@ -492,8 +686,8 @@
         .drawer-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
         .drawer-head-info{flex:1;min-width:0}
         .drawer-head h3{font-size:16px;font-weight:700;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
-        .drawer-ref{font-size:13px;color:var(--text-muted);font-family:monospace;letter-spacing:.4px;margin-bottom:2px}
-        .drawer-track{font-size:11px;color:var(--text-muted);font-family:monospace;letter-spacing:.4px;margin-bottom:4px}
+        .drawer-ref{font-size:13px;color:var(--text-muted);font-family:Poppins,sans-serif;font-weight:600;letter-spacing:.2px;margin-bottom:2px}
+        .drawer-track{font-size:11px;color:var(--text-muted);font-family:Poppins,sans-serif;font-weight:500;letter-spacing:.2px;margin-bottom:4px}
         .drawer-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#f8fafc;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px;flex-shrink:0;transition:all .15s}
         .drawer-close:hover{background:#fee2e2;color:#dc2626;border-color:#fca5a5}
         .drawer-body{flex:1;overflow-y:auto}
@@ -520,10 +714,11 @@
         .tl-office-hdr{display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--text-dark);text-transform:none;letter-spacing:0;margin:18px 0 8px -7px;padding-left:7px;padding-bottom:6px;position:relative}
         .tl-office-hdr::after{content:'';position:absolute;left:21px;right:0;bottom:0;height:1.5px;background:var(--border)}
         .tl-office-hdr:first-child{margin-top:0}
+        .tl-dur{font-size:10px;font-weight:600;color:#6366f1;background:#eef2ff;border:1px solid #c7d2fe;border-radius:20px;padding:1px 8px;text-transform:none;letter-spacing:0;white-space:nowrap;flex-shrink:0;margin-left:auto}
         .drawer-loader{display:flex;align-items:center;justify-content:center;padding:48px;flex-direction:column;gap:12px;color:var(--text-muted);font-size:13px}
-        .badge-forwarded{background:#f5f3ff;color:#7c3aed}
-        .badge-for_pickup{background:#fff7ed;color:#c2410c}
-        .badge-completed{background:#f0fdf4;color:#15803d}
+        .badge-forwarded,
+        .badge-for_pickup,
+        .badge-completed{background:#fff7ed;color:#c2410c}
     </style>
     <script src="/js/spa.js" defer></script>
     <script src="/js/form-utils.js" defer></script>
@@ -550,19 +745,18 @@
     </div>
     <nav class="sb-nav">
         <span class="nav-section">Overview</span>
-        <a href="/dashboard" class="active"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="/dashboard" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
         <span class="nav-section">Management</span>
         <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
         <a href="/admin/offices"><i class="fas fa-building"></i> Offices</a>
+        <?php if (! ($user->isSuperAdmin())): ?>
         <a href="/admin/documents"><i class="fas fa-folder-open"></i> Documents</a>
-        <?php if($user->isSuperAdmin()): ?>
-        <a href="/records/documents"><i class="fas fa-eye"></i> Records View</a>
-        <span class="nav-section">ICT Unit</span>
-        <a href="/ict/documents"><i class="fas fa-network-wired"></i> ICT Documents</a>
         <?php endif; ?>
         <?php if($user->isSuperAdmin()): ?>
-        <span class="nav-section">Reports</span>
-        <a href="/office/search"><i class="fas fa-chart-line"></i> Reports Dashboard</a>
+        <a href="/records/documents"><i class="fas fa-folder-open"></i> All Documents</a>
+        <span class="nav-section">ICT Unit</span>
+        <a href="/ict/documents"><i class="fas fa-network-wired"></i> ICT Documents</a>
+        <a href="/office/search"><i class="fas fa-chart-line"></i> Reports</a>
         <?php endif; ?>
         <span class="nav-section">My Documents</span>
         <a href="/submit"><i class="fas fa-paper-plane"></i> Submit Document</a>
@@ -591,9 +785,19 @@
 
         <!-- Top Bar -->
         <div class="top-bar anim">
+            <?php
+                $adminWelcomeName = $user->name ?? 'Admin';
+                $adminQueueLabel = $user->office?->name
+                    ?? ($user->isSuperAdmin() ? 'Super Admin' : 'Admin');
+                $adminQueueCopy = $user->isSuperAdmin()
+                    ? "DepEd DOCTRAX &mdash; here's your system overview."
+                    : ($user->office_id
+                        ? $adminQueueLabel . " &mdash; here's your document queue."
+                        : $adminQueueLabel . " &mdash; here's your system overview.");
+            ?>
             <div class="greeting-section">
-                <h1>Admin Dashboard</h1>
-                <p><?php echo e(now()->format('l, F j, Y')); ?></p>
+                <h1>Welcome back, <?php echo e($adminWelcomeName); ?>!</h1>
+                <p><?php echo $adminQueueCopy; ?></p>
             </div>
 
             <div class="live-clock">
@@ -614,28 +818,28 @@
             <div class="stat-card anim">
                 <div class="s-icon blue"><i class="fas fa-users"></i></div>
                 <div class="s-data">
-                    <div class="s-num" id="stat-users"><?php echo e($stats['total_users']); ?></div>
+                    <div class="s-num" id="stat-users"><?php echo e(\App\Support\UiNumber::compact($stats['total_users'])); ?></div>
                     <div class="s-label">Total Users</div>
                 </div>
             </div>
             <div class="stat-card anim">
                 <div class="s-icon purple"><i class="fas fa-file-alt"></i></div>
                 <div class="s-data">
-                    <div class="s-num" id="stat-docs"><?php echo e($stats['total_documents']); ?></div>
+                    <div class="s-num" id="stat-docs"><?php echo e(\App\Support\UiNumber::compact($stats['total_documents'])); ?></div>
                     <div class="s-label">Total Documents</div>
                 </div>
             </div>
             <div class="stat-card anim">
                 <div class="s-icon orange"><i class="fas fa-clock"></i></div>
                 <div class="s-data">
-                    <div class="s-num" id="stat-pending"><?php echo e($stats['pending_docs']); ?></div>
+                    <div class="s-num" id="stat-pending"><?php echo e(\App\Support\UiNumber::compact($stats['pending_docs'])); ?></div>
                     <div class="s-label">Pending</div>
                 </div>
             </div>
             <div class="stat-card anim">
                 <div class="s-icon green"><i class="fas fa-check-circle"></i></div>
                 <div class="s-data">
-                    <div class="s-num" id="stat-completed"><?php echo e($stats['completed_docs']); ?></div>
+                    <div class="s-num" id="stat-completed"><?php echo e(\App\Support\UiNumber::compact($stats['completed_docs'])); ?></div>
                     <div class="s-label">Completed</div>
                 </div>
             </div>
@@ -645,13 +849,17 @@
         <div class="grid">
 
             <!-- Recent Submissions -->
-            <div class="panel anim">
+            <div class="panel panel-fixed recent-panel anim" id="recentSubmissionsPanel">
                 <div class="panel-head">
-                    <div class="panel-title">Recent Submissions</div>
+                    <div class="panel-head-left">
+                        <div class="panel-title">Recent Submissions</div>
+                        <span class="table-doc-count"><?php echo e(\App\Support\UiNumber::compact($recentDocs->count())); ?> showing</span>
+                    </div>
+                    <a href="<?php echo e($user->isSuperAdmin() ? '/records/documents' : '/admin/documents'); ?>" class="panel-link">View all <i class="fas fa-arrow-right" style="font-size:11px"></i></a>
                 </div>
 
                 <?php if($recentDocs->count() > 0): ?>
-                <div class="dtable-wrap">
+                <div class="dtable-wrap panel-scroll-body">
                 <table class="dtable">
                     <thead>
                         <tr>
@@ -661,15 +869,16 @@
                             <th>Submitted By</th>
                             <th>Status</th>
                             <th>Date</th>
+                            <th class="td-action"></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php $__currentLoopData = $recentDocs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $doc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr class="doc-row" style="cursor:pointer;" onclick='openDocDetail(<?php echo json_encode($doc->tracking_number, 15, 512) ?>)'>
-                            <td><span class="t-num"><?php echo e($doc->tracking_number); ?></span></td>
-                            <td><span class="t-num" style="color:var(--text-dark)"><?php echo e($doc->reference_number ?: 'N/A'); ?></span></td>
-                            <td style="max-width:200px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="<?php echo e($doc->subject); ?>"><?php echo e($doc->subject); ?></div></td>
-                            <td class="t-user"><?php echo e($doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest')); ?></td>
+                            <td style="font-family:monospace;font-size:12px;font-weight:600;color:var(--primary);white-space:nowrap"><?php echo e($doc->tracking_number); ?></td>
+                            <td style="font-family:monospace;font-size:12px;font-weight:600;color:var(--text-dark);white-space:nowrap"><?php echo e($doc->reference_number ?: 'N/A'); ?></td>
+                            <td style="max-width:200px"><div class="cell-ellipsis" style="font-weight:600" title="<?php echo e($doc->subject); ?>"><?php echo e($doc->subject); ?></div></td>
+                            <td class="t-user"><div class="cell-ellipsis" style="max-width:170px" title="<?php echo e($doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest')); ?>"><?php echo e($doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest')); ?></div></td>
                             <td>
                                 <?php
                                     $sc = match($doc->status) {
@@ -686,6 +895,7 @@
                                 </span>
                             </td>
                             <td class="t-date"><?php echo e($doc->created_at->format('M d, Y')); ?></td>
+                            <td class="td-action"><span class="row-arrow"><i class="fas fa-chevron-right"></i></span></td>
                         </tr>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </tbody>
@@ -697,8 +907,10 @@
                     <?php $__currentLoopData = $recentDocs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $doc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div class="mob-card" onclick='openDocDetail(<?php echo json_encode($doc->tracking_number, 15, 512) ?>)'>
                         <div class="mob-card-top">
-                            <div class="mob-card-ref"><?php echo e($doc->tracking_number); ?></div>
-                        <div style="font-size:10px;color:var(--text-muted);font-family:monospace;margin-top:1px">Ref: <?php echo e($doc->reference_number ?: 'N/A'); ?></div>
+                            <div>
+                                <div class="mob-card-ref"><?php echo e($doc->tracking_number); ?></div>
+                                <div class="mob-card-track">Ref: <?php echo e($doc->reference_number ?: 'N/A'); ?></div>
+                            </div>
                             <span class="mob-card-arrow"><i class="fas fa-chevron-right"></i></span>
                         </div>
                         <div class="mob-card-subject"><?php echo e($doc->subject); ?></div>
@@ -712,8 +924,11 @@
                                 };
                             ?>
                             <span class="pill <?php echo e($sc); ?>"><?php echo e($doc->statusLabel()); ?></span>
-                            <span><i class="fas fa-user"></i><?php echo e($doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest')); ?></span>
-                            <span><i class="fas fa-calendar"></i><?php echo e($doc->created_at->format('M d, Y')); ?></span>
+                            <span class="mob-card-date"><i class="fas fa-calendar"></i><?php echo e($doc->created_at->format('M d, Y')); ?></span>
+                        </div>
+                        <div class="mob-card-row">
+                            <i class="fas fa-user"></i>
+                            <span class="cell-ellipsis" title="<?php echo e($doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest')); ?>"><?php echo e($doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest')); ?></span>
                         </div>
                     </div>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -728,13 +943,13 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="panel anim">
+            <div class="panel panel-actions anim" id="quickActionsPanel">
                 <div class="panel-head">
                     <div class="panel-title">Quick Actions</div>
                 </div>
                 <div class="actions-list">
                     <a href="/" class="act">
-                        <div class="act-icon" style="background:rgba(0,86,179,0.08);color:var(--primary);"><i class="fas fa-home"></i></div>
+                        <div class="act-icon"><i class="fas fa-home"></i></div>
                         <div class="act-body">
                             <div class="act-title">Home</div>
                             <div class="act-desc">Go to the main landing page</div>
@@ -742,23 +957,25 @@
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
                     <a href="/admin/users" class="act">
-                        <div class="act-icon" style="background:rgba(0,86,179,0.1);color:var(--primary);"><i class="fas fa-users-cog"></i></div>
+                        <div class="act-icon"><i class="fas fa-users-cog"></i></div>
                         <div class="act-body">
                             <div class="act-title">Manage Users</div>
                             <div class="act-desc">View &amp; manage accounts</div>
                         </div>
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
+                    <?php if (! ($user->isSuperAdmin())): ?>
                     <a href="/admin/documents" class="act">
-                        <div class="act-icon" style="background:rgba(252,163,17,0.1);color:#d97706;"><i class="fas fa-folder-open"></i></div>
+                        <div class="act-icon"><i class="fas fa-folder-open"></i></div>
                         <div class="act-body">
                             <div class="act-title">All Documents</div>
                             <div class="act-desc">Browse all submissions</div>
                         </div>
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
+                    <?php endif; ?>
                     <a href="/admin/users?status=pending" class="act">
-                        <div class="act-icon" style="background:#fff7ed;color:#9a3412;"><i class="fas fa-user-clock"></i></div>
+                        <div class="act-icon"><i class="fas fa-user-clock"></i></div>
                         <div class="act-body">
                             <div class="act-title">Pending Accounts</div>
                             <div class="act-desc">Accounts waiting for activation</div>
@@ -766,15 +983,15 @@
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
                     <a href="/admin/offices" class="act">
-                        <div class="act-icon" style="background:rgba(0,86,179,0.08);color:var(--primary);"><i class="fas fa-building"></i></div>
+                        <div class="act-icon"><i class="fas fa-building"></i></div>
                         <div class="act-body">
                             <div class="act-title">Office Accounts</div>
                             <div class="act-desc">Manage internal DepEd office accounts</div>
                         </div>
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
-                    <a href="/admin/documents?status=in_review" class="act">
-                        <div class="act-icon" style="background:#f1f5f9;color:#475569;"><i class="fas fa-inbox"></i></div>
+                    <a href="<?php echo e($user->isSuperAdmin() ? '/records/documents?status=in_review' : '/admin/documents?status=in_review'); ?>" class="act">
+                        <div class="act-icon"><i class="fas fa-inbox"></i></div>
                         <div class="act-body">
                             <div class="act-title">Pending Documents</div>
                             <div class="act-desc">Documents awaiting processing</div>
@@ -783,10 +1000,10 @@
                     </a>
                     <?php if($user->isSuperAdmin()): ?>
                     <a href="/records/documents" class="act">
-                        <div class="act-icon" style="background:#dcfce7;color:#16a34a;"><i class="fas fa-eye"></i></div>
+                        <div class="act-icon"><i class="fas fa-folder-open"></i></div>
                         <div class="act-body">
-                            <div class="act-title">Records View</div>
-                            <div class="act-desc">View all incoming documents (Records Section)</div>
+                            <div class="act-title">All Documents</div>
+                            <div class="act-desc">View all documents in Records Section</div>
                         </div>
                         <i class="fas fa-chevron-right act-arrow"></i>
                     </a>
@@ -827,6 +1044,11 @@
 
     <script>
     (function() {
+        function syncRecentPanelHeight() {
+            var recentPanel = document.getElementById('recentSubmissionsPanel');
+            if (!recentPanel) return;
+            recentPanel.style.minHeight = '';
+        }
         // ─── Clock ───
         function tick() {
             var n = new Date();
@@ -884,10 +1106,11 @@
                     .then(function(r) { return r.ok ? r.json() : null; })
                     .then(function(d) {
                         if (!d) return;
-                        document.getElementById('stat-users').textContent     = d.total_users;
-                        document.getElementById('stat-docs').textContent      = d.total_documents;
-                        document.getElementById('stat-pending').textContent   = d.pending_docs;
-                        document.getElementById('stat-completed').textContent = d.completed_docs;
+                        var compactCount = window.formatCompactCount || function(v) { return String(v); };
+                        document.getElementById('stat-users').textContent     = compactCount(d.total_users);
+                        document.getElementById('stat-docs').textContent      = compactCount(d.total_documents);
+                        document.getElementById('stat-pending').textContent   = compactCount(d.pending_docs);
+                        document.getElementById('stat-completed').textContent = compactCount(d.completed_docs);
                     })
                     .catch(function() {});
 
@@ -897,8 +1120,9 @@
                     .then(function(d) {
                         if (!d) return;
                         var el;
-                        el = document.getElementById('os-incoming');  if (el) el.textContent = d.incoming;
-                        el = document.getElementById('os-review');    if (el) el.textContent = d.in_review;
+                        var compactCount = window.formatCompactCount || function(v) { return String(v); };
+                        el = document.getElementById('os-incoming');  if (el) el.textContent = compactCount(d.incoming);
+                        el = document.getElementById('os-review');    if (el) el.textContent = compactCount(d.in_review);
                     })
                     .catch(function() {});
             }
@@ -907,6 +1131,8 @@
         })();
 
         // ─── Office document actions (SuperAdmin with office) ───
+        syncRecentPanelHeight();
+
         var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         window.acceptDoc = function(id) {
@@ -952,7 +1178,7 @@
                         var prev = container.querySelector('[data-idx="'+(parseInt(this.dataset.idx)-1)+'"]');
                         if(prev){ prev.focus(); prev.select(); }
                     }
-                    if(e.key === 'Enter'){ e.preventDefault(); receiveByReference(); }
+                    if(e.key === 'Enter'){ e.preventDefault(); window.receiveByReference(); }
                     if(e.key === 'ArrowLeft'){
                         var p2 = container.querySelector('[data-idx="'+(parseInt(this.dataset.idx)-1)+'"]');
                         if(p2) p2.focus();
@@ -1002,37 +1228,64 @@
             showReceiveMsg('', '');
         }
 
+        async function submitReceiveLookup(lookupValue, pendingMessage){
+            var receiveBtn = document.getElementById('receiveRefBtn');
+            var scanBtn = document.getElementById('scanQrBtn');
+            var lookup = String(lookupValue || '').trim().toUpperCase();
+
+            if(!lookup){
+                showReceiveMsg('Reference number is required.', 'err');
+                return false;
+            }
+
+            showReceiveMsg(pendingMessage || 'Receiving document...', '');
+            if(receiveBtn) receiveBtn.disabled = true;
+            if(scanBtn) scanBtn.disabled = true;
+
+            try{
+                var res = await fetch('/api/office/documents/receive-by-reference', {
+                    method: 'POST',
+                    headers:{'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
+                    body: JSON.stringify({
+                        reference_number: lookup,
+                        tracking_number: lookup
+                    })
+                });
+                var data = await res.json();
+
+                if(data.success){
+                    showReceiveMsg(data.message || 'Document received successfully.', 'ok');
+                    setTimeout(function(){ location.reload(); }, 700);
+                    return true;
+                }
+
+                showReceiveMsg(data.message || 'Failed to receive document.', 'err');
+            }catch(e){
+                showReceiveMsg('Network error. Please try again.', 'err');
+            }
+
+            if(receiveBtn) receiveBtn.disabled = false;
+            if(scanBtn) scanBtn.disabled = false;
+            return false;
+        }
+
         async function receiveByReference(){
-            var btn = document.getElementById('receiveRefBtn');
             var ref = getRefValue();
             if(ref.length < 8){
-                showReceiveMsg('Please enter all 8 characters of the tracking number.', 'err');
+                showReceiveMsg('Please enter all 8 characters of the reference number.', 'err');
                 var boxes = document.querySelectorAll('#refBoxes .ref-box');
                 for(var i=0;i<boxes.length;i++){
                     if(!boxes[i].value){ boxes[i].focus(); break; }
                 }
                 return;
             }
-            showReceiveMsg('', '');
-            btnLoading(btn);
-            try{
-                var res = await fetch('/api/office/documents/receive-by-reference', {
-                    method: 'POST',
-                    headers:{'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
-                    body: JSON.stringify({ reference_number: ref, tracking_number: ref })
-                });
-                var data = await res.json();
-                if(data.success){
-                    showReceiveMsg(data.message || 'Document received successfully.', 'ok');
-                    setTimeout(function(){ location.reload(); }, 700);
-                    return;
-                }
-                showReceiveMsg(data.message || 'Failed to receive document.', 'err');
-            }catch(e){
-                showReceiveMsg('Network error. Please try again.', 'err');
-            }
-            btn.disabled = false;
+
+            return submitReceiveLookup(ref, 'Receiving document...');
         }
+
+        window.clearRefBoxes = clearRefBoxes;
+        window.submitReceiveLookup = submitReceiveLookup;
+        window.receiveByReference = receiveByReference;
 
         /* ─── Tracking Drawer ─── */
         function escapeHtml(value){
@@ -1085,23 +1338,39 @@
             document.getElementById('drTitle').textContent = doc.subject || '-';
             document.getElementById('drRef').textContent = 'TN · ' + ref;
             document.getElementById('drTrack').textContent = (trackingNo && trackingNo !== ref) ? ('Ref · ' + trackingNo) : '';
+            document.getElementById('drRef').textContent = 'Ref · ' + ref;
+            document.getElementById('drTrack').textContent = (trackingNo && trackingNo !== ref) ? ('TN · ' + trackingNo) : '';
             var logs = Array.isArray(doc.routing_logs) ? doc.routing_logs : [];
             var tlHtml = '';
             if (!logs.length) {
                 tlHtml = '<div style="color:var(--text-muted);font-size:13px;padding:4px 0">No routing history yet.</div>';
             } else {
+                function _gk(log) {
+                    return (log.action === 'submitted') ? '__pending__' :
+                                   (log.action === 'forwarded' ? (log.from_office || 'Unknown') :
+                                   (log.to_office || log.from_office || 'Unknown'));
+                }
+                var segDurations = [];
+                logs.forEach(function(log) {
+                    if (log.office_duration_human != null) {
+                        segDurations.push({ key: _gk(log), dur: log.office_duration_human });
+                    }
+                });
+                var segDurIdx = segDurations.length - 1;
                 var prevGroupKey = null;
                 logs.slice().reverse().forEach(function(log, idx) {
                     var isLatest = idx === 0;
                     var dc = isLatest ? 'c-latest' : dotClass(log.status_after);
                     var dotIcon = isLatest ? 'fa-arrow-up' : 'fa-check';
-                    var groupKey = (log.action === 'submitted') ? '__pending__' :
-                                   (log.action === 'forwarded' ? (log.from_office || 'Unknown') :
-                                   (log.to_office || log.from_office || 'Unknown'));
+                    var groupKey = _gk(log);
                     var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Acceptance' : groupKey;
                     if (groupKey !== prevGroupKey) {
                         prevGroupKey = groupKey;
-                        tlHtml += '<div class="tl-office-hdr"><div class="tl-dot ' + dc + '" style="margin-right:5px"><i class="fas ' + dotIcon + '" style="font-size:5px"></i></div><span>' + escapeHtml(groupLabel) + '</span></div>';
+                        var dur = null;
+                        if (segDurIdx >= 0 && segDurations[segDurIdx] && segDurations[segDurIdx].key === groupKey) {
+                            dur = segDurations[segDurIdx--].dur;
+                        }
+                        tlHtml += '<div class="tl-office-hdr"><div class="tl-dot ' + dc + '" style="margin-right:5px"><i class="fas ' + dotIcon + '" style="font-size:5px"></i></div><span>' + escapeHtml(groupLabel) + '</span>' + (dur ? '<span class="tl-dur"><i class="fas fa-hourglass-half" style="margin-right:4px;font-size:9px"></i>' + escapeHtml(dur) + '</span>' : '') + '</div>';
                     }
                     tlHtml += '<div class="tl-item">' +
                         (log.performed_by ? '<div class="tl-action">' + escapeHtml(log.performed_by) + '</div>' : '') +
@@ -1120,8 +1389,458 @@
                 '<div class="drawer-timeline"><div class="tl">' + tlHtml + '</div></div>';
         }
         document.addEventListener('keydown', function(e){
-            if(e.key === 'Escape'){ closeDrawer(); closeSidebar(); }
+            if(e.key === 'Escape'){
+                var scannerOpen = document.getElementById('scannerOverlay') && document.getElementById('scannerOverlay').classList.contains('show');
+                if(scannerOpen) window.closeScanner();
+                else { closeDrawer(); closeSidebar(); }
+            }
         });
+    })();
+    </script>
+
+    <!-- QR Scanner Modal -->
+    <div class="scanner-overlay" id="scannerOverlay" onclick="if(event.target===this)closeScanner()">
+        <div class="scanner-modal">
+            <div class="scanner-modal-head">
+                <h3>Scan Document QR Code</h3>
+                <button class="scanner-close" onclick="closeScanner()">&#10005;</button>
+            </div>
+            <div class="scanner-body">
+                <div class="scanner-hint">Point your camera at the document's QR code to receive it automatically.</div>
+                <div id="qr-reader"></div>
+                <p class="camera-status" id="cameraStatus">Initializing camera...</p>
+            </div>
+        </div>
+    </div>
+    <script src="/js/html5-qrcode.min.js"></script>
+    <script src="/js/jsqr.js"></script>
+    <script>
+    (function(){
+        if (window.__docTraxAdminScanner && typeof window.__docTraxAdminScanner.cleanup === 'function') {
+            try { window.__docTraxAdminScanner.cleanup(); } catch (e) {}
+        }
+
+        var html5QrCode = null;
+        var scannerRunning = false;
+        var activeStream = null;
+        var scanLoopTimer = null;
+        var barcodeDetector = null;
+        var previewVideo = null;
+        var scanCooldown = false;
+        var scanBuffer = '';
+        var scanTimer = null;
+        var SCAN_IDLE_MS = 80;
+        var scannerDestroyed = false;
+
+        function scannerOverlay(){
+            return document.getElementById('scannerOverlay');
+        }
+
+        function statusEl(){
+            return document.getElementById('cameraStatus');
+        }
+
+        function showStatus(message, isHtml){
+            var el = statusEl();
+            if (!el) return;
+            if (isHtml) { el.innerHTML = message; } else { el.textContent = message; }
+            el.style.display = 'block';
+        }
+
+        function showPermissionDenied(){
+            var localhostUrl = (location.hostname === '127.0.0.1')
+                ? location.href.replace('127.0.0.1', 'localhost')
+                : null;
+            var msg = '<strong style="color:#dc2626;">&#9888; Camera blocked.</strong> ';
+            if (localhostUrl) {
+                msg += 'Your browser blocked camera for <strong>127.0.0.1</strong>. '
+                    + '<a href="' + localhostUrl + '" style="color:#0056b3;font-weight:700;">Open on localhost instead</a> '
+                    + '(same app, camera will work there).';
+            } else {
+                msg += 'Click the <strong>lock icon</strong> in the address bar → Camera → <strong>Allow</strong>, then '
+                    + '<button class="btn-cam-retry" onclick="window.retryCamera()" style="padding:2px 10px;">Retry</button>.';
+            }
+            showStatus(msg, true);
+        }
+
+        function isScannerOpen(){
+            var overlay = scannerOverlay();
+            return !!(overlay && overlay.classList.contains('show'));
+        }
+
+        function onDecodeSuccess(decodedText) {
+            if (scanCooldown) return;
+            scanCooldown = true;
+            setTimeout(function(){ scanCooldown = false; }, 2000);
+            processScannedText(decodedText);
+        }
+
+        function fillRefBoxes(tracking){
+            if (!/^[A-Z0-9]{1,8}$/.test(tracking)) return;
+            var boxes = document.querySelectorAll('#refBoxes .ref-box');
+            if (!boxes.length) return;
+            for (var i = 0; i < boxes.length; i++) {
+                boxes[i].value = '';
+                boxes[i].classList.remove('filled');
+            }
+            for (var j = 0; j < boxes.length && j < tracking.length; j++) {
+                boxes[j].value = tracking[j];
+                boxes[j].classList.add('filled');
+            }
+        }
+
+        function normalizeScannedLookup(text) {
+            var raw = String(text || '').trim();
+            if (!raw) return '';
+
+            try {
+                var parsed = new URL(raw, window.location.origin);
+                var receiveMatch = parsed.pathname.match(/\/receive\/([A-Za-z0-9\-]+)/i);
+                if (receiveMatch) {
+                    raw = receiveMatch[1];
+                } else {
+                    var lookupParam = parsed.searchParams.get('ref')
+                        || parsed.searchParams.get('tracking')
+                        || parsed.searchParams.get('reference');
+                    if (lookupParam) raw = lookupParam;
+                }
+            } catch (e) {}
+
+            var fallbackMatch = raw.match(/\/receive\/([A-Za-z0-9\-]+)/i);
+            if (fallbackMatch) raw = fallbackMatch[1];
+
+            raw = raw.trim().toUpperCase();
+            if (!raw) return '';
+
+            var compact = raw.replace(/[^A-Z0-9]/g, '');
+            if (/^[A-Z0-9]{8}$/.test(compact)) {
+                return compact;
+            }
+
+            return raw.replace(/[^A-Z0-9\-]/g, '').replace(/^-+|-+$/g, '');
+        }
+
+        function processScannedText(text) {
+            var lookup = normalizeScannedLookup(text);
+            if (!lookup || lookup.length < 8) return;
+
+            window.closeScanner();
+            fillRefBoxes(lookup);
+            window.submitReceiveLookup(lookup, 'QR detected. Receiving document...');
+        }
+
+        window.openScanner = function() {
+            var overlay = scannerOverlay();
+            if (!overlay) return;
+            scannerDestroyed = false;
+            overlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            scanCooldown = false;
+            scanBuffer = '';
+            if (scanTimer) {
+                clearTimeout(scanTimer);
+                scanTimer = null;
+            }
+            stopCamera();
+            startCamera();
+        };
+
+        window.closeScanner = function() {
+            var overlay = scannerOverlay();
+            if (overlay) overlay.classList.remove('show');
+            document.body.style.overflow = '';
+            stopCamera();
+        };
+
+        function readerEl() {
+            return document.getElementById('qr-reader');
+        }
+
+        function clearReader() {
+            var el = readerEl();
+            if (el) el.innerHTML = '';
+            previewVideo = null;
+        }
+
+        function isPermDenied(e) {
+            var s = String(e || '').toLowerCase();
+            return s.indexOf('notallowed') !== -1 || s.indexOf('permission') !== -1 || s.indexOf('denied') !== -1;
+        }
+
+        function normalizeCameraError(err) {
+            var raw = String((err && (err.name || err.message)) || err || '').toLowerCase();
+            if (raw.indexOf('notallowed') !== -1 || raw.indexOf('permission') !== -1 || raw.indexOf('denied') !== -1) return 'denied';
+            if (raw.indexOf('notfound') !== -1 || raw.indexOf('devicesnotfound') !== -1 || raw.indexOf('overconstrained') !== -1 || raw.indexOf('constraint') !== -1) return 'notfound';
+            if (raw.indexOf('notreadable') !== -1 || raw.indexOf('trackstart') !== -1 || raw.indexOf('could not start') !== -1 || raw.indexOf('device in use') !== -1 || raw.indexOf('in use') !== -1) return 'busy';
+            if (raw.indexOf('security') !== -1 || raw.indexOf('secure') !== -1) return 'security';
+            return raw || 'unknown';
+        }
+
+        function getCameraStream(constraints) {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                return Promise.reject(new Error('GET_USER_MEDIA_UNAVAILABLE'));
+            }
+            return navigator.mediaDevices.getUserMedia({ video: constraints, audio: false });
+        }
+
+        function listVideoInputs() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+                return Promise.resolve([]);
+            }
+            return navigator.mediaDevices.enumerateDevices()
+                .then(function(devices) {
+                    return (devices || []).filter(function(device) {
+                        return device && device.kind === 'videoinput';
+                    });
+                })
+                .catch(function() {
+                    return [];
+                });
+        }
+
+        function cameraScore(device, isMobile) {
+            var label = String((device && device.label) || '').toLowerCase();
+            var score = 0;
+
+            if (isMobile) {
+                if (/back|rear|environment|world|traseira|trasera|externa/.test(label)) score += 50;
+                if (/front|user|selfie|facetime|integrated|frontal|frente/.test(label)) score -= 25;
+            } else {
+                if (/usb|external|rear|back|environment/.test(label)) score += 20;
+                if (/integrated|front|facetime|user/.test(label)) score += 5;
+            }
+
+            return score;
+        }
+
+        function buildCameraAttempts(isMobile, devices) {
+            var attempts = [];
+            var seen = {};
+            var hdHint = { width: { ideal: 1280 }, height: { ideal: 720 } };
+
+            function addAttempt(constraints) {
+                var key = typeof constraints === 'boolean'
+                    ? ('bool:' + constraints)
+                    : JSON.stringify(constraints);
+                if (seen[key]) return;
+                seen[key] = true;
+                attempts.push(constraints);
+            }
+
+            if (isMobile) {
+                addAttempt({
+                    facingMode: { ideal: 'environment' },
+                    width: hdHint.width,
+                    height: hdHint.height
+                });
+            }
+
+            (devices || []).slice().sort(function(a, b) {
+                return cameraScore(b, isMobile) - cameraScore(a, isMobile);
+            }).forEach(function(device) {
+                if (!device.deviceId) return;
+                addAttempt({
+                    deviceId: { exact: device.deviceId },
+                    width: hdHint.width,
+                    height: hdHint.height
+                });
+            });
+
+            addAttempt(true);
+            addAttempt({
+                facingMode: 'user',
+                width: hdHint.width,
+                height: hdHint.height
+            });
+
+            return attempts;
+        }
+
+        function attachPreview(stream) {
+            clearReader();
+            var el = readerEl();
+            if (!el) return Promise.reject(new Error('QR_READER_MISSING'));
+            var video = document.createElement('video');
+            video.setAttribute('autoplay', '');
+            video.setAttribute('muted', '');
+            video.setAttribute('playsinline', '');
+            video.muted = true;
+            video.srcObject = stream;
+            video.style.width = '100%';
+            video.style.display = 'block';
+            video.style.borderRadius = '8px';
+            el.appendChild(video);
+            previewVideo = video;
+            return video.play().catch(function() {}).then(function(){ return video; });
+        }
+
+        function startDetectLoop() {
+            if (typeof jsQR === 'undefined') {
+                showStatus('QR library not loaded. Please refresh the page.');
+                return;
+            }
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            function scanFrame() {
+                if (!scannerRunning || !previewVideo) return;
+                if (previewVideo.readyState < 2 || !previewVideo.videoWidth) {
+                    if (scannerRunning) scanLoopTimer = setTimeout(scanFrame, 200);
+                    return;
+                }
+                try {
+                    canvas.width = previewVideo.videoWidth;
+                    canvas.height = previewVideo.videoHeight;
+                    ctx.drawImage(previewVideo, 0, 0);
+                    var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    var code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+                    if (code && code.data) {
+                        onDecodeSuccess(code.data);
+                        return;
+                    }
+                } catch (e) {}
+                if (scannerRunning) scanLoopTimer = setTimeout(scanFrame, 150);
+            }
+            scanLoopTimer = setTimeout(scanFrame, 600);
+        }
+
+        window.retryCamera = function() {
+            stopCamera();
+            startCamera();
+        };
+
+        function startCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showStatus('Camera not available. Please use Chrome or Edge.');
+                return;
+            }
+
+            function doStart() {
+                showStatus('Requesting camera access...');
+                var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                listVideoInputs().then(function(devices) {
+                    var attempts = buildCameraAttempts(isMobile, devices);
+                    var seenFailures = {};
+
+                    function finishFailure() {
+                        if (seenFailures.security) {
+                            showStatus('Camera access requires HTTPS or localhost. Open this app on localhost or HTTPS and try again.');
+                            return;
+                        }
+                        if (seenFailures.notfound) {
+                            showStatus('No available camera was found on this device. Allow camera access, then reopen the scanner to try another camera.');
+                            return;
+                        }
+                        showStatus('Camera could not start. Close any app using your webcam (Zoom, Teams, OBS), then reload the page.');
+                    }
+
+                    function tryNext(idx) {
+                        if (idx >= attempts.length) {
+                            finishFailure();
+                            return;
+                        }
+
+                        getCameraStream(attempts[idx])
+                            .then(function(stream) {
+                                activeStream = stream;
+                                return attachPreview(stream);
+                            })
+                            .then(function() {
+                                scannerRunning = true;
+                                showStatus('Camera live. Point it at a QR code.');
+                                startDetectLoop();
+                            })
+                            .catch(function(err) {
+                                var kind = normalizeCameraError(err);
+                                seenFailures[kind] = true;
+                                if (kind === 'denied') { showPermissionDenied(); return; }
+                                if (kind === 'busy') { showStatus('Camera is in use by another app. Close Zoom, Teams, or OBS and retry.'); return; }
+                                tryNext(idx + 1);
+                            });
+                    }
+
+                    tryNext(0);
+                });
+            }
+
+            doStart();
+        }
+
+        function stopCamera() {
+            scannerRunning = false;
+            if (scanLoopTimer) {
+                clearTimeout(scanLoopTimer);
+                scanLoopTimer = null;
+            }
+            if (activeStream) {
+                activeStream.getTracks().forEach(function(track) { track.stop(); });
+                activeStream = null;
+            }
+            if (html5QrCode) {
+                try { html5QrCode.stop(); } catch (e) {}
+                try { html5QrCode.clear(); } catch (e2) {}
+            }
+            clearReader();
+        }
+
+        function handleScannerKeydown(e) {
+            if (e.key === 'Escape' && isScannerOpen()) {
+                e.preventDefault();
+                window.closeScanner();
+                return;
+            }
+
+            if (!isScannerOpen()) return;
+            if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+            if (e.key === 'Enter') {
+                if (scanBuffer.length) {
+                    var payload = scanBuffer;
+                    scanBuffer = '';
+                    if (scanTimer) {
+                        clearTimeout(scanTimer);
+                        scanTimer = null;
+                    }
+                    processScannedText(payload);
+                }
+                return;
+            }
+
+            if (e.key.length === 1) {
+                scanBuffer += e.key;
+                if (scanTimer) clearTimeout(scanTimer);
+                scanTimer = setTimeout(function(){
+                    if (scanBuffer.length >= 6) processScannedText(scanBuffer);
+                    scanBuffer = '';
+                    scanTimer = null;
+                }, SCAN_IDLE_MS);
+            }
+        }
+
+        function destroyScanner() {
+            if (scannerDestroyed) return;
+            scannerDestroyed = true;
+            scanCooldown = false;
+            scanBuffer = '';
+            if (scanTimer) {
+                clearTimeout(scanTimer);
+                scanTimer = null;
+            }
+            stopCamera();
+            var overlay = scannerOverlay();
+            if (overlay) overlay.classList.remove('show');
+            if (document.body) document.body.style.overflow = '';
+            document.removeEventListener('keydown', handleScannerKeydown);
+            window.removeEventListener('spa:before-swap', destroyScanner);
+            window.removeEventListener('pagehide', destroyScanner);
+            if (window.__docTraxAdminScanner && window.__docTraxAdminScanner.cleanup === destroyScanner) {
+                window.__docTraxAdminScanner = null;
+            }
+        }
+
+        window.__docTraxAdminScanner = { cleanup: destroyScanner };
+        window.addEventListener('spa:before-swap', destroyScanner);
+        window.addEventListener('pagehide', destroyScanner);
+        document.addEventListener('keydown', handleScannerKeydown);
     })();
     </script>
 </body>

@@ -80,6 +80,39 @@
         return str.replace(/[&<>"']/g, function (c) { return map[c]; });
     };
 
+    /**
+     * Compact large counters so stat cards stay stable.
+     * Examples: 1400 -> 1.4K, 10000 -> 10K, 1250000 -> 1.3M
+     */
+    window.formatCompactCount = function (value) {
+        if (value === null || value === undefined || value === '') return '0';
+
+        var normalized = typeof value === 'string' ? value.replace(/,/g, '').trim() : value;
+        var num = Number(normalized);
+        if (!isFinite(num)) return String(value);
+
+        var abs = Math.abs(num);
+        if (abs < 1000) return String(Math.round(num));
+
+        var units = ['K', 'M', 'B', 'T'];
+        var unitIndex = -1;
+
+        while (abs >= 1000 && unitIndex < units.length - 1) {
+            num = num / 1000;
+            abs = abs / 1000;
+            unitIndex++;
+        }
+
+        var rounded = Number(num.toFixed(1));
+        if (Math.abs(rounded) >= 1000 && unitIndex < units.length - 1) {
+            num = rounded / 1000;
+            unitIndex++;
+        }
+
+        var formatted = num.toFixed(1).replace(/\.0$/, '');
+        return formatted + units[unitIndex];
+    };
+
     // ── Fetch Wrapper with Rate Limiting ──────────────────────────────────────
     var _fetchTimestamps = {};
     var FETCH_COOLDOWN = 1000; // 1s minimum between identical requests
@@ -211,6 +244,122 @@
     });
     mo.observe(document.documentElement, { childList: true, subtree: true });
 
+    // Live SPA search/filter forms
+    // Mark GET filter forms with data-live-search to auto-submit through the SPA
+    // layer while typing/changing filters, without a full page refresh.
+
+    var LIVE_FORM_SELECTOR = 'form[data-live-search][method="GET"]';
+
+    function buildLiveFormUrl(form) {
+        var action = form.getAttribute('action') || location.pathname;
+        var url = new URL(action, location.origin);
+        var formData = new FormData(form);
+        var params = new URLSearchParams();
+
+        formData.forEach(function (value, key) {
+            var normalized = typeof value === 'string' ? window.sanitizeInput(value) : value;
+            if (normalized === null || normalized === undefined) return;
+            if (String(normalized).trim() === '') return;
+            params.append(key, String(normalized).trim());
+        });
+
+        url.search = params.toString();
+        return url.toString();
+    }
+
+    function submitLiveForm(form) {
+        var url = buildLiveFormUrl(form);
+        var currentUrl = location.href.split('#')[0];
+
+        if (form.dataset.liveSearchLastUrl === url && url === currentUrl) {
+            return Promise.resolve(false);
+        }
+
+        if (form._liveSearchController && typeof form._liveSearchController.abort === 'function') {
+            form._liveSearchController.abort();
+        }
+        form._liveSearchController = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+        form.dataset.liveSearchLastUrl = url;
+
+        if (typeof window.spaNavigate === 'function') {
+            return window.spaNavigate(url, {
+                historyMode: 'replace',
+                fallbackUrl: url,
+                silent: true,
+                preserveScroll: true,
+                preserveFocus: true,
+                signal: form._liveSearchController ? form._liveSearchController.signal : undefined
+            });
+        }
+
+        window.location.href = url;
+        return Promise.resolve(false);
+    }
+
+    function bindLiveForm(form) {
+        if (!form || form.dataset.liveSearchBound === '1') return;
+        form.dataset.liveSearchBound = '1';
+        form.dataset.liveSearchLastUrl = location.href.split('#')[0];
+
+        var delay = parseInt(form.getAttribute('data-live-debounce') || '280', 10);
+        if (isNaN(delay) || delay < 0) delay = 280;
+
+        var debouncedSubmit = window.debounce(function () {
+            submitLiveForm(form);
+        }, delay);
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            submitLiveForm(form);
+        });
+
+        form.querySelectorAll('input, textarea, select').forEach(function (field) {
+            if (!field || field.hasAttribute('data-no-live-search')) return;
+
+            var tag = field.tagName;
+            var type = (field.getAttribute('type') || '').toLowerCase();
+
+            if (tag === 'SELECT' || type === 'date' || type === 'checkbox' || type === 'radio') {
+                field.addEventListener('change', function () {
+                    submitLiveForm(form);
+                });
+                return;
+            }
+
+            if (type === 'hidden') return;
+
+            if (tag === 'TEXTAREA' || type === 'text' || type === 'search' || type === '') {
+                field.addEventListener('input', debouncedSubmit);
+                field.addEventListener('change', function () {
+                    submitLiveForm(form);
+                });
+            }
+        });
+    }
+
+    function initLiveForms() {
+        document.querySelectorAll(LIVE_FORM_SELECTOR).forEach(bindLiveForm);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initLiveForms);
+    } else {
+        initLiveForms();
+    }
+
+    var liveFormObserver = new MutationObserver(function (mutations) {
+        mutations.forEach(function (m) {
+            m.addedNodes.forEach(function (node) {
+                if (node.nodeType !== 1) return;
+                if (node.matches && node.matches(LIVE_FORM_SELECTOR)) bindLiveForm(node);
+                if (node.querySelectorAll) {
+                    node.querySelectorAll(LIVE_FORM_SELECTOR).forEach(bindLiveForm);
+                }
+            });
+        });
+    });
+    liveFormObserver.observe(document.documentElement, { childList: true, subtree: true });
+
     // ── Form Submit Cooldown (auto-apply to search forms) ─────────────────────
     // Enforces a 2-second cooldown on any <form method="GET"> submission to
     // prevent rapid-fire search requests. Skips forms with data-no-cooldown.
@@ -224,6 +373,7 @@
 
         var method = (form.getAttribute('method') || 'POST').toUpperCase();
         if (method !== 'GET') return; // only apply to search/filter forms
+        if (form.hasAttribute('data-live-search')) return;
         if (form.hasAttribute('data-no-cooldown')) return;
 
         var key = form.id || form.getAttribute('action') || 'default';

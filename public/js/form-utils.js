@@ -295,6 +295,7 @@
     document.addEventListener('submit', function (e) {
         var form = e.target;
         if (!form || form.tagName !== 'FORM') return;
+        if (form.hasAttribute('data-live-search')) return;
 
         // Find the submit trigger
         var btn = form.querySelector('button[type="submit"], button:not([type])');

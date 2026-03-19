@@ -11,46 +11,49 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root{--primary:#0056b3;--primary-dark:#004494;--bg:#f0f2f5;--border:#e2e8f0;--text-dark:#1b263b;--text-muted:#64748b}
+        :root{--primary:#0056b3;--primary-dark:#004494;--blue-soft:#eff6ff;--slate-dark:#334155;--bg:#f0f2f5;--border:#e2e8f0;--text-dark:#1b263b;--text-muted:#64748b}
         *{margin:0;padding:0;box-sizing:border-box}
         body{background:var(--bg);font-family:'Poppins',sans-serif;min-height:100vh;display:flex;flex-direction:column}
 
         /* ─── Receive Strip ─── */
-        .receive-strip{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:20px}
-        .receive-strip h2{font-size:17px;font-weight:700;color:var(--text-dark);margin:0 0 4px}
-        .receive-strip p.rs-sub{font-size:12px;color:var(--text-muted);margin:0 0 14px}
-        .rs-main{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:0}
+        .receive-strip{background:#fff;border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:24px}
+        .receive-strip h2{font-size:20px;font-weight:700;color:var(--text-dark);margin:0 0 6px}
+        .receive-strip p.rs-sub{font-size:13px;color:var(--text-muted);margin:0 0 18px}
+        .rs-main{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;margin-bottom:0;min-width:0}
         .ref-boxes-row{display:flex;align-items:center;gap:7px;flex:1;min-width:0;flex-wrap:nowrap}
-        .ref-box{flex:1;min-width:0;height:50px;text-align:center;font-size:20px;font-weight:700;font-family:'Poppins',sans-serif;border:1.5px solid #e2e8f0;border-radius:8px;outline:none;text-transform:uppercase;background:#f8fafc;transition:border-color .2s,box-shadow .2s,background .2s;color:#1e293b;padding:0;caret-color:#16a34a}
-        .ref-box:focus{border-color:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.13);background:#fff}
-        .ref-box.filled{background:#fff;border-color:#94a3b8}
+        .ref-box{flex:1;min-width:0;height:clamp(60px,5.8vw,72px);text-align:center;font-size:clamp(21px,2.2vw,26px);font-weight:700;font-family:'Poppins',sans-serif;border:1.5px solid #cbd5e1;border-radius:8px;outline:none;text-transform:uppercase;background:#f8fafc;transition:border-color .2s,box-shadow .2s,background .2s;color:#1e293b;padding:0;caret-color:var(--primary);box-shadow:0 0 0 1px rgba(203,213,225,.75)}
+        .ref-box:focus{border-color:var(--primary);box-shadow:0 0 0 1px rgba(0,86,179,.28),0 0 0 4px rgba(0,86,179,.13);background:#fff}
+        .ref-box.filled{background:#fff;border-color:#94a3b8;box-shadow:0 0 0 1px rgba(148,163,184,.42)}
         .ref-sep{font-size:18px;color:#cbd5e1;user-select:none;padding:0 2px}
         .btn-clear-x{width:36px;height:36px;border:1.5px solid #e2e8f0;border-radius:50%;background:#f8fafc;color:#94a3b8;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;padding:0}
         .rs-center{width:100%;margin:0 auto}
-        .rs-btn-wrap{display:flex;justify-content:center;margin-top:14px;gap:12px}
-        .btn-receive{flex:1;height:48px;padding:0 32px;border:none;border-radius:8px;background:#16a34a;color:#fff;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s}
-        .btn-receive:hover{background:#15803d}
-        .btn-receive:active{background:#166534}
+        .rs-btn-wrap{display:flex;justify-content:center;margin-top:18px;gap:12px}
+        .btn-receive{flex:1;height:clamp(54px,5.6vw,60px);padding:0 clamp(16px,2.8vw,32px);border:none;border-radius:8px;background:var(--slate-dark);color:#fff;font-family:'Poppins',sans-serif;font-size:clamp(13px,1.7vw,14px);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s}
+        .btn-receive:hover{background:#243244}
+        .btn-receive:active{background:#1e293b}
         .btn-receive:disabled{opacity:.5;cursor:not-allowed}
-        .btn-scan-qr{flex:1;height:48px;padding:0 32px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s;text-decoration:none}
+        .btn-scan-qr{flex:1;height:clamp(54px,5.6vw,60px);padding:0 clamp(16px,2.8vw,32px);border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:'Poppins',sans-serif;font-size:clamp(13px,1.7vw,14px);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s;text-decoration:none}
         .btn-scan-qr:hover{background:var(--primary-dark)}
         .btn-scan-qr:active{background:#003976}
+        .btn-scan-qr svg{width:18px;height:18px;flex-shrink:0}
         .receive-alert{margin-top:12px;padding:8px 12px;border-radius:7px;font-size:12px;display:none;align-items:center;gap:8px;animation:rcvFadeIn .2s ease-out;width:100%}
         .receive-alert.show{display:flex}
         .receive-alert.err{background:#fef2f2;border-left:3px solid #dc2626;color:#b91c1c}
-        .receive-alert.ok{background:#f0fdf4;border-left:3px solid #16a34a;color:#15803d}
+        .receive-alert.ok{background:var(--blue-soft);border-left:3px solid var(--primary);color:var(--primary-dark)}
         .receive-alert i{font-size:13px;flex-shrink:0}
         .receive-alert span{line-height:1.4}
         @keyframes rcvFadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
         @media(max-width:900px){
             .receive-strip{padding:16px 18px}
-            .rs-main{gap:5px}
+            .receive-strip h2{font-size:15px}
+            .rs-main{gap:0;grid-template-columns:minmax(0,1fr)}
             .ref-boxes-row{gap:3px}
-            .ref-box{height:40px;font-size:14px}
+            .ref-box{height:clamp(52px,13vw,58px);font-size:clamp(17px,4.4vw,19px)}
             .ref-sep{font-size:13px;padding:0 1px}
-            .btn-clear-x{width:32px;height:32px;font-size:12px}
-            .btn-receive{min-width:auto;width:100%;height:44px;font-size:13px}
-            .btn-scan-qr{min-width:auto;width:100%;height:44px;font-size:13px}
+            .btn-clear-x{display:none}
+            .rs-btn-wrap .btn-receive{flex:1 1 0;min-width:0;width:auto;height:48px;padding:0 12px;font-size:12.5px;white-space:nowrap}
+            .rs-btn-wrap .btn-scan-qr{flex:1 1 0;min-width:0;width:auto;height:48px;padding:0 12px;font-size:12.5px;white-space:nowrap}
+            .rs-btn-wrap{flex-direction:row;gap:8px}
         }
         /* ─── QR Scanner Modal ─── */
         .scanner-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center;padding:16px}
@@ -65,6 +68,9 @@
         #qr-reader{width:100%;border-radius:8px;overflow:hidden}
         #qr-reader video{border-radius:8px}
         .camera-status{text-align:left;padding:10px 0 4px;font-size:12px;color:var(--text-muted)}
+        .camera-status .cam-steps{margin:4px 0 8px;padding-left:16px;font-size:11.5px;line-height:1.7}
+        .btn-cam-retry{margin-top:6px;padding:6px 16px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600}
+        .btn-cam-retry:hover{background:var(--primary-dark)}
 
         /* Page header */
         .page-header{margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border)}
@@ -133,18 +139,21 @@
 
         /* ─── Stats ─── */
         .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
-        .stat-card{background:#fff;border-radius:10px;padding:16px 18px;box-shadow:none;border:1px solid var(--border);position:relative;overflow:hidden}
-        .stat-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
-        .stat-card.c-blue::before{background:#3b82f6}
-        .stat-card.c-amber::before{background:#f59e0b}
-        .stat-card.c-green::before{background:#22c55e}
-        .stat-card.c-emerald::before{background:#10b981}
-        .stat-label{font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+        .stat-card{background:#fff;border-radius:12px;padding:18px 18px 16px;box-shadow:none;border:1px solid var(--border);position:relative;overflow:hidden}
+        .stat-label{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px}
+        .stat-card.c-blue .stat-label{background:#eff6ff;color:#2563eb}
+        .stat-card.c-amber .stat-label{background:#fffbeb;color:#d97706}
+        .stat-card.c-green .stat-label{background:#fffbeb;color:#d97706}
+        .stat-card.c-emerald .stat-label{background:#f1f5f9;color:#64748b}
         .stat-num{font-size:28px;font-weight:800;color:var(--text-dark);line-height:1;letter-spacing:-1px}
         .stat-sub{font-size:11px;color:var(--text-muted);margin-top:6px}
 
         /* ─── Table card ─── */
         .table-card{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden}
+        .dashboard-table-card.has-list{display:flex;flex-direction:column;max-height:clamp(520px,72vh,820px)}
+        .dashboard-table-card.has-list .table-card-scroll{display:block;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+        .dashboard-table-card.has-list .table-card-scroll thead th{position:sticky;top:0;z-index:2}
+        .dashboard-table-card.has-list .pagination-bar{flex-shrink:0}
         .table-head{padding:16px 20px 14px;border-bottom:1px solid var(--border)}
         .table-head-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
         .table-title{font-size:14px;font-weight:700;color:var(--text-dark)}
@@ -171,16 +180,16 @@
         .t-num-sub{font-size:10px;color:var(--text-muted);display:block;font-family:monospace;margin-top:1px}
         .t-date{font-size:12px;color:var(--text-muted)}
         .badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
-        .badge-submitted{background:#eff6ff;color:#2563eb}
-        .badge-received{background:#ecfdf5;color:#059669}
-        .badge-in_review{background:#fffbeb;color:#d97706}
-        .badge-on_hold{background:#fff7ed;color:#ea580c}
-        .badge-forwarded{background:#f5f3ff;color:#7c3aed}
-        .badge-completed{background:#f0fdf4;color:#15803d}
-        .badge-for_pickup{background:#fff7ed;color:#c2410c}
-        .badge-returned{background:#fef2f2;color:#dc2626}
-        .badge-cancelled{background:#f8fafc;color:#64748b}
-        .badge-archived{background:#f1f5f9;color:#9ca3af}
+        .badge-submitted,
+        .badge-received,
+        .badge-in_review,
+        .badge-on_hold,
+        .badge-forwarded,
+        .badge-completed,
+        .badge-for_pickup,
+        .badge-returned,
+        .badge-cancelled,
+        .badge-archived{background:#fff7ed;color:#c2410c}
         .td-action{width:140px;text-align:center}
         .btn-view{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;text-decoration:none;transition:background .2s}
         .btn-view:hover{background:var(--primary-dark)}
@@ -189,6 +198,7 @@
         .btn-manage{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;background:#334155;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;text-decoration:none;transition:background .2s}
         .btn-manage:hover{background:#1e293b}
         tr.doc-row{cursor:pointer}
+        .cell-ellipsis{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
         /* ─── Drawer ─── */
         .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:998;display:none;backdrop-filter:blur(2px)}
@@ -247,19 +257,21 @@
             .stats-grid{grid-template-columns:1fr 1fr}
             .page-header-top{flex-direction:column;align-items:flex-start;gap:10px}
             .live-clock{display:none}
-            .receive-strip{padding:14px 16px}
+            .receive-strip{padding:16px 18px}
             .receive-strip h2{font-size:15px}
-            .rs-main{gap:5px}
+            .rs-main{gap:0;grid-template-columns:minmax(0,1fr)}
             .ref-boxes-row{gap:3px}
-            .ref-box{height:40px;font-size:14px}
+            .ref-box{height:clamp(52px,13vw,58px);font-size:clamp(17px,4.4vw,19px)}
             .ref-sep{font-size:13px;padding:0 1px}
-            .btn-clear-x{width:32px;height:32px;font-size:12px}
-            .btn-receive{min-width:auto;width:100%;height:42px;font-size:12px}
-            .btn-scan-qr{min-width:auto;width:100%;height:42px;font-size:12px}
+            .btn-clear-x{display:none}
+            .rs-btn-wrap .btn-receive{flex:1 1 0;min-width:0;width:auto;height:48px;padding:0 12px;font-size:12.5px;white-space:nowrap}
+            .rs-btn-wrap .btn-scan-qr{flex:1 1 0;min-width:0;width:auto;height:48px;padding:0 12px;font-size:12.5px;white-space:nowrap}
+            .rs-btn-wrap{flex-direction:row;gap:8px}
             .stat-card{padding:14px 14px}
             .stat-num{font-size:24px}
             .stat-label{font-size:10px;margin-bottom:6px}
             .site-footer{flex-direction:column;gap:6px;text-align:center;padding:16px 5%}
+            .dashboard-table-card.has-list{max-height:min(68vh,560px)}
             /* Table head */
             .table-head{padding:12px 14px 12px}
             .filters input{font-size:12px;padding:8px 10px 8px 32px}
@@ -305,19 +317,18 @@
     </div>
     <nav class="sb-nav">
         <span class="nav-section">Overview</span>
-        <a href="/dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
         <span class="nav-section">Management</span>
         <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
         <a href="/admin/offices"><i class="fas fa-building"></i> Offices</a>
+        <?php if (! ($user->isSuperAdmin())): ?>
         <a href="/admin/documents"><i class="fas fa-folder-open"></i> Documents</a>
-        <?php if($user->isSuperAdmin()): ?>
-        <a href="/records/documents"><i class="fas fa-eye"></i> Records View</a>
-        <span class="nav-section">ICT Unit</span>
-        <a href="/ict/documents" class="active"><i class="fas fa-network-wired"></i> ICT Documents</a>
         <?php endif; ?>
         <?php if($user->isSuperAdmin()): ?>
-        <span class="nav-section">Reports</span>
-        <a href="/office/search"><i class="fas fa-chart-line"></i> Reports Dashboard</a>
+        <a href="/records/documents"><i class="fas fa-folder-open"></i> All Documents</a>
+        <span class="nav-section">ICT Unit</span>
+        <a href="/ict/documents" class="active"><i class="fas fa-network-wired"></i> ICT Documents</a>
+        <a href="/office/search"><i class="fas fa-chart-line"></i> Reports</a>
         <?php endif; ?>
         <span class="nav-section">My Documents</span>
         <a href="/submit"><i class="fas fa-paper-plane"></i> Submit Document</a>
@@ -345,8 +356,8 @@
     <div class="page-header">
         <div class="page-header-top">
             <div>
-                <h1>Welcome back, <?php echo e(explode(' ', $user->name)[0]); ?>!</h1>
-                <p>Information and Communications Technology Unit &mdash; here's your document queue.</p>
+                <h1>Welcome back, <?php echo e($user->name); ?>!</h1>
+                <p><?php echo e($user->isSuperAdmin() ? 'Information and Communications Technology Unit' : ($office?->name ?? 'Office')); ?> &mdash; here's your document queue.</p>
             </div>
             <div class="live-clock">
                 <div class="clock-time-display">
@@ -364,7 +375,7 @@
 
     <div class="receive-strip">
         <h2>Receive Document</h2>
-        <p class="rs-sub">Enter the 8-character tracking number</p>
+        <p class="rs-sub">Enter the 8-character reference number</p>
         <div class="rs-center">
             <div class="rs-main">
                 <div class="ref-boxes-row" id="refBoxes">
@@ -383,44 +394,44 @@
             <div class="receive-alert" id="receiveRefMsg"><i class="fas fa-exclamation-circle"></i><span></span></div>
         </div>
         <div class="rs-btn-wrap">
-            <button class="btn-receive" id="receiveRefBtn" onclick="receiveByReference()"><i class="fas fa-check"></i> Receive</button>
-            <button class="btn-scan-qr" id="scanQrBtn" onclick="openScanner()"><i class="fas fa-qrcode"></i> Scan Document</button>
+            <button class="btn-receive" id="receiveRefBtn" onclick="window.receiveByReference()"><i class="fas fa-check"></i> Receive</button>
+            <button class="btn-scan-qr" id="scanQrBtn" onclick="openScanner()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 8v-2a2 2 0 0 1 2 -2h2"/><path d="M4 16v2a2 2 0 0 0 2 2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M16 20h2a2 2 0 0 0 2 -2v-2"/><path d="M11 12h6"/><path d="M8 8h5"/><path d="M9 16h5"/></svg> Scan Document</button>
         </div>
     </div>
 
     <!-- Stats -->
     <div class="stats-grid">
         <div class="stat-card c-blue">
-            <div class="stat-label">Active</div>
-            <div class="stat-num" id="stat-active"><?php echo e($stats['active']); ?></div>
-            <div class="stat-sub">All non-closed documents</div>
+            <div class="stat-label">Incoming</div>
+            <div class="stat-num" id="stat-active"><?php echo e(\App\Support\UiNumber::compact($stats['active'])); ?></div>
+            <div class="stat-sub">In your office queue</div>
         </div>
         <div class="stat-card c-amber">
             <div class="stat-label">Processing</div>
-            <div class="stat-num" id="stat-in-review"><?php echo e($stats['in_review']); ?></div>
+            <div class="stat-num" id="stat-in-review"><?php echo e(\App\Support\UiNumber::compact($stats['in_review'])); ?></div>
             <div class="stat-sub">Being processed</div>
         </div>
         <div class="stat-card c-emerald">
             <div class="stat-label">Completed</div>
-            <div class="stat-num" id="stat-completed"><?php echo e($stats['completed']); ?></div>
+            <div class="stat-num" id="stat-completed"><?php echo e(\App\Support\UiNumber::compact($stats['completed'])); ?></div>
             <div class="stat-sub">Resolved documents</div>
         </div>
     </div>
 
     <!-- Table Card -->
-    <div class="table-card">
+    <div class="table-card dashboard-table-card<?php echo e($documents->count() ? ' has-list' : ''); ?>">
         <div class="table-head">
             <div class="table-head-row">
                 <div>
-                    <div class="table-title">ICT Unit Documents</div>
-                    <div class="table-count"><?php echo e($documents->total()); ?> document<?php echo e($documents->total() !== 1 ? 's' : ''); ?> assigned to you</div>
+                    <div class="table-title">Document Queue</div>
+                    <div class="table-count"><?php echo e(\App\Support\UiNumber::compact($documents->total())); ?> document<?php echo e($documents->total() !== 1 ? 's' : ''); ?> in your office queue</div>
                 </div>
             </div>
             <div class="filters">
                 <div class="filter-row">
                     <div class="search-wrap">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="tblSearch" placeholder="Search reference, subject, sender, type…" oninput="filterTable()">
+                        <input type="text" id="tblSearch" placeholder="Search reference, subject, sender, type…" data-clearable data-no-capitalize oninput="filterTable()">
                     </div>
                 </div>
                 <div class="filter-row">
@@ -436,6 +447,7 @@
         </div>
 
         <?php if($documents->count()): ?>
+        <div class="table-scroll table-card-scroll">
         <table id="docTable">
             <thead>
                 <tr>
@@ -459,9 +471,9 @@
                             <span class="t-num-sub"><?php echo e($doc->tracking_number); ?></span>
                         <?php endif; ?>
                     </td>
-                    <td style="max-width:200px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="<?php echo e($doc->subject); ?>"><?php echo e($doc->subject); ?></div></td>
-                    <td style="font-size:12px;color:var(--text-muted)"><?php echo e($doc->type ?? 'No type specified'); ?></td>
-                    <td style="font-size:12px"><?php echo e($sender); ?></td>
+                    <td style="max-width:200px"><div class="cell-ellipsis" title="<?php echo e($doc->subject); ?>"><?php echo e($doc->subject); ?></div></td>
+                    <td style="font-size:12px;color:var(--text-muted)"><div class="cell-ellipsis" style="max-width:160px" title="<?php echo e($doc->type ?? 'No type specified'); ?>"><?php echo e($doc->type ?? 'No type specified'); ?></div></td>
+                    <td style="font-size:12px"><div class="cell-ellipsis" style="max-width:170px" title="<?php echo e($sender); ?>"><?php echo e($sender); ?></div></td>
                     <td>
                         <span class="badge badge-<?php echo e($doc->status); ?>"><?php echo e($doc->statusLabel()); ?></span>
                     </td>
@@ -472,13 +484,14 @@
                             <button class="btn-accept" onclick="quickAccept(<?php echo e($doc->id); ?>, this)"><i class="fas fa-check"></i> Accept</button>
                         </div>
                         <?php endif; ?>
-                        <a href="/records/documents/<?php echo e($doc->id); ?>" class="btn-manage" onclick="event.stopPropagation()"><i class="fas fa-folder-open"></i> Manage</a>
+                        <a href="/office/documents/<?php echo e($doc->id); ?>" class="btn-manage" onclick="event.stopPropagation()"><i class="fas fa-folder-open"></i> Manage</a>
                     </td>
                     <td style="color:#cbd5e1;font-size:11px"><i class="fas fa-chevron-right"></i></td>
                 </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
         </table>
+        </div>
 
         <?php if($documents->hasPages()): ?>
         <div class="pagination-bar">
@@ -511,7 +524,7 @@
         <div class="empty-state" id="emptyState">
             <i class="fas fa-network-wired"></i>
             <h3>No documents found</h3>
-            <p>No documents are currently assigned to you as ICT.</p>
+            <p>No documents are currently in your office queue.</p>
         </div>
         <?php endif; ?>
     </div>
@@ -534,7 +547,7 @@
 <div class="modal-overlay" id="acceptModal">
     <div class="modal">
         <h3><i class="fas fa-check-circle" style="color:#16a34a;margin-right:6px"></i>Accept Document</h3>
-        <p>Accept this document and tag it under ICT Unit? This will update the routing log.</p>
+        <p>Accept this document into your office queue? This will update the routing log.</p>
         <div class="modal-btns">
             <button class="btn-cancel-modal" onclick="document.getElementById('acceptModal').classList.remove('open')">Cancel</button>
             <button class="btn-confirm-modal" onclick="confirmAccept()"><i class="fas fa-check"></i> Confirm</button>
@@ -651,8 +664,48 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
         showReceiveMsg('', '');
     }
 
+    async function submitReceiveLookup(lookupValue, pendingMessage){
+        var receiveBtn = document.getElementById('receiveRefBtn');
+        var scanBtn = document.getElementById('scanQrBtn');
+        var lookup = String(lookupValue || '').trim().toUpperCase();
+
+        if(!lookup){
+            showReceiveMsg('Reference number is required.', 'err');
+            return false;
+        }
+
+        showReceiveMsg(pendingMessage || 'Receiving document...', '');
+        if(receiveBtn) receiveBtn.disabled = true;
+        if(scanBtn) scanBtn.disabled = true;
+
+        try{
+            var res = await fetch('/api/office/documents/receive-by-reference', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
+                body: JSON.stringify({
+                    reference_number: lookup,
+                    tracking_number: lookup
+                })
+            });
+            var data = await res.json();
+
+            if(data.success){
+                showReceiveMsg(data.message || 'Document received successfully.', 'ok');
+                setTimeout(function(){ location.reload(); }, 700);
+                return true;
+            }
+
+            showReceiveMsg(data.message || 'Failed to receive document.', 'err');
+        }catch(e){
+            showReceiveMsg('Network error. Please try again.', 'err');
+        }
+
+        if(receiveBtn) receiveBtn.disabled = false;
+        if(scanBtn) scanBtn.disabled = false;
+        return false;
+    }
+
     async function receiveByReference(){
-        var btn = document.getElementById('receiveRefBtn');
         var ref = getRefValue();
 
         if(ref.length < 8){
@@ -664,33 +717,12 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
             return;
         }
 
-        showReceiveMsg('', '');
-        btn.disabled = true;
-
-        try{
-            var res = await fetch('/api/ict/receive-by-reference', {
-                method: 'POST',
-                headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
-                body: JSON.stringify({
-                    reference_number: ref,
-                    tracking_number: ref
-                })
-            });
-            var data = await res.json();
-
-            if(data.success){
-                showReceiveMsg(data.message || 'Document received successfully.', 'ok');
-                setTimeout(function(){ location.reload(); }, 700);
-                return;
-            }
-
-            showReceiveMsg(data.message || 'Failed to receive document.', 'err');
-        }catch(e){
-            showReceiveMsg('Network error. Please try again.', 'err');
-        }
-
-        btn.disabled = false;
+        return submitReceiveLookup(ref, 'Receiving document...');
     }
+
+    window.clearRefBoxes = clearRefBoxes;
+    window.submitReceiveLookup = submitReceiveLookup;
+    window.receiveByReference = receiveByReference;
 
     // ─── Accept Document ───
     window.quickAccept = function(docId, btn) {
@@ -700,7 +732,7 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
     window.confirmAccept = function() {
         if (!_acceptDocId) return;
         document.getElementById('acceptModal').classList.remove('open');
-        fetch('/api/ict/documents/' + _acceptDocId + '/accept', {
+        fetch('/api/office/documents/' + _acceptDocId + '/accept', {
             method:'POST',
             headers:{'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
             body: JSON.stringify({})
@@ -775,7 +807,7 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
                 logsHtml +
             '</div>' +
             '<div style="padding-top:8px">' +
-                '<a href="/records/documents/' + parseInt(doc.id) + '" class="btn-view" style="width:100%;justify-content:center"><i class="fas fa-folder-open"></i> Full Record</a>' +
+                '<a href="/office/documents/' + parseInt(doc.id) + '" class="btn-view" style="width:100%;justify-content:center"><i class="fas fa-folder-open"></i> Full Record</a>' +
             '</div>';
     }
 
@@ -788,7 +820,10 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
             .then(function(d) {
                 _ictStatKeys.forEach(function(k) {
                     var el = document.getElementById('stat-' + k.replace('_','-'));
-                    if (el && d[k] !== undefined) el.textContent = d[k];
+                    if (el && d[k] !== undefined) {
+                        var compactCount = window.formatCompactCount || function(v) { return String(v); };
+                        el.textContent = compactCount(d[k]);
+                    }
                 });
             }).catch(function(){});
     }
@@ -830,85 +865,283 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
             </div>
         </div>
     </div>
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="/js/html5-qrcode.min.js"></script>
+    <script src="/js/jsqr.js"></script>
     <script>
     (function(){
         var html5QrCode = null;
         var scannerRunning = false;
+        var activeStream = null;
+        var scanLoopTimer = null;
+        var barcodeDetector = null;
+        var previewVideo = null;
         var scanCooldown = false;
+        var scanBuffer = '';
+        var scanTimer = null;
+        var SCAN_IDLE_MS = 80;
 
-        window.openScanner = function() {
-            document.getElementById('scannerOverlay').classList.add('show');
-            document.body.style.overflow = 'hidden';
-            startCamera();
-        };
+        function scannerOverlay(){
+            return document.getElementById('scannerOverlay');
+        }
 
-        window.closeScanner = function() {
-            document.getElementById('scannerOverlay').classList.remove('show');
-            document.body.style.overflow = '';
-            stopCamera();
-        };
+        function statusEl(){
+            return document.getElementById('cameraStatus');
+        }
 
-        function startCamera() {
-            if (scannerRunning) return;
-            var statusEl = document.getElementById('cameraStatus');
-            statusEl.textContent = 'Initializing camera...';
-            statusEl.style.display = 'block';
+        function showStatus(message, isHtml){
+            var el = statusEl();
+            if (!el) return;
+            if (isHtml) { el.innerHTML = message; } else { el.textContent = message; }
+            el.style.display = 'block';
+        }
 
-            try {
-                html5QrCode = new Html5Qrcode('qr-reader');
-                html5QrCode.start(
-                    { facingMode: 'environment' },
-                    { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
-                    function(decodedText) {
-                        if (scanCooldown) return;
-                        scanCooldown = true;
-                        setTimeout(function(){ scanCooldown = false; }, 2000);
-                        onQrScanned(decodedText);
-                    },
-                    function() {}
-                ).then(function() {
-                    scannerRunning = true;
-                    statusEl.textContent = 'Point your camera at a QR code';
-                }).catch(function() {
-                    statusEl.textContent = 'Camera not available. Please enter the tracking number manually.';
-                });
-            } catch(e) {
-                statusEl.textContent = 'Camera not available. Please enter the tracking number manually.';
+        function showPermissionDenied(){
+            var localhostUrl = (location.hostname === '127.0.0.1')
+                ? location.href.replace('127.0.0.1', 'localhost')
+                : null;
+            var msg = '<strong style="color:#dc2626;">&#9888; Camera blocked.</strong> ';
+            if (localhostUrl) {
+                msg += 'Your browser blocked camera for <strong>127.0.0.1</strong>. '
+                    + '<a href="' + localhostUrl + '" style="color:#0056b3;font-weight:700;">Open on localhost instead</a> '
+                    + '(same app, camera will work there).';
+            } else {
+                msg += 'Click the <strong>lock icon</strong> in the address bar → Camera → <strong>Allow</strong>, then '
+                    + '<button class="btn-cam-retry" onclick="window.retryCamera()" style="padding:2px 10px;">Retry</button>.';
+            }
+            showStatus(msg, true);
+        }
+
+        function isScannerOpen(){
+            var overlay = scannerOverlay();
+            return !!(overlay && overlay.classList.contains('show'));
+        }
+
+        function onDecodeSuccess(decodedText) {
+            if (scanCooldown) return;
+            scanCooldown = true;
+            setTimeout(function(){ scanCooldown = false; }, 2000);
+            processScannedText(decodedText);
+        }
+
+        function fillRefBoxes(tracking){
+            var boxes = document.querySelectorAll('#refBoxes .ref-box');
+            if (!boxes.length) return;
+            for (var i = 0; i < boxes.length; i++) {
+                boxes[i].value = '';
+                boxes[i].classList.remove('filled');
+            }
+            for (var j = 0; j < boxes.length && j < tracking.length; j++) {
+                boxes[j].value = tracking[j];
+                boxes[j].classList.add('filled');
             }
         }
 
-        function stopCamera() {
-            if (html5QrCode && scannerRunning) {
-                html5QrCode.stop().then(function() {
-                    scannerRunning = false;
-                    html5QrCode.clear();
-                }).catch(function() {
-                    scannerRunning = false;
-                });
-            }
-        }
-
-        function onQrScanned(text) {
-            var tracking = text.trim();
-            var match = tracking.match(/\/receive\/([A-Za-z0-9]+)/);
+        function processScannedText(text) {
+            var tracking = String(text || '').trim();
+            if (!tracking) return;
+            var match = tracking.match(/\/receive\/([A-Za-z0-9\-]+)/i);
             if (match) tracking = match[1];
             tracking = tracking.toUpperCase().replace(/[^A-Z0-9]/g, '');
             if (!tracking || tracking.length < 4) return;
 
-            closeScanner();
-            var boxes = document.querySelectorAll('#refBoxes .ref-box');
-            for (var i = 0; i < boxes.length && i < tracking.length; i++) {
-                boxes[i].value = tracking[i];
-                boxes[i].classList.add('filled');
+            window.closeScanner();
+            fillRefBoxes(tracking);
+            window.submitReceiveLookup(tracking, 'QR detected. Receiving document...');
+        }
+
+        window.openScanner = function() {
+            var overlay = scannerOverlay();
+            if (!overlay) return;
+            overlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            scanBuffer = '';
+            if (scanTimer) {
+                clearTimeout(scanTimer);
+                scanTimer = null;
             }
-            receiveByReference();
+            startCamera();
+        };
+
+        window.closeScanner = function() {
+            var overlay = scannerOverlay();
+            if (overlay) overlay.classList.remove('show');
+            document.body.style.overflow = '';
+            stopCamera();
+        };
+
+        function readerEl() {
+            return document.getElementById('qr-reader');
+        }
+
+        function clearReader() {
+            var el = readerEl();
+            if (el) el.innerHTML = '';
+            previewVideo = null;
+        }
+
+        function isPermDenied(e) {
+            var s = String(e || '').toLowerCase();
+            return s.indexOf('notallowed') !== -1 || s.indexOf('permission') !== -1 || s.indexOf('denied') !== -1;
+        }
+
+        function normalizeCameraError(err) {
+            var raw = String((err && (err.name || err.message)) || err || '').toLowerCase();
+            if (raw.indexOf('notallowed') !== -1 || raw.indexOf('permission') !== -1 || raw.indexOf('denied') !== -1) return 'denied';
+            if (raw.indexOf('notfound') !== -1 || raw.indexOf('devicesnotfound') !== -1 || raw.indexOf('overconstrained') !== -1 || raw.indexOf('constraint') !== -1) return 'notfound';
+            if (raw.indexOf('notreadable') !== -1 || raw.indexOf('trackstart') !== -1 || raw.indexOf('could not start') !== -1 || raw.indexOf('device in use') !== -1 || raw.indexOf('in use') !== -1) return 'busy';
+            if (raw.indexOf('security') !== -1 || raw.indexOf('secure') !== -1) return 'security';
+            return raw || 'unknown';
+        }
+
+        function getCameraStream(constraints) {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                return Promise.reject(new Error('GET_USER_MEDIA_UNAVAILABLE'));
+            }
+            return navigator.mediaDevices.getUserMedia({ video: constraints, audio: false });
+        }
+
+
+        function attachPreview(stream) {
+            clearReader();
+            var el = readerEl();
+            if (!el) return Promise.reject(new Error('QR_READER_MISSING'));
+            var video = document.createElement('video');
+            video.setAttribute('autoplay', '');
+            video.setAttribute('muted', '');
+            video.setAttribute('playsinline', '');
+            video.muted = true;
+            video.srcObject = stream;
+            video.style.width = '100%';
+            video.style.display = 'block';
+            video.style.borderRadius = '8px';
+            el.appendChild(video);
+            previewVideo = video;
+            return video.play().catch(function() {}).then(function(){ return video; });
+        }
+
+        function startDetectLoop() {
+            if (typeof jsQR === 'undefined') {
+                showStatus('QR library not loaded. Please refresh the page.');
+                return;
+            }
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            function scanFrame() {
+                if (!scannerRunning || !previewVideo) return;
+                if (previewVideo.readyState < 2 || !previewVideo.videoWidth) {
+                    if (scannerRunning) scanLoopTimer = setTimeout(scanFrame, 200);
+                    return;
+                }
+                try {
+                    canvas.width = previewVideo.videoWidth;
+                    canvas.height = previewVideo.videoHeight;
+                    ctx.drawImage(previewVideo, 0, 0);
+                    var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    var code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+                    if (code && code.data) {
+                        onDecodeSuccess(code.data);
+                        return;
+                    }
+                } catch (e) {}
+                if (scannerRunning) scanLoopTimer = setTimeout(scanFrame, 150);
+            }
+            scanLoopTimer = setTimeout(scanFrame, 600);
+        }
+
+        window.retryCamera = function() {
+            stopCamera();
+            startCamera();
+        };
+
+        function startCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showStatus('Camera not available. Please use Chrome or Edge.');
+                return;
+            }
+
+            function doStart() {
+                showStatus('Requesting camera access...');
+                var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                var attempts = isMobile
+                    ? [{ facingMode: { ideal: 'environment' } }, { facingMode: 'user' }, true]
+                    : [true, { facingMode: 'user' }];
+
+                function tryNext(idx) {
+                    if (idx >= attempts.length) {
+                        showStatus('Camera could not start. Close any app using your webcam (Zoom, Teams, OBS), then reload the page.');
+                        return;
+                    }
+                    getCameraStream(attempts[idx])
+                        .then(function(stream) {
+                            activeStream = stream;
+                            return attachPreview(stream);
+                        })
+                        .then(function() {
+                            scannerRunning = true;
+                            showStatus('Camera live. Point it at a QR code.');
+                            startDetectLoop();
+                        })
+                        .catch(function(err) {
+                            var kind = normalizeCameraError(err);
+                            if (kind === 'denied') { showPermissionDenied(); return; }
+                            if (kind === 'busy') { showStatus('Camera is in use by another app. Close Zoom, Teams, or OBS and retry.'); return; }
+                            tryNext(idx + 1);
+                        });
+                }
+                tryNext(0);
+            }
+
+            doStart();
+        }
+
+        function stopCamera() {
+            scannerRunning = false;
+            if (scanLoopTimer) {
+                clearTimeout(scanLoopTimer);
+                scanLoopTimer = null;
+            }
+            if (activeStream) {
+                activeStream.getTracks().forEach(function(track) { track.stop(); });
+                activeStream = null;
+            }
+            if (html5QrCode) {
+                try { html5QrCode.stop(); } catch (e) {}
+                try { html5QrCode.clear(); } catch (e2) {}
+            }
+            clearReader();
         }
 
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                var scannerOpen = document.getElementById('scannerOverlay').classList.contains('show');
-                if (scannerOpen) closeScanner();
+            if (e.key === 'Escape' && isScannerOpen()) {
+                e.preventDefault();
+                window.closeScanner();
+                return;
+            }
+
+            if (!isScannerOpen()) return;
+            if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+            if (e.key === 'Enter') {
+                if (scanBuffer.length) {
+                    var payload = scanBuffer;
+                    scanBuffer = '';
+                    if (scanTimer) {
+                        clearTimeout(scanTimer);
+                        scanTimer = null;
+                    }
+                    processScannedText(payload);
+                }
+                return;
+            }
+
+            if (e.key.length === 1) {
+                scanBuffer += e.key;
+                if (scanTimer) clearTimeout(scanTimer);
+                scanTimer = setTimeout(function(){
+                    if (scanBuffer.length >= 6) processScannedText(scanBuffer);
+                    scanBuffer = '';
+                    scanTimer = null;
+                }, SCAN_IDLE_MS);
             }
         });
     })();

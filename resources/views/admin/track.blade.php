@@ -187,7 +187,7 @@
     </div>
     <nav class="sb-nav">
         <span class="nav-section">Overview</span>
-        <a href="/dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
         <span class="nav-section">Management</span>
         <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
         <a href="/admin/offices"><i class="fas fa-building"></i> Offices</a>
@@ -195,13 +195,10 @@
         <a href="/admin/documents"><i class="fas fa-folder-open"></i> Documents</a>
         @endunless
         @if($user->isSuperAdmin())
-        <a href="/records/documents"><i class="fas fa-eye"></i> Records View</a>
+        <a href="/records/documents"><i class="fas fa-folder-open"></i> All Documents</a>
         <span class="nav-section">ICT Unit</span>
         <a href="/ict/documents"><i class="fas fa-network-wired"></i> ICT Documents</a>
-        @endif
-        @if($user->isSuperAdmin())
-        <span class="nav-section">Reports</span>
-        <a href="/office/search"><i class="fas fa-chart-line"></i> Reports Dashboard</a>
+        <a href="/office/search"><i class="fas fa-chart-line"></i> Reports</a>
         @endif
         <span class="nav-section">My Documents</span>
         <a href="/submit"><i class="fas fa-paper-plane"></i> Submit Document</a>

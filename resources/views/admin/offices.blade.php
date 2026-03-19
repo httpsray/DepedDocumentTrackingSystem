@@ -19,6 +19,10 @@
             --primary-gradient: linear-gradient(135deg, #0056b3 0%, #004494 100%);
             --blue-soft: #eff6ff;
             --blue-soft-2: #dbeafe;
+            --danger: #dc2626;
+            --danger-dark: #b91c1c;
+            --danger-soft: #fef2f2;
+            --danger-soft-2: #fecaca;
             --slate-soft: #f1f5f9;
             --slate-soft-2: #e2e8f0;
             --slate: #475569;
@@ -83,6 +87,11 @@
 
         /* ─── Panel ─── */
         .panel { background:#fff; border-radius:16px; box-shadow:var(--shadow-sm); border:1px solid var(--border); overflow:hidden; }
+        .panel.list-panel.has-list { display:flex; flex-direction:column; max-height:clamp(520px,72vh,820px); }
+        .panel.list-panel.has-list .dtable-wrap { flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
+        .panel.list-panel.has-list .dtable-wrap .dtable th { position:sticky; top:0; z-index:2; }
+        .panel.list-panel.has-list .mob-cards,
+        .panel.list-panel.has-list .empty-state { flex:1; min-height:0; }
         .panel-head { padding:18px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
         .panel-title { font-size:17px; font-weight:700; }
 
@@ -106,8 +115,8 @@
         /* ─── Actions ─── */
         .action-btns { display:flex; gap:6px; flex-wrap:wrap; }
         .btn-sm { width:30px; height:30px; border:none; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; transition:all .2s; }
-        .btn-sm.suspend { background:var(--slate-soft-2); color:var(--slate-dark); }
-        .btn-sm.suspend:hover { background:var(--slate-dark); color:#fff; }
+        .btn-sm.suspend { background:var(--danger-soft); color:var(--danger); box-shadow:inset 0 0 0 1px rgba(220,38,38,.16); }
+        .btn-sm.suspend:hover { background:var(--danger); color:#fff; box-shadow:none; }
         .btn-sm.activate { background:var(--blue-soft); color:var(--primary); }
         .btn-sm.activate:hover { background:var(--primary); color:#fff; }
         .btn-sm.reports-on { background:var(--blue-soft-2); color:var(--primary); }
@@ -129,13 +138,16 @@
         /* ─── Modal ─── */
         .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:200; align-items:center; justify-content:center; padding:16px; }
         .modal-overlay.show { display:flex; }
-        .modal { background:#fff; border-radius:16px; max-width:480px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,.2); }
+        .modal { background:#fff; border-radius:16px; max-width:480px; width:100%; max-height:min(88vh,720px); display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,.2); }
         .modal-head { padding:20px 24px 0; }
         .modal-head h3 { font-size:16px; font-weight:700; }
         .modal-body { padding:20px 24px; display:flex; flex-direction:column; gap:14px; max-height:70vh; overflow-y:auto; }
         .modal-field label { display:block; font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:.3px; }
         .modal-input { width:100%; box-sizing:border-box; padding:10px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:14px; font-family:inherit; color:var(--text-dark); outline:none; transition:border .2s; background:#fff; }
         .modal-input:focus { border-color:var(--primary); }
+        .modal-select-wrap { position:relative; }
+        .modal-select-wrap::after { content:'\f078'; font-family:'Font Awesome 6 Free'; font-weight:900; position:absolute; right:14px; top:50%; transform:translateY(-50%); color:#64748b; font-size:12px; pointer-events:none; }
+        select.modal-input { appearance:none; -webkit-appearance:none; -moz-appearance:none; padding-right:40px; min-height:46px; line-height:1.35; text-overflow:ellipsis; white-space:nowrap; overflow:hidden; }
         .modal-foot { padding:16px 24px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; }
         .modal-btn { padding:9px 18px; border-radius:10px; font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; border:1px solid var(--border); background:#fff; color:var(--text-dark); transition:all .2s; }
         .modal-btn:hover { background:#f1f5f9; }
@@ -147,6 +159,10 @@
         .modal-btn.warning:hover { background:#243244; }
         .modal-btn.success { background:var(--primary); color:#fff; border:none; }
         .modal-btn.success:hover { background:var(--primary-dark); }
+        .status-modal-row { display:block; padding-top:4px; }
+        .status-modal-copy { min-width:0; }
+        .status-modal-msg { margin-bottom:0; font-size:14px; color:#475569; line-height:1.6; word-break:break-word; }
+        .status-modal-sub { font-size:12px; color:#94a3b8; margin-top:6px; line-height:1.55; }
 
         /* ─── Toast ─── */
         .toast {
@@ -207,12 +223,16 @@
             .page-header h1{font-size:18px}
             .page-header p{font-size:12px}
             .btn-create{font-size:12px;padding:8px 14px}
+            .panel.list-panel.has-list{max-height:min(68vh,560px)}
             .panel .dtable-wrap{display:none}
-            .mob-cards{display:block;padding:12px}
-            .modal{max-width:95vw}
+            .mob-cards{display:block;padding:12px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+            .modal{max-width:95vw;max-height:calc(100dvh - 24px);border-radius:14px}
             .modal-body{padding:16px}
             .modal-head{padding:16px 16px 0}
-            .modal-foot{padding:12px 16px}
+            .modal-foot{padding:12px 16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+            .modal-foot .modal-btn{width:100%;min-height:44px;display:flex;align-items:center;justify-content:center;padding-inline:12px}
+            select.modal-input{min-height:50px;font-size:16px}
+            .status-modal-msg{font-size:13px}
             .dash-footer{flex-direction:column;gap:6px;text-align:center;padding:16px 5%}
             .toast{right:12px;left:12px;max-width:none}
         }
@@ -244,7 +264,7 @@
     </div>
     <nav class="sb-nav">
         <span class="nav-section">Overview</span>
-        <a href="/dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
         <span class="nav-section">Management</span>
         <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
         <a href="/admin/offices" class="active"><i class="fas fa-building"></i> Offices</a>
@@ -252,13 +272,10 @@
         <a href="/admin/documents"><i class="fas fa-folder-open"></i> Documents</a>
         @endunless
         @if($user->isSuperAdmin())
-        <a href="/records/documents"><i class="fas fa-eye"></i> Records View</a>
+        <a href="/records/documents"><i class="fas fa-folder-open"></i> All Documents</a>
         <span class="nav-section">ICT Unit</span>
         <a href="/ict/documents"><i class="fas fa-network-wired"></i> ICT Documents</a>
-        @endif
-        @if($user->isSuperAdmin())
-        <span class="nav-section">Reports</span>
-        <a href="/office/search"><i class="fas fa-chart-line"></i> Reports Dashboard</a>
+        <a href="/office/search"><i class="fas fa-chart-line"></i> Reports</a>
         @endif
         <span class="nav-section">My Documents</span>
         <a href="/submit"><i class="fas fa-paper-plane"></i> Submit Document</a>
@@ -292,7 +309,7 @@
             </button>
         </div>
 
-        <div class="panel">
+        <div class="panel list-panel{{ $accounts->count() ? ' has-list' : '' }}">
             <div class="panel-head">
                 <div class="panel-title">Office Accounts ({{ $accounts->count() }})</div>
             </div>
@@ -461,13 +478,13 @@
                 </div>
                 <div class="modal-field">
                     <label>Assigned Office <span style="color:#dc2626">*</span></label>
-                    <select class="modal-input" id="createOfficeId" style="box-sizing:border-box" onchange="toggleCustomOffice()">
+                    <div class="modal-select-wrap"><select class="modal-input" id="createOfficeId" style="box-sizing:border-box" onchange="toggleCustomOffice()">
                         <option value="">— Select office —</option>
                         @foreach($offices as $office)
                             <option value="{{ $office->id }}" data-name="{{ $office->name }}">{{ $office->name }}</option>
                         @endforeach
                         <option value="other">Others (Add New Office)</option>
-                    </select>
+                    </select></div>
                     <div class="field-err" id="err-createOfficeId"><i class="fas fa-exclamation-circle"></i><span></span></div>
                 </div>
                 <div class="modal-field" id="customOfficeField" style="display:none">
@@ -496,11 +513,10 @@
                 <h3 id="statusModalTitle">Deactivate Office Account</h3>
             </div>
             <div class="modal-body">
-                <div style="display:flex;align-items:flex-start;gap:14px;padding-top:4px;">
-                    <div id="statusModalIcon" style="flex-shrink:0;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;"></div>
-                    <div>
-                        <p id="statusModalMsg" style="margin-bottom:0;font-size:14px;color:#475569;line-height:1.6;"></p>
-                        <p id="statusModalSub" style="font-size:12px;color:#94a3b8;margin-top:6px;"></p>
+                <div class="status-modal-row">
+                    <div class="status-modal-copy">
+                        <p id="statusModalMsg" class="status-modal-msg"></p>
+                        <p id="statusModalSub" class="status-modal-sub"></p>
                     </div>
                 </div>
             </div>
@@ -515,7 +531,7 @@
     <div class="modal-overlay" id="transferModal">
         <div class="modal">
             <div class="modal-head">
-                <h3><i class="fas fa-exchange-alt" style="color:var(--primary);margin-right:6px;"></i> Transfer Personnel</h3>
+                <h3>Transfer Personnel</h3>
             </div>
             <div class="modal-body">
                 <p style="font-size:13px;color:var(--text-muted);margin-bottom:4px;">
@@ -527,19 +543,19 @@
                 </p>
                 <div class="modal-field">
                     <label>New Office <span style="color:#dc2626">*</span></label>
-                    <select class="modal-input" id="transferOfficeId" style="box-sizing:border-box">
+                    <div class="modal-select-wrap"><select class="modal-input" id="transferOfficeId" style="box-sizing:border-box">
                         <option value="">— Select new office —</option>
                         @foreach($offices as $office)
                             <option value="{{ $office->id }}">{{ $office->name }}</option>
                         @endforeach
-                    </select>
+                    </select></div>
                     <div class="field-err" id="err-transferOfficeId"><i class="fas fa-exclamation-circle"></i><span></span></div>
                 </div>
             </div>
             <div class="modal-foot">
                 <button class="modal-btn" onclick="closeTransferModal()">Cancel</button>
                 <button class="modal-btn primary" id="confirmTransferBtn" onclick="submitTransfer()">
-                    <i class="fas fa-exchange-alt"></i> Transfer
+                    Transfer
                 </button>
             </div>
         </div>
@@ -736,10 +752,7 @@
 
             var isSuspend  = status === 'suspended';
             var title      = isSuspend ? 'Deactivate Office Account' : 'Activate Office Account';
-            var iconBg     = isSuspend ? 'var(--slate-soft)' : 'var(--blue-soft)';
-            var iconColor  = isSuspend ? 'var(--slate-dark)' : 'var(--primary)';
-            var iconClass  = isSuspend ? 'fas fa-ban' : 'fas fa-check-circle';
-            var btnClass   = isSuspend ? 'warning'   : 'success';
+            var btnClass   = isSuspend ? 'danger'    : 'success';
             var btnLabel   = isSuspend ? 'Deactivate' : 'Activate';
             var msg        = isSuspend
                 ? 'Are you sure you want to deactivate <strong>' + escapeHtml(name) + '</strong>?'
@@ -751,10 +764,6 @@
             document.getElementById('statusModalTitle').textContent = title;
             document.getElementById('statusModalMsg').innerHTML     = msg;
             document.getElementById('statusModalSub').textContent   = sub;
-
-            var iconEl = document.getElementById('statusModalIcon');
-            iconEl.style.background = iconBg;
-            iconEl.innerHTML = '<i class="' + iconClass + '" style="color:' + iconColor + ';"></i>';
 
             var btn = document.getElementById('confirmStatusBtn');
             btn.textContent = btnLabel;

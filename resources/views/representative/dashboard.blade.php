@@ -56,6 +56,10 @@
         .stat-info p{font-size:11px;color:var(--text-muted);margin-top:3px}
         /* Table card */
         .table-card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.05);overflow:hidden}
+        .dashboard-table-card.has-list{display:flex;flex-direction:column;max-height:clamp(520px,72vh,820px)}
+        .dashboard-table-card.has-list .table-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+        .dashboard-table-card.has-list .table-scroll thead th{position:sticky;top:0;z-index:2}
+        .dashboard-table-card.has-list .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
         .table-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
         .table-title{font-size:17px;font-weight:700;color:var(--text-dark)}
         .filters{display:flex;gap:10px;align-items:center;flex-wrap:nowrap}
@@ -71,15 +75,16 @@
         td{padding:12px 16px;font-size:13px;color:var(--text-dark);border-bottom:1px solid #f1f5f9;vertical-align:middle}
         tr:last-child td{border-bottom:none}
         tr:hover td{background:#fafbff}
+        .cell-ellipsis{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
-        .badge-submitted{background:#eff6ff;color:#2563eb}
-        .badge-received{background:#f0fdf4;color:#16a34a}
-        .badge-in_review{background:#fffbeb;color:#d97706}
-        .badge-forwarded{background:#f5f3ff;color:#7c3aed}
-        .badge-completed{background:#f0fdf4;color:#15803d}
-        .badge-for_pickup{background:#fff7ed;color:#c2410c}
-        .badge-returned{background:#fef2f2;color:#dc2626}
-        .badge-cancelled{background:#f8fafc;color:#64748b}
+        .badge-submitted,
+        .badge-received,
+        .badge-in_review,
+        .badge-forwarded,
+        .badge-completed,
+        .badge-for_pickup,
+        .badge-returned,
+        .badge-cancelled{background:#fff7ed;color:#c2410c}
         .btn-view{padding:5px 13px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:background .2s}
         .btn-view:hover{background:var(--primary-dark)}
         .btn-accept{padding:5px 11px;background:#16a34a;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:Poppins,sans-serif;transition:background .2s;display:inline-flex;align-items:center;gap:5px}
@@ -105,6 +110,7 @@
             .stats-grid{grid-template-columns:1fr 1fr}
             .page-header-top{flex-direction:column;align-items:flex-start;gap:10px}
             .live-clock{display:none}
+            .dashboard-table-card.has-list{max-height:min(68vh,560px)}
             .table-head{padding:14px 16px;flex-direction:column;align-items:stretch;gap:8px}
             .table-title{font-size:15px}
             .filters{flex-direction:column;gap:6px}
@@ -215,34 +221,34 @@
         <div class="stat-card">
             <div class="stat-icon" style="background:#eff6ff;color:#2563eb"><i class="fas fa-inbox"></i></div>
             <div class="stat-info">
-                <h3>{{ $stats['incoming'] }}</h3>
+                <h3>{{ \App\Support\UiNumber::compact($stats['incoming']) }}</h3>
                 <p>Incoming / Pending</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background:#fffbeb;color:#d97706"><i class="fas fa-microscope"></i></div>
+            <div class="stat-icon" style="background:#eff6ff;color:#2563eb"><i class="fas fa-microscope"></i></div>
             <div class="stat-info">
-                <h3>{{ $stats['in_review'] }}</h3>
+                <h3>{{ \App\Support\UiNumber::compact($stats['in_review']) }}</h3>
                 <p>Processing</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background:#ecfdf5;color:#047857"><i class="fas fa-flag-checkered"></i></div>
+            <div class="stat-icon" style="background:#eff6ff;color:#2563eb"><i class="fas fa-flag-checkered"></i></div>
             <div class="stat-info">
-                <h3>{{ $stats['completed'] }}</h3>
+                <h3>{{ \App\Support\UiNumber::compact($stats['completed']) }}</h3>
                 <p>Completed</p>
             </div>
         </div>
     </div>
 
     <!-- Documents table -->
-    <div class="table-card">
+    <div class="table-card dashboard-table-card{{ $documents->isNotEmpty() ? ' has-list' : '' }}">
         <div class="table-head">
             <span class="table-title">Document Queue</span>
             <div class="filters">
                 <div class="search-wrap">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Search subject or sender..." oninput="filterTable()">
+                    <input type="text" id="searchInput" placeholder="Search subject or sender..." data-clearable data-no-capitalize oninput="filterTable()">
                 </div>
                 <select id="statusFilter" onchange="filterTable()">
                     <option value="">All Statuses</option>
@@ -283,10 +289,10 @@
                             {{ $doc->reference_number }}
                         </td>
                         <td style="max-width:200px">
-                            <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $doc->subject }}</div>
+                            <div class="cell-ellipsis" style="font-weight:600" title="{{ $doc->subject }}">{{ $doc->subject }}</div>
                         </td>
-                        <td style="font-size:12px;white-space:nowrap">{{ $doc->type }}</td>
-                        <td style="font-size:12px">{{ $doc->sender_name }}</td>
+                        <td style="font-size:12px;white-space:nowrap"><div class="cell-ellipsis" style="max-width:150px" title="{{ $doc->type }}">{{ $doc->type }}</div></td>
+                        <td style="font-size:12px"><div class="cell-ellipsis" style="max-width:160px" title="{{ $doc->sender_name }}">{{ $doc->sender_name }}</div></td>
                         <td>
                             <span class="badge badge-{{ $doc->status }}">
                                 {{ $doc->statusLabel() }}

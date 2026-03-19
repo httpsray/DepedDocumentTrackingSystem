@@ -65,6 +65,11 @@
 
         /* ─── Table card ─── */
         .table-card{background:#fff;border-radius:12px;border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+        .table-card.list-table-card.has-list{display:flex;flex-direction:column;max-height:clamp(520px,72vh,820px)}
+        .table-card.list-table-card.has-list .table-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+        .table-card.list-table-card.has-list .table-scroll th{position:sticky;top:0;z-index:2}
+        .table-card.list-table-card.has-list .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+        .table-card.list-table-card.has-list .pagination-bar{flex-shrink:0}
         .table-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
         .table-head h2{font-size:14px;font-weight:600;color:var(--text-dark)}
         table{width:100%;border-collapse:collapse}
@@ -81,16 +86,22 @@
         .t-num-sub{font-size:11px;color:var(--text-muted);font-family:monospace;margin-top:2px}
         .t-subject{font-weight:500;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .t-date{font-size:12px;color:var(--text-muted);white-space:nowrap}
-        .t-office{font-size:12px;color:var(--text-muted);max-width:160px}
+        .t-office{font-size:12px;color:var(--text-muted);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .t-type{font-size:12px;color:var(--text-muted)}
+        .cell-ellipsis{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
         /* ─── Pills ─── */
         .pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap}
-        .pill-submitted{background:#eff6ff;color:#2563eb}
-        .pill-received{background:#f0fdf4;color:#16a34a}
-        .pill-in_review{background:#fffbeb;color:#d97706}
-        .pill-forwarded{background:#f5f3ff;color:#7c3aed}
-        .pill-completed{background:#f0fdf4;color:#15803d}
-        .pill-for_pickup{background:#fff7ed;color:#c2410c}
+        .pill-submitted,
+        .pill-received,
+        .pill-in_review,
+        .pill-forwarded,
+        .pill-completed,
+        .pill-for_pickup,
+        .pill-on_hold,
+        .pill-returned,
+        .pill-cancelled,
+        .pill-archived{background:#fff7ed;color:#c2410c}
         .pill-returned{background:#fef2f2;color:#dc2626}
         .pill-cancelled{background:#f8fafc;color:#64748b}
 
@@ -212,6 +223,7 @@
             .dm-item{border-right:none}
             .search-card{flex-direction:column;align-items:stretch}
             .status-select{min-width:unset}
+            .table-card.list-table-card.has-list{max-height:min(68vh,560px)}
             th:nth-child(3),td:nth-child(3),
             th:nth-child(5),td:nth-child(5),
             th:nth-child(6),td:nth-child(6){display:none}
@@ -314,11 +326,11 @@
     </div>
 
     <!-- Documents Table -->
-    <div class="table-card">
+    <div class="table-card list-table-card{{ $documents->count() ? ' has-list' : '' }}">
         <div class="table-head">
             <div style="display:flex;align-items:center;gap:8px">
                 <span class="table-title">Results</span>
-                <span class="table-doc-count" id="totalCount">({{ $documents->total() }})</span>
+                <span class="table-doc-count" id="totalCount">({{ \App\Support\UiNumber::compact($documents->total()) }})</span>
             </div>
         </div>
 
@@ -329,6 +341,7 @@
                 <p>Documents you submit will appear here.</p>
             </div>
         @else
+            <div class="table-scroll">
             <table id="docsTable">
                 <thead>
                     <tr>
@@ -354,16 +367,16 @@
                                 <div class="t-num-sub">{{ $doc->tracking_number }}</div>
                             @endif
                         </td>
-                        <td class="t-subject">{{ $doc->subject }}</td>
-                        <td style="font-size:12px;color:var(--text-muted)">{{ $doc->type }}</td>
+                        <td class="t-subject" title="{{ $doc->subject }}">{{ $doc->subject }}</td>
+                        <td class="t-type"><div class="cell-ellipsis" style="max-width:160px" title="{{ $doc->type }}">{{ $doc->type }}</div></td>
                         <td>
                             <span class="pill pill-{{ $doc->status }}">{{ $doc->statusLabel() }}</span>
                         </td>
                         <td class="t-office">
                             @if($doc->status === 'submitted')
-                                {{ 'Awaiting acceptance by ' . ($doc->submittedToOffice->name ?? 'Records Section') }}
+                                <div class="cell-ellipsis" title="{{ 'Awaiting acceptance by ' . ($doc->submittedToOffice->name ?? 'Records Section') }}">{{ 'Awaiting acceptance by ' . ($doc->submittedToOffice->name ?? 'Records Section') }}</div>
                             @else
-                                {{ $doc->currentOffice->name ?? $doc->submittedToOffice->name ?? 'No office assigned' }}
+                                <div class="cell-ellipsis" title="{{ $doc->currentOffice->name ?? $doc->submittedToOffice->name ?? 'No office assigned' }}">{{ $doc->currentOffice->name ?? $doc->submittedToOffice->name ?? 'No office assigned' }}</div>
                             @endif
                         </td>
                         <td class="t-date">{{ $doc->created_at->format('M d, Y') }}</td>
@@ -385,6 +398,7 @@
                     </tr>
                 </tbody>
             </table>
+            </div>
 
             @if($documents->hasPages())
             <div class="pagination-bar">
@@ -489,7 +503,8 @@ function filterDocs(immediate) {
     var countEl = document.getElementById('resultCount');
     if (countEl) {
         if (q || status) {
-            countEl.textContent = shown + ' result' + (shown !== 1 ? 's' : '');
+            var compactCount = window.formatCompactCount || function(v) { return String(v); };
+            countEl.textContent = compactCount(shown) + ' result' + (shown !== 1 ? 's' : '');
         } else {
             countEl.textContent = '';
         }

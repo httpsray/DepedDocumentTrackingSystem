@@ -208,6 +208,36 @@
             overflow: hidden;
         }
 
+        .panel.list-panel.has-list {
+            display: flex;
+            flex-direction: column;
+            max-height: clamp(520px, 72vh, 820px);
+        }
+
+        .panel.list-panel.has-list .dtable-wrap {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .panel.list-panel.has-list .dtable-wrap .dtable th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .panel.list-panel.has-list .mob-cards,
+        .panel.list-panel.has-list .empty-state {
+            flex: 1;
+            min-height: 0;
+        }
+
+        .panel.list-panel.has-list .pagination-bar {
+            flex-shrink: 0;
+        }
+
         .panel-head {
             display: flex;
             justify-content: space-between;
@@ -254,6 +284,7 @@
         .t-num-sub { display:block; margin-top:2px; font-size:11px; color: var(--text-muted); font-family: monospace; }
         .t-user { font-size: 12px; color: var(--text-muted); }
         .t-date { font-size: 12px; color: #94a3b8; }
+        .cell-ellipsis { display:block; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
         .pill {
             display: inline-block;
@@ -263,11 +294,11 @@
             font-weight: 500;
         }
 
-        .pill.pending { background: #fff7ed; color: #9a3412; }
-        .pill.forwarded { background: #eff6ff; color: #1e40af; }
-        .pill.processing { background: #fffbeb; color: #d97706; }
-        .pill.completed { background: #f0fdf4; color: #166534; }
-        .pill.other { background: #f3f4f6; color: #4b5563; }
+        .pill.pending,
+        .pill.forwarded,
+        .pill.processing,
+        .pill.completed,
+        .pill.other { background: #fff7ed; color: #c2410c; }
 
         .empty-state {
             padding: 48px 24px;
@@ -713,8 +744,9 @@
             .filter-btn { font-size: 12px; padding: 8px 12px; }
             .filter-clear { font-size: 12px; padding: 8px 10px; }
             .stats-row { grid-template-columns: 1fr 1fr; }
+            .panel.list-panel.has-list { max-height: min(68vh, 560px); }
             .dtable-wrap { display: none; }
-            .mob-cards { display: block; }
+            .mob-cards { display: block; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
             .dash-footer { flex-direction: column; gap: 6px; text-align: center; padding: 16px 5%; }
             .drawer { width: 100%; max-width: 100%; }
             .drawer-meta { grid-template-columns: 1fr; }
@@ -748,19 +780,16 @@
     </div>
     <nav class="sb-nav">
         <span class="nav-section">Overview</span>
-        <a href="/dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
         <span class="nav-section">Management</span>
         <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
         <a href="/admin/offices"><i class="fas fa-building"></i> Offices</a>
         <a href="/admin/documents" class="active"><i class="fas fa-folder-open"></i> Documents</a>
         @if($user->isSuperAdmin())
-        <a href="/records/documents"><i class="fas fa-eye"></i> Records View</a>
+        <a href="/records/documents"><i class="fas fa-folder-open"></i> All Documents</a>
         <span class="nav-section">ICT Unit</span>
         <a href="/ict/documents"><i class="fas fa-network-wired"></i> ICT Documents</a>
-        @endif
-        @if($user->isSuperAdmin())
-        <span class="nav-section">Reports</span>
-        <a href="/office/search"><i class="fas fa-chart-line"></i> Reports Dashboard</a>
+        <a href="/office/search"><i class="fas fa-chart-line"></i> Reports</a>
         @endif
         <span class="nav-section">My Documents</span>
         <a href="/submit"><i class="fas fa-paper-plane"></i> Submit Document</a>
@@ -796,30 +825,30 @@
         <!-- Stats Row -->
         <div class="stats-row anim">
             <div class="mini-stat">
-                <div class="mini-stat-icon" style="background:rgba(139,92,246,0.1);color:#7c3aed;"><i class="fas fa-file-alt"></i></div>
+                <div class="mini-stat-icon" style="background:rgba(0,86,179,0.1);color:var(--primary);"><i class="fas fa-file-alt"></i></div>
                 <div>
-                    <div class="mini-stat-num">{{ $stats['total'] }}</div>
+                    <div class="mini-stat-num">{{ \App\Support\UiNumber::compact($stats['total']) }}</div>
                     <div class="mini-stat-label">Total</div>
                 </div>
             </div>
             <div class="mini-stat">
-                <div class="mini-stat-icon" style="background:rgba(252,163,17,0.12);color:#d97706;"><i class="fas fa-clock"></i></div>
+                <div class="mini-stat-icon" style="background:rgba(0,86,179,0.1);color:var(--primary);"><i class="fas fa-clock"></i></div>
                 <div>
-                    <div class="mini-stat-num">{{ $stats['processing'] }}</div>
+                    <div class="mini-stat-num">{{ \App\Support\UiNumber::compact($stats['processing']) }}</div>
                     <div class="mini-stat-label">Processing</div>
                 </div>
             </div>
             <div class="mini-stat">
-                <div class="mini-stat-icon" style="background:rgba(22,163,74,0.1);color:#16a34a;"><i class="fas fa-check-circle"></i></div>
+                <div class="mini-stat-icon" style="background:rgba(0,86,179,0.1);color:var(--primary);"><i class="fas fa-check-circle"></i></div>
                 <div>
-                    <div class="mini-stat-num">{{ $stats['completed'] }}</div>
+                    <div class="mini-stat-num">{{ \App\Support\UiNumber::compact($stats['completed']) }}</div>
                     <div class="mini-stat-label">Completed</div>
                 </div>
             </div>
         </div>
 
         <!-- Filters -->
-        <form class="filters anim" method="GET" action="/admin/documents" id="searchForm">
+        <form class="filters anim" method="GET" action="/admin/documents" id="searchForm" data-live-search>
             <input type="text" name="search" class="filter-input" placeholder="Search tracking/reference no., subject, or sender..." value="{{ $filters['search'] }}" data-clearable data-no-capitalize>
             <select name="status" class="filter-select">
                 <option value="">All Status</option>
@@ -827,17 +856,17 @@
                     <option value="{{ $key }}" {{ $filters['status'] === $key ? 'selected' : '' }}>{{ $label }}</option>
                 @endforeach
             </select>
-            <button type="submit" class="filter-btn" id="searchBtn" data-no-auto-loading><i class="fas fa-search"></i> Search</button>
+            <button type="submit" class="filter-btn" id="searchBtn" data-no-auto-loading>@include('partials.filter-icon', ['size' => 16]) Search</button>
             @if($filters['search'] || $filters['status'])
                 <a href="/admin/documents" class="filter-clear">Clear</a>
             @endif
         </form>
 
         <!-- Documents Table -->
-        <div class="panel anim">
+        <div class="panel list-panel{{ $documents->count() > 0 ? ' has-list' : '' }} anim">
             <div class="panel-head">
                 <div class="panel-title">Documents</div>
-                <span class="panel-badge">{{ $documents->total() }} total</span>
+                <span class="panel-badge">{{ \App\Support\UiNumber::compact($documents->total()) }} total</span>
             </div>
 
             @if($documents->count() > 0)
@@ -859,8 +888,8 @@
                     <tr class="doc-row" id="doc-row-{{ $doc->id }}" onclick='viewDoc(@json($doc->tracking_number))'>
                         <td><span class="t-num">{{ $doc->tracking_number }}</span></td>
                         <td><span class="t-num" style="color:var(--text-dark)">{{ $doc->reference_number ?: 'N/A' }}</span></td>
-                        <td style="max-width:200px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ $doc->subject }}">{{ $doc->subject }}</div></td>
-                        <td class="t-user">{{ $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest') }}</td>
+                        <td style="max-width:200px"><div class="cell-ellipsis" title="{{ $doc->subject }}">{{ $doc->subject }}</div></td>
+                        <td class="t-user"><div class="cell-ellipsis" style="max-width:170px" title="{{ $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest') }}">{{ $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest') }}</div></td>
                         <td>
                             @php
                                 $sc = match($doc->status) {
@@ -1189,7 +1218,7 @@
         (function() {
             var form = document.getElementById('searchForm');
             var btn = document.getElementById('searchBtn');
-            if (!form || !btn) return;
+            if (!form || !btn || form.hasAttribute('data-live-search')) return;
             var lastSubmit = 0;
             var cooldown = 2000;
             form.addEventListener('submit', function(e) {
