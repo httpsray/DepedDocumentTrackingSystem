@@ -93,7 +93,7 @@
                 <i class="fas fa-exclamation-triangle"></i>
                 <h3 id="errTitle">Document Not Found</h3>
                 <p id="errMsg">The tracking number <strong>{{ strtoupper($tracking) }}</strong> could not be found in the system.</p>
-                <a href="/office/dashboard" class="btn-back"><i class="fas fa-arrow-left"></i> Go to Dashboard</a>
+                <a href="{{ $backUrl ?? '/office/dashboard' }}" class="btn-back"><i class="fas fa-arrow-left"></i> Go to Dashboard</a>
             </div>
             <!-- Doc info + confirm -->
             <div class="doc-info" id="docInfo">
@@ -110,7 +110,7 @@
                     Do you want to <strong>receive this document</strong> into your office? This will update the document's status and assign you as the handler.
                 </div>
                 <div class="btn-row">
-                    <a href="/office/dashboard" class="btn"><i class="fas fa-times"></i> Cancel</a>
+                    <a href="{{ $backUrl ?? '/office/dashboard' }}" class="btn"><i class="fas fa-times"></i> Cancel</a>
                     <button class="btn confirm" id="confirmBtn" onclick="confirmReceive()"><i class="fas fa-check"></i> Confirm Receive</button>
                 </div>
             </div>
@@ -119,7 +119,7 @@
                 <i class="fas fa-check-circle"></i>
                 <h3>Document Received!</h3>
                 <p id="successMsg">The document has been received into your office.</p>
-                <a href="/office/dashboard" class="btn-dashboard"><i class="fas fa-tachometer-alt"></i> Go to Dashboard</a>
+                <a href="{{ $backUrl ?? '/office/dashboard' }}" class="btn-dashboard"><i class="fas fa-tachometer-alt"></i> Go to Dashboard</a>
             </div>
         </div>
     </div>
@@ -127,10 +127,12 @@
 
 <div class="toast" id="toast"><i class="fas toast-icon" id="toastIcon"></i><span id="toastMsg"></span></div>
 
+<script src="/js/request-utils.js"></script>
 <script>
 (function(){
     var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     var tracking = @json($tracking);
+    var receiveEndpoint = @json($receiveEndpoint ?? '/api/office/documents/receive-by-reference');
 
     function escapeHtml(val) {
         return String(val == null ? '' : val).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -147,12 +149,12 @@
     }
 
     // Lookup document on page load
-    fetch('/api/track-document', {
+    window.docTraxFetchJson('/api/track-document', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+        timeoutMs: 15000,
         body: JSON.stringify({ tracking_number: tracking })
     })
-    .then(function(r) { return r.json(); })
     .then(function(data) {
         document.getElementById('loadingState').style.display = 'none';
         if (!data.success || !data.document) {
@@ -170,10 +172,10 @@
         document.getElementById('dDate').textContent = doc.submitted_at || '—';
         document.getElementById('docInfo').style.display = 'block';
     })
-    .catch(function() {
+    .catch(function(error) {
         document.getElementById('loadingState').style.display = 'none';
         document.getElementById('errTitle').textContent = 'Connection Error';
-        document.getElementById('errMsg').textContent = 'Could not connect to the server. Please try again.';
+        document.getElementById('errMsg').textContent = window.describeRequestError(error, 'Could not connect to the server. Please try again.');
         document.getElementById('errorState').style.display = 'block';
     });
 
@@ -182,12 +184,12 @@
         var btn = document.getElementById('confirmBtn');
         btn.disabled = true;
 
-        fetch('/api/office/documents/receive-by-reference', {
+        window.docTraxFetchJson(receiveEndpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+            timeoutMs: 15000,
             body: JSON.stringify({ tracking_number: tracking })
         })
-        .then(function(r) { return r.json(); })
         .then(function(data) {
             btn.disabled = false;
             if (data.success) {
@@ -199,9 +201,9 @@
                 showToast(data.message || 'Failed to receive document.', 'error');
             }
         })
-        .catch(function() {
+        .catch(function(error) {
             btn.disabled = false;
-            showToast('Network error. Please try again.', 'error');
+            showToast(window.describeRequestError(error, 'Network error. Please try again.'), 'error');
         });
     };
 })();

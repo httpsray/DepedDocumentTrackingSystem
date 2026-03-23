@@ -138,6 +138,20 @@
         const submitBtn = document.getElementById('submitBtn');
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+        function getSafeNextPath() {
+            const next = new URLSearchParams(window.location.search).get('next');
+            if (!next) return null;
+
+            // Allow only internal app paths to avoid open redirects.
+            if (next.startsWith('/') && !next.startsWith('//')) {
+                return next;
+            }
+
+            return null;
+        }
+
+        const nextPath = getSafeNextPath();
+
         let step = 1; // 1: Email check, 2: Password
         let confirmedEmail = '';
 
@@ -251,7 +265,7 @@
                     const data = await response.json();
 
                     if (data.success) {
-                        window.location.href = '/dashboard';
+                        window.location.href = nextPath || '/dashboard';
                     } else if (data.throttled) {
                         let secs = data.retry_after || 60;
                         showError('password', data.message);

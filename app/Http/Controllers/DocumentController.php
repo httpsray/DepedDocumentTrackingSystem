@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Document;
 use App\Models\Office;
 use App\Models\RoutingLog;
+use App\Models\User;
 use App\Services\ReferenceNumberService;
 use App\Services\TrackingNumberService;
 use chillerlan\QRCode\QRCode;
@@ -35,13 +36,14 @@ class DocumentController extends Controller
         if (!$isAuth) {
             $rules['sender_first_name'] = ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\s.\-]+$/'];
             $rules['sender_last_name']  = ['required', 'string', 'max:100', 'regex:/^[a-zA-Z\s.\-]+$/'];
-            $rules['sender_contact'] = 'nullable|string|max:20';
+            $rules['sender_contact'] = ['nullable', 'regex:/^09\d{9}$/'];
             $rules['sender_email'] = 'required|email|max:255';
         }
 
         $request->validate($rules, [
             'sender_first_name.regex' => 'First name may only contain letters, spaces, dots, and hyphens.',
             'sender_last_name.regex'  => 'Last name may only contain letters, spaces, dots, and hyphens.',
+            'sender_contact.regex'    => 'Contact number must start with 09 and contain exactly 11 digits.',
             'sender_email.required'   => 'Email address is required so your submitted documents can be linked to your account later.',
         ]);
 
@@ -59,6 +61,25 @@ class DocumentController extends Controller
             $senderName = trim($request->sender_first_name) . ' ' . trim($request->sender_last_name);
             $senderEmail = strtolower(trim((string) $request->sender_email));
             $senderContact = $request->sender_contact;
+
+            $existingUser = User::where('email', $senderEmail)->first();
+            if ($existingUser) {
+                $message = 'This email is already registered. Please sign in to continue submitting documents.';
+
+                if ($existingUser->isPending()) {
+                    $message = 'This email is already registered and pending activation. Please activate your account and sign in.';
+                } elseif ($existingUser->isSuspended()) {
+                    $message = 'This email is already registered but currently deactivated. Please contact the administrator.';
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'requires_login' => true,
+                    'pending' => $existingUser->isPending(),
+                    'suspended' => $existingUser->isSuspended(),
+                    'message' => $message,
+                ], 409);
+            }
         }
 
         try {
@@ -221,7 +242,11 @@ class DocumentController extends Controller
             ], 404);
         }
 
-        $orderedLogs = $document->routingLogs->sortBy('created_at')->values();
+        $orderedLogs = $document->routingLogs
+            ->sortBy(function ($log) {
+                return sprintf('%s-%010d', $log->created_at?->format('YmdHis') ?? '00000000000000', (int) $log->id);
+            })
+            ->values();
         $timelineNow = now();
         $logCount = $orderedLogs->count();
         $submittedOfficeName = $document->submittedToOffice?->name ?: 'Records Section';
@@ -299,7 +324,17 @@ class DocumentController extends Controller
             ];
         }
 
-        $logs = $orderedLogs->map(function ($log, $index) use ($submittedOfficeName, $arrivalMetaByLogIndex) {
+        $formatPerformerName = function ($performer) {
+            if (!$performer) {
+                return null;
+            }
+
+            return str_contains($performer->name, ' - ')
+                ? trim(substr($performer->name, strpos($performer->name, ' - ') + 3))
+                : $performer->name;
+        };
+
+        $logs = $orderedLogs->map(function ($log, $index) use ($submittedOfficeName, $arrivalMetaByLogIndex, $formatPerformerName) {
             $isSubmissionPending = $log->action === 'submitted' && $log->status_after === 'submitted';
             $arrivalMeta = $arrivalMetaByLogIndex[$index] ?? null;
             $officeDurationSeconds = $arrivalMeta['office_duration_seconds'] ?? null;
@@ -318,11 +353,7 @@ class DocumentController extends Controller
                 'status_after' => $log->status_after,
                 'from_office' => $isSubmissionPending ? null : $log->fromOffice?->name,
                 'to_office' => $displayToOffice,
-                'performed_by' => $log->performer
-                    ? (str_contains($log->performer->name, ' - ')
-                        ? trim(substr($log->performer->name, strpos($log->performer->name, ' - ') + 3))
-                        : $log->performer->name)
-                    : null,
+                'performed_by' => $formatPerformerName($log->performer),
                 'remarks' => $remarks,
                 'timestamp' => $log->created_at->copy()->setTimezone('Asia/Manila')->format('M d, Y h:i A'),
                 'office_name' => $arrivalMeta['office_name'] ?? null,
@@ -348,7 +379,27 @@ class DocumentController extends Controller
         $currentOfficeName = $isSubmittedAwaitingAcceptance
             ? $submittedOfficeName
             : ($document->currentOffice?->name ?: $submittedOfficeName);
-        $currentHandlerName = $isSubmittedAwaitingAcceptance ? null : $document->currentHandler?->name;
+
+        $latestHandlerLog = $orderedLogs
+            ->sortByDesc(function ($log) {
+                return sprintf('%s-%010d', $log->created_at?->format('YmdHis') ?? '00000000000000', (int) $log->id);
+            })
+            ->first(function ($log) {
+                return $log->performer && in_array($log->action, [
+                    'processing',
+                    'handoff',
+                    'completed',
+                    'for_pickup',
+                    'returned',
+                    'received',
+                    'in_review',
+                    'on_hold',
+                ], true);
+            });
+
+        $currentHandlerName = $isSubmittedAwaitingAcceptance
+            ? null
+            : ($formatPerformerName($latestHandlerLog?->performer) ?: $formatPerformerName($document->currentHandler));
 
         return response()->json([
             'success' => true,

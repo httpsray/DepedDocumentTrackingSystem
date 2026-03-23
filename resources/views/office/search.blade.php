@@ -1072,8 +1072,36 @@
     <div class="footer-right">Developed by Raymond Bautista</div>
 </footer>
 
+@php
+    $docDrawerData = [];
+    foreach ($documents as $doc) {
+        $fallback = [
+            'reference_number' => $doc->reference_number ?: $doc->tracking_number,
+            'tracking_number' => $doc->tracking_number ?: $doc->reference_number,
+            'subject' => $doc->subject,
+            'type' => $doc->type,
+            'status' => $doc->status,
+            'status_label' => $doc->statusLabel(),
+            'sender_name' => $doc->sender_name,
+            'submitted_to_office' => optional($doc->submittedToOffice)->name,
+            'current_office' => optional($doc->currentOffice)->name,
+            'current_handler' => optional($doc->currentHandler)->name,
+            'date' => optional($doc->created_at)->copy()?->setTimezone('Asia/Manila')?->format('M d, Y h:i A'),
+        ];
+        $primaryKey = $doc->tracking_number ?: $doc->reference_number;
+        if ($primaryKey) {
+            $docDrawerData[$primaryKey] = $fallback;
+        }
+        if ($doc->reference_number && $doc->reference_number !== $doc->tracking_number) {
+            $docDrawerData[$doc->reference_number] = $fallback;
+        }
+    }
+@endphp
+<script type="application/json" id="docsData">@json($docDrawerData)</script>
+
 <script>
 var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+var docsData = JSON.parse(document.getElementById('docsData').textContent || '{}');
 
 // ─── User Activity Drawer ───
 var currentUaUid = null;
@@ -1417,15 +1445,15 @@ function openDocDetail(ref, tracking) {
     document.getElementById('docDrawer').classList.add('open');
     document.body.style.overflow = 'hidden';
 
-    fetch('/api/track-document', {
+    window.docTraxFetchJson('/api/track-document', {
         method: 'POST',
         headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
+        timeoutMs: 15000,
         body: JSON.stringify({
             reference_number: ref,
             tracking_number: tracking
         })
     })
-    .then(function(r) { return r.json(); })
     .then(function(data) {
         if (!data.success || !data.document) {
             document.getElementById('drawerBody').innerHTML = '<div class="drawer-loader"><i class="fas fa-file-circle-question" style="font-size:32px;color:#cbd5e1;margin-bottom:8px"></i>Document not found.</div>';
@@ -1433,8 +1461,31 @@ function openDocDetail(ref, tracking) {
         }
         renderDrawer(data.document);
     })
-    .catch(function() {
-        document.getElementById('drawerBody').innerHTML = '<div class="drawer-loader">Something went wrong. Please try again.</div>';
+    .catch(function(error) {
+        var fallback = docsData[tracking] || docsData[ref];
+        if (fallback) {
+            renderDrawer({
+                subject: fallback.subject || '-',
+                reference_number: fallback.reference_number || tracking || ref,
+                tracking_number: fallback.tracking_number || tracking || ref,
+                status: fallback.status || 'unknown',
+                status_label: fallback.status_label || 'Unknown',
+                sender_name: fallback.sender_name || '-',
+                type: fallback.type || '-',
+                submitted_to_office: fallback.submitted_to_office || '-',
+                current_office: fallback.current_office || '-',
+                current_handler: fallback.current_handler || 'Unassigned',
+                date: fallback.date || '-',
+                routing_logs: []
+            });
+            window.showNetworkNotice('Showing basic document details from the current list while the live request is unavailable.', {
+                type: 'warning',
+                duration: 5000
+            });
+            return;
+        }
+        document.getElementById('drawerBody').innerHTML =
+            '<div class="drawer-loader">' + escapeHtml(window.describeRequestError(error, 'Could not load tracking details. Please try again.')) + '</div>';
     });
 }
 

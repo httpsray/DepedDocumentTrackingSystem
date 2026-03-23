@@ -11,6 +11,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="/css/auth.css">
+    <script src="/js/request-utils.js" defer></script>
     <style>
         .container { background: transparent; box-shadow: none; animation: none; }
 
@@ -104,7 +105,7 @@
     <div class="main-wrapper">
         <div class="auth-container">
             <div class="auth-header" id="formHeader">
-                <a href="/login" style="display: inline-flex; align-items: center; gap: 6px; color: #64748b; text-decoration: none; font-size: 13px; font-weight: 500; margin-bottom: 12px; transition: color 0.2s;" onmouseover="this.style.color='#0056b3'" onmouseout="this.style.color='#64748b'">
+                <a href="/login" class="back-link" style="margin-bottom: 12px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M5 12l6 6" /><path d="M5 12l6 -6" /></svg>
                     Back to login
                 </a>

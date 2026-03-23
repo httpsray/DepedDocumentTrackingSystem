@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="/js/request-utils.js" defer></script>
 
 
     <style>
@@ -285,14 +286,35 @@
 <body>
 
     @php
-        $isRep          = ($user->account_type ?? '') === 'representative';
-        $navOfficeName  = '';
-        $navRepName     = '';
+        $isAdminUser = $user->isAdmin();
+        $isSuperAdminUser = $user->isSuperAdmin();
+        $isRep = ($user->account_type ?? '') === 'representative';
+        $isOfficeUser = $isRep && $user->office_id && !$isAdminUser;
+
+        $navOfficeName = '';
+        $navRepName = '';
         if ($isRep && str_contains($user->name, ' - ')) {
             [$navOfficeName, $navRepName] = explode(' - ', $user->name, 2);
         }
-        $navDisplayName = $isRep ? $navOfficeName : explode(' ', $user->name)[0];
-        $navDisplayRole = $isRep ? ($user->office_id ? 'Office' : 'Representative') : ucfirst($user->role ?? 'User');
+
+        $displayFirst = explode(' ', trim($user->name ?? 'User'))[0] ?? 'User';
+        $officeLabel = $navOfficeName ?: ($user->office?->name ?? 'Office');
+        $officePerson = $navRepName ?: $displayFirst;
+        $navDisplayRole = $isAdminUser ? ($isSuperAdminUser ? 'Super Admin' : 'Admin') : ucfirst($user->role ?? 'User');
+        $helpBackUrl = $isOfficeUser ? '/office/dashboard' : '/dashboard';
+
+        $sidebarNameSource = $isOfficeUser ? $officePerson : $displayFirst;
+        $sidebarInitials = '';
+        foreach (preg_split('/\s+/', trim($sidebarNameSource)) as $part) {
+            if ($part === '') {
+                continue;
+            }
+            $sidebarInitials .= strtoupper(substr($part, 0, 1));
+            if (strlen($sidebarInitials) >= 2) {
+                break;
+            }
+        }
+        $sidebarInitials = $sidebarInitials ?: strtoupper(substr($displayFirst, 0, 1));
     @endphp
 
 <!-- Mobile top bar -->
@@ -313,6 +335,43 @@
         <small>DepEd Document Tracking System</small>
     </div>
     <nav class="sb-nav">
+        @if($isAdminUser)
+        <span class="nav-section">Overview</span>
+        <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <span class="nav-section">Management</span>
+        <a href="/admin/users"><i class="fas fa-users"></i> Users</a>
+        <a href="/admin/offices"><i class="fas fa-building"></i> Offices</a>
+        @unless($isSuperAdminUser)
+        <a href="/admin/documents"><i class="fas fa-folder-open"></i> Documents</a>
+        @endunless
+        @if($isSuperAdminUser)
+        <a href="/records/documents"><i class="fas fa-folder-open"></i> All Documents</a>
+        <span class="nav-section">ICT Unit</span>
+        <a href="/ict/documents"><i class="fas fa-network-wired"></i> ICT Documents</a>
+        <a href="/office/search"><i class="fas fa-chart-line"></i> Reports</a>
+        @endif
+        <span class="nav-section">My Documents</span>
+        <a href="/submit"><i class="fas fa-paper-plane"></i> Submit Document</a>
+        <a href="/my-documents"><i class="fas fa-folder"></i> My Documents</a>
+        <a href="/track"><i class="fas fa-search"></i> Track Document</a>
+        <span class="nav-section">Account</span>
+        <a href="/profile"><i class="fas fa-user-cog"></i> My Profile</a>
+        <a href="/help" class="active"><i class="fas fa-circle-question"></i> Help</a>
+        @elseif($isOfficeUser)
+        <span class="nav-section">Office</span>
+        <a href="/office/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/office/search" style="{{ $user->hasReportsAccess() ? '' : 'display:none' }}"><i class="fas fa-chart-line"></i> Reports</a>
+        @if($user->isRecords())
+        <span class="nav-section">Records Section</span>
+        <a href="/records/documents"><i class="fas fa-folder-open"></i> All Documents</a>
+        @endif
+        <span class="nav-section">My Documents</span>
+        <a href="/submit"><i class="fas fa-paper-plane"></i> Submit Document</a>
+        <a href="/my-documents"><i class="fas fa-folder"></i> My Documents</a>
+        <span class="nav-section">Account</span>
+        <a href="/profile"><i class="fas fa-user-cog"></i> My Profile</a>
+        <a href="/help" class="active"><i class="fas fa-circle-question"></i> Help</a>
+        @else
         <span class="nav-section">Overview</span>
         <a href="/dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
         <span class="nav-section">Documents</span>
@@ -321,13 +380,20 @@
         <a href="/track"><i class="fas fa-search"></i> Track Document</a>
         <span class="nav-section">Account</span>
         <a href="/profile"><i class="fas fa-user-cog"></i> My Profile</a>
+        <a href="/help" class="active"><i class="fas fa-circle-question"></i> Help</a>
+        @endif
     </nav>
     <div class="sb-footer">
         <div class="sb-user">
-            <div class="sb-avatar">{{ strtoupper(substr($navDisplayName, 0, 1)) }}</div>
+            <div class="sb-avatar">{{ $sidebarInitials }}</div>
             <div class="sb-user-info">
+                @if($isOfficeUser)
+                <small>{{ $officeLabel }}</small>
+                <span>{{ $officePerson }}</span>
+                @else
                 <small>{{ $navDisplayRole }}</small>
-                <span>{{ $navDisplayName }}</span>
+                <span>{{ $displayFirst }}</span>
+                @endif
             </div>
         </div>
         <button onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -348,7 +414,7 @@
             @if(request()->query('from') === 'profile')
             <a href="/profile" class="back-link"><i class="fas fa-arrow-left"></i> Back to Profile</a>
             @else
-            <a href="/dashboard" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            <a href="{{ $helpBackUrl }}" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
             @endif
         </div>
 

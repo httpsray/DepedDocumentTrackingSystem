@@ -43,9 +43,15 @@ class RepresentativeController extends Controller
     private function applyOfficeQueueVisibility($query, $user)
     {
         return $query->where(function ($q) use ($user) {
-            $q->whereNull('user_id')
-              ->orWhere('user_id', '!=', $user->id)
-              ->orWhere('current_handler_id', $user->id);
+                        // Queue should only show items available to this user:
+                        // unassigned documents OR documents currently tagged to this user.
+                        $q->whereNull('current_handler_id')
+                            ->orWhere('current_handler_id', $user->id);
+                })->where(function ($q) use ($user) {
+                        // Keep public submissions visible; hide untouched self-submissions.
+                        $q->whereNull('user_id')
+                            ->orWhere('user_id', '!=', $user->id)
+                            ->orWhere('current_handler_id', $user->id);
         });
     }
 
@@ -115,12 +121,12 @@ class RepresentativeController extends Controller
                     Document::where('current_office_id', $office->id),
                     $user
                 )->where('status', 'in_review')->count(),
-            'completed' => $this->applyOfficeQueueVisibility(
-                    Document::where('submitted_to_office_id', $office->id),
-                    $user
-                )
-                ->whereIn('status', ['completed', 'for_pickup'])
-                ->count(),
+            // Count documents this specific office user finalized (completed/returned).
+            'completed' => RoutingLog::query()
+                ->where('performed_by', $user->id)
+                ->whereIn('action', ['completed', 'returned'])
+                ->distinct('document_id')
+                ->count('document_id'),
             'for_pickup' => $this->applyOfficeQueueVisibility(
                     Document::where('current_office_id', $office->id),
                     $user
@@ -253,14 +259,14 @@ class RepresentativeController extends Controller
             ], 404);
         }
 
-        if (in_array($document->status, ['completed', 'returned', 'cancelled'], true)) {
+        if (in_array($document->status, ['completed', 'returned', 'cancelled', 'archived'], true)) {
             return response()->json([
                 'success' => false,
                 'message' => 'This document is already closed and cannot be received.',
             ], 422);
         }
 
-        // Document is already physically at this office — block re-receive to prevent duplicate log entries.
+        // Document is already physically at this office.
         if ($document->current_office_id === $office->id
             && in_array($document->status, ['received', 'in_review', 'for_pickup'], true)) {
 
@@ -272,13 +278,31 @@ class RepresentativeController extends Controller
                 ], 422);
             }
 
-            // Tagged to a different colleague at the same office
+            // At this office but tagged to another colleague — allow handoff by scan.
             if ($document->current_handler_id && (int) $document->current_handler_id !== (int) $user->id) {
-                $handlerName = optional($document->currentHandler)->name ?: 'another office user';
+                $previousHandlerName = optional($document->currentHandler)->name ?: 'another office user';
+                $document->current_handler_id = $user->id;
+                $document->last_action_at = now();
+                $document->save();
+
+                RoutingLog::create([
+                    'document_id' => $document->id,
+                    'performed_by' => $user->id,
+                    'from_office_id' => $office->id,
+                    'to_office_id' => $office->id,
+                    'action' => 'handoff',
+                    'status_after' => $document->status,
+                    'remarks' => $request->input('remarks', "Internal handoff within {$office->name}: {$previousHandlerName} to {$user->name} via scan."),
+                ]);
+
                 return response()->json([
-                    'success' => false,
-                    'message' => "This document is already at your office and tagged to {$handlerName}.",
-                ], 409);
+                    'success' => true,
+                    'message' => "Document handoff complete. You are now the handler.",
+                    'status' => $document->status,
+                    'reference_number' => $document->reference_number ?: $document->tracking_number,
+                    'tracking_number' => $document->tracking_number,
+                    'current_handler' => $user->name,
+                ]);
             }
 
             // At this office but unassigned — just tag the user without creating a new log entry

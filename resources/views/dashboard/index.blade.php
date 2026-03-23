@@ -811,16 +811,23 @@
 
         // ─── Live stats (refresh every 30s, silent update) ───
         function refreshStats() {
-            fetch('/api/my-stats', { headers: { 'Accept': 'application/json' } })
-                .then(function(r) { return r.ok ? r.json() : null; })
+            window.docTraxFetchJson('/api/my-stats', {
+                headers: { 'Accept': 'application/json' },
+                timeoutMs: 10000
+            })
                 .then(function(d) {
-                    if (!d) return;
                     var compactCount = window.formatCompactCount || function(v) { return String(v); };
                     document.getElementById('stat-total').textContent     = compactCount(d.total);
                     document.getElementById('stat-pending').textContent   = compactCount(d.pending);
                     document.getElementById('stat-completed').textContent = compactCount(d.completed);
+                    window.clearStatusNotice('user-dashboard-stats');
                 })
-                .catch(function() {});
+                .catch(function() {
+                    window.setStatusNotice('user-dashboard-stats', 'Live dashboard updates are temporarily unavailable. Showing the last known counts.', {
+                        type: 'warning',
+                        priority: 30
+                    });
+                });
         }
         if (window.smartInterval) { window.smartInterval(refreshStats, 30000); }
         else { setInterval(refreshStats, 30000); }

@@ -469,8 +469,35 @@
 
 </div><!-- /.main -->
 
+<script type="application/json" id="docsData">
+    @php
+        $docData = [];
+        foreach($documents as $doc) {
+            $entry = [
+                'reference_number' => $doc->reference_number ?: $doc->tracking_number,
+                'tracking_number' => $doc->tracking_number,
+                'subject' => $doc->subject,
+                'type' => $doc->type ?? 'General',
+                'status' => $doc->status,
+                'status_label' => $doc->statusLabel(),
+                'sender_name' => $doc->sender_name ?? ($doc->user->name ?? 'Guest'),
+                'submitted_to_office' => optional($doc->submittedToOffice)->name ?? 'Records Section',
+                'current_office' => optional($doc->currentOffice)->name ?? optional($doc->submittedToOffice)->name ?? 'No office assigned',
+                'current_handler' => 'Unassigned',
+                'date' => $doc->created_at?->format('M d, Y h:i A') ?? '-',
+            ];
+            $docData[$doc->tracking_number] = $entry;
+            if ($doc->reference_number && $doc->reference_number !== $doc->tracking_number) {
+                $docData[$doc->reference_number] = $entry;
+            }
+        }
+    @endphp
+    @json($docData)
+</script>
+
 <script>
 var _searchTimer = null;
+var docsData = JSON.parse(document.getElementById('docsData').textContent || '{}');
 
 function filterDocs(immediate) {
     var q      = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -575,15 +602,15 @@ function openDocDetail(ref, tracking) {
     document.getElementById('docDrawer').classList.add('open');
     document.body.style.overflow = 'hidden';
 
-    fetch('/api/track-document', {
+    window.docTraxFetchJson('/api/track-document', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': _csrf, 'Accept': 'application/json' },
+        timeoutMs: 15000,
         body: JSON.stringify({
             reference_number: ref,
             tracking_number: tracking || ref
         })
     })
-    .then(function(r) { return r.json(); })
     .then(function(data) {
         if (!data.success || !data.document) {
             document.getElementById('drawerBody').innerHTML =
@@ -592,9 +619,31 @@ function openDocDetail(ref, tracking) {
         }
         renderDrawer(data.document);
     })
-    .catch(function() {
+    .catch(function(error) {
+        var fallback = docsData[tracking] || docsData[ref];
+        if (fallback) {
+            renderDrawer({
+                subject: fallback.subject || '-',
+                reference_number: fallback.reference_number || tracking || ref,
+                tracking_number: fallback.tracking_number || tracking || ref,
+                status: fallback.status || 'unknown',
+                status_label: fallback.status_label || 'Unknown',
+                sender_name: fallback.sender_name || '-',
+                type: fallback.type || '-',
+                submitted_to_office: fallback.submitted_to_office || '-',
+                current_office: fallback.current_office || '-',
+                current_handler: fallback.current_handler || 'Unassigned',
+                date: fallback.date || '-',
+                routing_logs: []
+            });
+            window.showNetworkNotice('Showing basic document details from the current list while the live request is unavailable.', {
+                type: 'warning',
+                duration: 5000
+            });
+            return;
+        }
         document.getElementById('drawerBody').innerHTML =
-            '<div class="drawer-loader">Something went wrong. Please try again.</div>';
+            '<div class="drawer-loader">' + escapeHtml(window.describeRequestError(error, 'Could not load tracking details. Please try again.')) + '</div>';
     });
 }
 
@@ -692,9 +741,46 @@ function renderDrawer(doc) {
     var currentOfficeText = (doc.status === 'submitted')
         ? ('Awaiting acceptance by ' + (doc.submitted_to_office || doc.current_office || 'Records Section'))
         : (doc.current_office || doc.submitted_to_office || '-');
-    var currentHandlerText = doc.current_handler || 'Unassigned';
+
+    var receiveActions = ['processing', 'received', 'in_review'];
+    var takeActions = ['handoff', 'processing', 'received', 'in_review'];
+    var receivedByText = 'Not recorded';
+    var takenByText = 'Not recorded';
+
+    for (var i = 0; i < logs.length; i++) {
+        var firstLog = logs[i] || {};
+        var firstAction = String(firstLog.action || '').toLowerCase();
+        var firstPerformer = String(firstLog.performed_by || '').trim();
+        if (firstPerformer && receiveActions.indexOf(firstAction) !== -1) {
+            receivedByText = firstPerformer;
+            break;
+        }
+    }
+
+    for (var j = logs.length - 1; j >= 0; j--) {
+        var latestLog = logs[j] || {};
+        var latestAction = String(latestLog.action || '').toLowerCase();
+        var latestPerformer = String(latestLog.performed_by || '').trim();
+        if (latestPerformer && takeActions.indexOf(latestAction) !== -1) {
+            takenByText = latestPerformer;
+            break;
+        }
+    }
+
+    if (takenByText === 'Not recorded' && doc.current_handler) {
+        takenByText = doc.current_handler;
+    }
+    if (receivedByText === 'Not recorded' && takenByText !== 'Not recorded') {
+        receivedByText = takenByText;
+    }
 
     document.getElementById('drawerBody').innerHTML =
+        '<div class="drawer-meta">' +
+            '<div class="dm-item"><div class="dm-label">Current Office</div><div class="dm-value">' + escapeHtml(currentOfficeText) + '</div></div>' +
+            '<div class="dm-item"><div class="dm-label">Nag Receive (Stamp)</div><div class="dm-value">' + escapeHtml(receivedByText) + '</div></div>' +
+            '<div class="dm-item"><div class="dm-label">Kumuha (Latest)</div><div class="dm-value">' + escapeHtml(takenByText) + '</div></div>' +
+            '<div class="dm-item"><div class="dm-label">Status</div><div class="dm-value">' + escapeHtml(doc.status_label || '-') + '</div></div>' +
+        '</div>' +
         '<div class="drawer-tl-head"><i class="fas fa-history"></i> Routing History</div>' +
         '<div class="drawer-timeline"><div class="tl">' + tlHtml + '</div></div>';
 }

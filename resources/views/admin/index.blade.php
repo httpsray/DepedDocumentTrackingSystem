@@ -304,9 +304,20 @@
             font-weight: 500;
         }
 
+        .recent-panel .dtable {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .recent-panel .panel-scroll-body {
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-gutter: stable;
+        }
+
         .recent-panel .dtable th {
             text-align: left;
-            padding: 10px 18px;
+            padding: 10px 10px;
             font-size: 10.5px;
             font-weight: 600;
             color: #94a3b8;
@@ -317,7 +328,7 @@
         }
 
         .recent-panel .dtable td {
-            padding: 13px 18px;
+            padding: 10px 10px;
             font-size: 13px;
             color: var(--text-dark);
             border-top: none;
@@ -335,39 +346,75 @@
 
         .recent-panel .dtable th,
         .recent-panel .dtable td {
-            padding-top: 11px;
-            padding-bottom: 11px;
+            padding-top: 10px;
+            padding-bottom: 10px;
         }
 
         .recent-panel .pill {
             display: inline-block;
-            padding: 3px 10px;
+            padding: 3px 9px;
             border-radius: 20px;
-            font-size: 10px;
+            font-size: 9.5px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: .4px;
+            white-space: nowrap;
         }
 
         .recent-panel .td-action {
-            width: 44px;
+            width: 40px;
             text-align: center;
+        }
+
+        .recent-panel .dtable th.td-action,
+        .recent-panel .dtable td.td-action {
+            padding-left: 2px;
+            padding-right: 8px;
         }
 
         .recent-panel .row-arrow {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
-            border-radius: 7px;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
             color: #94a3b8;
             transition: all .15s;
+            flex-shrink: 0;
         }
 
         .recent-panel .dtable tbody tr:hover .row-arrow {
             background: var(--primary);
             color: #fff;
+        }
+
+        .recent-panel .col-track { width: 18%; }
+        .recent-panel .col-ref { width: 16%; }
+        .recent-panel .col-subject { width: 24%; }
+        .recent-panel .col-submitted { width: 23%; }
+        .recent-panel .col-status { width: 13%; }
+        .recent-panel .col-action { width: 6%; }
+
+        .recent-panel .t-track,
+        .recent-panel .t-ref {
+            font-family: monospace;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .recent-panel .t-track { color: var(--primary); }
+        .recent-panel .t-ref { color: var(--text-dark); }
+
+        .recent-panel .t-subject .cell-ellipsis,
+        .recent-panel .t-user .cell-ellipsis {
+            max-width: 100%;
+        }
+
+        .recent-panel .t-status {
+            white-space: nowrap;
+            min-width: 0;
         }
 
         .panel-head {
@@ -437,8 +484,18 @@
         .pill.completed,
         .pill.other { background: #fff7ed; color: #c2410c; }
 
-        .t-date { font-size: 12px; color: #94a3b8; }
-        .t-user { font-size: 12px; color: var(--text-muted); }
+        .t-user { min-width: 0; }
+        .submission-person { font-size: 12px; color: var(--text-dark); font-weight: 500; }
+        .submission-date {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 4px;
+            font-size: 11px;
+            color: #94a3b8;
+            white-space: nowrap;
+        }
+        .submission-date i { font-size: 10px; }
         .cell-ellipsis { display:block; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
         .empty-state {
@@ -861,25 +918,35 @@
                 @if($recentDocs->count() > 0)
                 <div class="dtable-wrap panel-scroll-body">
                 <table class="dtable">
+                    <colgroup>
+                        <col class="col-track">
+                        <col class="col-ref">
+                        <col class="col-subject">
+                        <col class="col-submitted">
+                        <col class="col-status">
+                        <col class="col-action">
+                    </colgroup>
                     <thead>
                         <tr>
                             <th>Tracking #</th>
                             <th>Reference #</th>
                             <th>Subject</th>
-                            <th>Submitted By</th>
+                            <th>Submitted</th>
                             <th>Status</th>
-                            <th>Date</th>
                             <th class="td-action"></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($recentDocs as $doc)
                         <tr class="doc-row" style="cursor:pointer;" onclick='openDocDetail(@json($doc->tracking_number))'>
-                            <td style="font-family:monospace;font-size:12px;font-weight:600;color:var(--primary);white-space:nowrap">{{ $doc->tracking_number }}</td>
-                            <td style="font-family:monospace;font-size:12px;font-weight:600;color:var(--text-dark);white-space:nowrap">{{ $doc->reference_number ?: 'N/A' }}</td>
-                            <td style="max-width:200px"><div class="cell-ellipsis" style="font-weight:600" title="{{ $doc->subject }}">{{ $doc->subject }}</div></td>
-                            <td class="t-user"><div class="cell-ellipsis" style="max-width:170px" title="{{ $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest') }}">{{ $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest') }}</div></td>
-                            <td>
+                            <td class="t-track"><div class="cell-ellipsis" title="{{ $doc->tracking_number }}">{{ $doc->tracking_number }}</div></td>
+                            <td class="t-ref"><div class="cell-ellipsis" title="{{ $doc->reference_number ?: 'N/A' }}">{{ $doc->reference_number ?: 'N/A' }}</div></td>
+                            <td class="t-subject"><div class="cell-ellipsis" style="font-weight:600" title="{{ $doc->subject }}">{{ $doc->subject }}</div></td>
+                            <td class="t-user">
+                                <div class="cell-ellipsis submission-person" style="max-width:170px" title="{{ $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest') }}">{{ $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest') }}</div>
+                                <div class="submission-date"><i class="fas fa-calendar-alt"></i>{{ $doc->created_at->format('M d, Y') }}</div>
+                            </td>
+                            <td class="t-status">
                                 @php
                                     $sc = match($doc->status) {
                                         'submitted', 'received' => 'pending',
@@ -893,8 +960,7 @@
                                     {{ $statusLabel }}
                                 </span>
                             </td>
-                            <td class="t-date">{{ $doc->created_at->format('M d, Y') }}</td>
-                            <td class="td-action"><span class="row-arrow"><i class="fas fa-chevron-right"></i></span></td>
+                            <td class="td-action"><span class="row-arrow" aria-hidden="true"><i class="fas fa-chevron-right"></i></span></td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -1041,12 +1107,50 @@
 
 </div><!-- end .main -->
 
+    @php
+        $docDrawerData = [];
+        foreach ($recentDocs as $doc) {
+            $fallback = [
+                'reference_number' => $doc->reference_number ?: $doc->tracking_number,
+                'tracking_number' => $doc->tracking_number ?: $doc->reference_number,
+                'subject' => $doc->subject,
+                'status' => $doc->status,
+                'status_label' => $doc->statusLabel(),
+                'sender_name' => $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest'),
+                'submitted_to_office' => null,
+                'current_office' => null,
+                'current_handler' => null,
+                'date' => optional($doc->created_at)->format('M d, Y'),
+            ];
+            $primaryKey = $doc->tracking_number ?: $doc->reference_number;
+            if ($primaryKey) {
+                $docDrawerData[$primaryKey] = $fallback;
+            }
+            if ($doc->reference_number && $doc->reference_number !== $doc->tracking_number) {
+                $docDrawerData[$doc->reference_number] = $fallback;
+            }
+        }
+    @endphp
+    <script type="application/json" id="docsData">@json($docDrawerData)</script>
+
     <script>
     (function() {
         function syncRecentPanelHeight() {
             var recentPanel = document.getElementById('recentSubmissionsPanel');
+            var quickActionsPanel = document.getElementById('quickActionsPanel');
             if (!recentPanel) return;
+
+            recentPanel.style.height = '';
             recentPanel.style.minHeight = '';
+
+            if (!quickActionsPanel || window.innerWidth <= 1024) {
+                return;
+            }
+
+            var quickActionsHeight = quickActionsPanel.offsetHeight;
+            if (quickActionsHeight > 0) {
+                recentPanel.style.height = quickActionsHeight + 'px';
+            }
         }
         // ─── Clock ───
         function tick() {
@@ -1101,29 +1205,43 @@
         // Live stats (silent update every 30s)
         (function() {
             function refreshStats() {
-                fetch('/api/admin-stats', { headers: { 'Accept': 'application/json' } })
-                    .then(function(r) { return r.ok ? r.json() : null; })
+                window.docTraxFetchJson('/api/admin-stats', {
+                    headers: { 'Accept': 'application/json' },
+                    timeoutMs: 10000
+                })
                     .then(function(d) {
-                        if (!d) return;
                         var compactCount = window.formatCompactCount || function(v) { return String(v); };
                         document.getElementById('stat-users').textContent     = compactCount(d.total_users);
                         document.getElementById('stat-docs').textContent      = compactCount(d.total_documents);
                         document.getElementById('stat-pending').textContent   = compactCount(d.pending_docs);
                         document.getElementById('stat-completed').textContent = compactCount(d.completed_docs);
+                        window.clearStatusNotice('admin-dashboard-stats');
                     })
-                    .catch(function() {});
+                    .catch(function() {
+                        window.setStatusNotice('admin-dashboard-stats', 'Live dashboard updates are temporarily unavailable. Showing the last known counts.', {
+                            type: 'warning',
+                            priority: 30
+                        });
+                    });
 
                 // Refresh office stats too
-                fetch('/api/office-stats', { headers: { 'Accept': 'application/json' } })
-                    .then(function(r) { return r.ok ? r.json() : null; })
+                window.docTraxFetchJson('/api/office-stats', {
+                    headers: { 'Accept': 'application/json' },
+                    timeoutMs: 10000
+                })
                     .then(function(d) {
-                        if (!d) return;
                         var el;
                         var compactCount = window.formatCompactCount || function(v) { return String(v); };
                         el = document.getElementById('os-incoming');  if (el) el.textContent = compactCount(d.incoming);
                         el = document.getElementById('os-review');    if (el) el.textContent = compactCount(d.in_review);
+                        window.clearStatusNotice('admin-office-stats');
                     })
-                    .catch(function() {});
+                    .catch(function() {
+                        window.setStatusNotice('admin-office-stats', 'Office-side live counts are temporarily unavailable. Showing the last known values.', {
+                            type: 'warning',
+                            priority: 20
+                        });
+                    });
             }
             if (window.smartInterval) { window.smartInterval(refreshStats, 30000); }
             else { setInterval(refreshStats, 30000); }
@@ -1131,8 +1249,25 @@
 
         // ─── Office document actions (SuperAdmin with office) ───
         syncRecentPanelHeight();
+        window.addEventListener('resize', syncRecentPanelHeight);
+        window.addEventListener('load', syncRecentPanelHeight);
+
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(syncRecentPanelHeight).catch(function() {});
+        }
+
+        if (window.ResizeObserver) {
+            var quickActionsPanel = document.getElementById('quickActionsPanel');
+            if (quickActionsPanel) {
+                var recentPanelObserver = new ResizeObserver(function() {
+                    syncRecentPanelHeight();
+                });
+                recentPanelObserver.observe(quickActionsPanel);
+            }
+        }
 
         var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        var docsData = JSON.parse(document.getElementById('docsData').textContent || '{}');
 
         window.acceptDoc = function(id) {
             var btn = document.querySelector('.btn-accept-office[data-id="' + id + '"]');
@@ -1296,6 +1431,7 @@
                 .replace(/'/g,'&#39;');
         }
         window.openDocDetail = function(ref){
+            ref = (ref || '').toString().trim();
             document.getElementById('drTitle').textContent='—';
             document.getElementById('drRef').textContent=ref;
             document.getElementById('drTrack').textContent='';
@@ -1303,12 +1439,12 @@
             document.getElementById('drawerOverlay').classList.add('open');
             document.getElementById('docDrawer').classList.add('open');
             document.body.style.overflow='hidden';
-            fetch('/api/track-document',{
+            window.docTraxFetchJson('/api/track-document',{
                 method:'POST',
                 headers:{'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
+                timeoutMs: 15000,
                 body:JSON.stringify({ reference_number: ref, tracking_number: ref })
             })
-            .then(function(r){ return r.json(); })
             .then(function(data){
                 if(!data.success || !data.document){
                     document.getElementById('drawerBody').innerHTML='<div class="drawer-loader">Document not found.</div>';
@@ -1316,8 +1452,30 @@
                 }
                 renderDrawer(data.document);
             })
-            .catch(function(){
-                document.getElementById('drawerBody').innerHTML='<div class="drawer-loader">Something went wrong. Please try again.</div>';
+            .catch(function(error){
+                var fallback = docsData[ref];
+                if (fallback) {
+                    renderDrawer({
+                        subject: fallback.subject || '-',
+                        reference_number: fallback.reference_number || ref,
+                        tracking_number: fallback.tracking_number || ref,
+                        status: fallback.status || 'unknown',
+                        status_label: fallback.status_label || 'Unknown',
+                        sender_name: fallback.sender_name || '-',
+                        submitted_to_office: fallback.submitted_to_office || '-',
+                        current_office: fallback.current_office || '-',
+                        current_handler: fallback.current_handler || 'Unassigned',
+                        date: fallback.date || '-',
+                        routing_logs: []
+                    });
+                    window.showNetworkNotice('Showing basic document details from the current list while the live request is unavailable.', {
+                        type: 'warning',
+                        duration: 5000
+                    });
+                    return;
+                }
+                document.getElementById('drawerBody').innerHTML =
+                    '<div class="drawer-loader">' + escapeHtml(window.describeRequestError(error, 'Could not load tracking details. Please try again.')) + '</div>';
             });
         };
         window.closeDrawer = function(){

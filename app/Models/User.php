@@ -154,6 +154,16 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if this user is an internal office account.
+     */
+    public function isOfficeAccount(): bool
+    {
+        return $this->isRepresentative()
+            && !is_null($this->office_id)
+            && !$this->isAdmin();
+    }
+
+    /**
      * Check if the user has access to the Reports dashboard.
      * SuperAdmins always have access; everyone else is controlled by the toggle.
      */

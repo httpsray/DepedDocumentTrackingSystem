@@ -551,8 +551,36 @@
     </div>
 </div>
 
+@php
+    $docDrawerData = [];
+    foreach ($documents as $doc) {
+        $fallback = [
+            'reference_number' => $doc->reference_number ?: $doc->tracking_number,
+            'tracking_number' => $doc->tracking_number ?: $doc->reference_number,
+            'subject' => $doc->subject,
+            'type' => $doc->type,
+            'status' => $doc->status,
+            'status_label' => $doc->statusLabel(),
+            'sender_name' => $doc->sender_name,
+            'submitted_to_office' => optional($doc->submittedToOffice)->name,
+            'current_office' => optional($doc->currentOffice)->name,
+            'current_handler' => optional($doc->currentHandler)->name,
+            'date' => optional($doc->created_at)->format('M d, Y'),
+        ];
+        $primaryKey = $doc->tracking_number ?: $doc->reference_number;
+        if ($primaryKey) {
+            $docDrawerData[$primaryKey] = $fallback;
+        }
+        if ($doc->reference_number && $doc->reference_number !== $doc->tracking_number) {
+            $docDrawerData[$doc->reference_number] = $fallback;
+        }
+    }
+@endphp
+<script type="application/json" id="docsData">@json($docDrawerData)</script>
+
 <script>
 var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+var docsData = JSON.parse(document.getElementById('docsData').textContent || '{}');
 
 function filterTable(){
     var q      = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -757,6 +785,7 @@ function escapeHtml(value){
         .replace(/'/g,'&#39;');
 }
 function openDocDetail(ref){
+    ref = (ref || '').toString().trim();
     document.getElementById('drTitle').textContent='—';
     document.getElementById('drRef').textContent=ref;
     document.getElementById('drTrack').textContent='';
@@ -765,15 +794,15 @@ function openDocDetail(ref){
     document.getElementById('docDrawer').classList.add('open');
     document.body.style.overflow='hidden';
 
-    fetch('/api/track-document',{
+    window.docTraxFetchJson('/api/track-document',{
         method:'POST',
         headers:{'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
+        timeoutMs: 15000,
         body:JSON.stringify({
             reference_number: ref,
             tracking_number: ref
         })
     })
-    .then(function(r){ return r.json(); })
     .then(function(data){
         if(!data.success || !data.document){
             document.getElementById('drawerBody').innerHTML='<div class="drawer-loader">Document not found.</div>';
@@ -781,8 +810,31 @@ function openDocDetail(ref){
         }
         renderDrawer(data.document);
     })
-    .catch(function(){
-        document.getElementById('drawerBody').innerHTML='<div class="drawer-loader">Something went wrong. Please try again.</div>';
+    .catch(function(error){
+        var fallback = docsData[ref];
+        if (fallback) {
+            renderDrawer({
+                subject: fallback.subject || '-',
+                reference_number: fallback.reference_number || ref,
+                tracking_number: fallback.tracking_number || ref,
+                status: fallback.status || 'unknown',
+                status_label: fallback.status_label || 'Unknown',
+                sender_name: fallback.sender_name || '-',
+                type: fallback.type || '-',
+                submitted_to_office: fallback.submitted_to_office || '-',
+                current_office: fallback.current_office || '-',
+                current_handler: fallback.current_handler || 'Unassigned',
+                date: fallback.date || '-',
+                routing_logs: []
+            });
+            window.showNetworkNotice('Showing basic document details from the current list while the live request is unavailable.', {
+                type: 'warning',
+                duration: 5000
+            });
+            return;
+        }
+        document.getElementById('drawerBody').innerHTML =
+            '<div class="drawer-loader">' + escapeHtml(window.describeRequestError(error, 'Could not load tracking details. Please try again.')) + '</div>';
     });
 }
 function closeDrawer(){
@@ -833,6 +885,7 @@ function renderDrawer(doc){
     var currentOfficeText = (doc.status === 'submitted')
         ? ('Awaiting acceptance by ' + (doc.submitted_to_office || doc.current_office || 'Records Section'))
         : (doc.current_office || doc.submitted_to_office || '-');
+
     var currentHandlerText = doc.current_handler || 'Unassigned';
 
     document.getElementById('drawerBody').innerHTML =
@@ -858,29 +911,49 @@ document.addEventListener('keydown', function(e){
     }
 
     function refreshTable(){
-        fetch(window.location.pathname + window.location.search, {headers:{'X-Requested-With':'XMLHttpRequest','Accept':'text/html'}})
-            .then(function(r){ return r.ok ? r.text() : null; })
+        window.docTraxFetch(window.location.pathname + window.location.search, {
+            headers:{'X-Requested-With':'XMLHttpRequest','Accept':'text/html'},
+            timeoutMs: 12000
+        })
+            .then(function(r){
+                if (!r.ok) {
+                    throw window.createRequestError('server', 'Could not refresh the document list right now.');
+                }
+                return r.text();
+            })
             .then(function(html){
-                if(!html) return;
                 var parser  = new DOMParser();
                 var newDoc  = parser.parseFromString(html, 'text/html');
                 var newCard = newDoc.querySelector('.table-card');
                 var curCard = document.querySelector('.table-card');
+                var newDocsData = newDoc.getElementById('docsData');
+                var curDocsData = document.getElementById('docsData');
                 if(newCard && curCard){
                     curCard.replaceWith(newCard);
+                    if (newDocsData && curDocsData) {
+                        curDocsData.textContent = newDocsData.textContent;
+                        docsData = JSON.parse(curDocsData.textContent || '{}');
+                    }
                     if(typeof filterTable === 'function') filterTable();
                     flash();
+                    window.clearStatusNotice('office-dashboard-table');
                 }
             })
-            .catch(function(){});
+            .catch(function(){
+                window.setStatusNotice('office-dashboard-table', 'Live document list updates are temporarily unavailable. Showing the last loaded list.', {
+                    type: 'warning',
+                    priority: 20
+                });
+            });
     }
 
     // Live stats (silent update every 30s)
     function refreshStats(){
-        fetch('/api/office-stats',{headers:{'Accept':'application/json'}})
-            .then(function(r){ return r.ok ? r.json() : null; })
+        window.docTraxFetchJson('/api/office-stats',{
+            headers:{'Accept':'application/json'},
+            timeoutMs: 10000
+        })
             .then(function(d){
-                if(!d) return;
                 var compactCount = window.formatCompactCount || function(v) { return String(v); };
                 document.getElementById('stat-in-review').textContent = compactCount(d.in_review);
                 document.getElementById('stat-completed').textContent = compactCount(d.completed);
@@ -893,8 +966,14 @@ document.addEventListener('keydown', function(e){
                     d.completed !== prev.completed
                 )) refreshTable();
                 prev = {in_review:d.in_review, completed:d.completed};
+                window.clearStatusNotice('office-dashboard-stats');
             })
-            .catch(function(){});
+            .catch(function(){
+                window.setStatusNotice('office-dashboard-stats', 'Live dashboard updates are temporarily unavailable. Showing the last known counts.', {
+                    type: 'warning',
+                    priority: 30
+                });
+            });
     }
     refreshStats(); // seed prev counts immediately on load
     if (window.smartInterval) { window.smartInterval(refreshStats, 30000); }

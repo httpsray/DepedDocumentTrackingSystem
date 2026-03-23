@@ -823,9 +823,46 @@
             var currentOfficeText = (doc.status === 'submitted')
                 ? ('Awaiting acceptance by ' + (doc.submitted_to_office || doc.current_office || 'Records Section'))
                 : (doc.current_office || doc.submitted_to_office || '-');
-            var currentHandlerText = doc.current_handler || 'Unassigned';
+
+            var receiveActions = ['processing', 'received', 'in_review'];
+            var takeActions = ['handoff', 'processing', 'received', 'in_review'];
+            var receivedByText = 'Not recorded';
+            var takenByText = 'Not recorded';
+
+            for (var i = 0; i < logs.length; i++) {
+                var firstLog = logs[i] || {};
+                var firstAction = String(firstLog.action || '').toLowerCase();
+                var firstPerformer = String(firstLog.performed_by || '').trim();
+                if (firstPerformer && receiveActions.indexOf(firstAction) !== -1) {
+                    receivedByText = firstPerformer;
+                    break;
+                }
+            }
+
+            for (var j = logs.length - 1; j >= 0; j--) {
+                var latestLog = logs[j] || {};
+                var latestAction = String(latestLog.action || '').toLowerCase();
+                var latestPerformer = String(latestLog.performed_by || '').trim();
+                if (latestPerformer && takeActions.indexOf(latestAction) !== -1) {
+                    takenByText = latestPerformer;
+                    break;
+                }
+            }
+
+            if (takenByText === 'Not recorded' && doc.current_handler) {
+                takenByText = doc.current_handler;
+            }
+            if (receivedByText === 'Not recorded' && takenByText !== 'Not recorded') {
+                receivedByText = takenByText;
+            }
 
             document.getElementById('viewDocContent').innerHTML =
+                '<div class="drawer-meta">' +
+                    '<div class="dm-item"><div class="dm-label">Current Office</div><div class="dm-value">' + escapeHtml(currentOfficeText) + '</div></div>' +
+                    '<div class="dm-item"><div class="dm-label">Nag Receive (Stamp)</div><div class="dm-value">' + escapeHtml(receivedByText) + '</div></div>' +
+                    '<div class="dm-item"><div class="dm-label">Kumuha (Latest)</div><div class="dm-value">' + escapeHtml(takenByText) + '</div></div>' +
+                    '<div class="dm-item"><div class="dm-label">Status</div><div class="dm-value">' + escapeHtml(doc.status_label || '-') + '</div></div>' +
+                '</div>' +
                 '<div class="drawer-tl-head"><i class="fas fa-history"></i> Routing History</div>' +
                 '<div class="drawer-timeline"><div class="tl">' + tlHtml + '</div></div>';
 
@@ -847,12 +884,12 @@
                 '<div class="drawer-loader"><span class="loading-dots"><span></span><span></span><span></span></span>Loading details...</div>';
 
             try {
-                var response = await fetch('/api/track-document', {
+                var data = await window.docTraxFetchJson('/api/track-document', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+                    timeoutMs: 15000,
                     body: JSON.stringify({ tracking_number: trackingNumber })
                 });
-                var data = await response.json();
                 if (!data.success || !data.document) throw new Error(data.message || 'Unable to load tracking details.');
                 renderDrawer(data.document);
             } catch (error) {
@@ -875,9 +912,9 @@
                     });
                 } else {
                     document.getElementById('viewDocContent').innerHTML =
-                        '<div class="drawer-loader">Failed to load tracking details.</div>';
+                        '<div class="drawer-loader">' + escapeHtml(window.describeRequestError(error, 'Failed to load tracking details.')) + '</div>';
                 }
-                showToast(error.message || 'Failed to load tracking details.', 'error');
+                showToast(window.describeRequestError(error, error.message || 'Failed to load tracking details.'), 'error');
             }
         };
 

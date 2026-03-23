@@ -201,10 +201,13 @@
         .receipt-details .detail-summary { margin-bottom: 0; }
         .receipt-notes { width: min(100%, 680px); margin: 0 auto; }
         .receipt-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:8px; }
-        .note-box { font-size:11px; border-radius:10px; padding:9px 12px; margin-bottom:8px; text-align:left; }
-        .note-box i { margin-right:4px; }
-        .note-warning { color:#92400e; background:#fffbeb; border:1px solid #fde68a; }
-        .note-info { color:#1e40af; background:#eff6ff; border:1px solid #bfdbfe; }
+        .note-box { display:flex; align-items:flex-start; gap:10px; font-size:12px; line-height:1.55; border-radius:12px; padding:12px 14px; margin-bottom:10px; text-align:left; border:1px solid var(--border); background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.04); }
+        .note-box i { width:24px; height:24px; border-radius:999px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+        .note-box strong { font-weight:700; }
+        .note-warning { color:#1f2937; border-left:4px solid #d97706; }
+        .note-warning i { color:#92400e; background:#ffedd5; }
+        .note-info { color:#1f2937; border-left:4px solid var(--primary); }
+        .note-info i { color:#1d4ed8; background:#dbeafe; }
 
         /* Auth info banner */
         .auth-info-banner { display:flex; align-items:center; gap:12px; background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:10px; padding:12px 16px; margin-bottom:4px; }
@@ -249,7 +252,8 @@
             .detail-summary td{padding:4px 6px;font-size:10.5px}
             .detail-summary td:first-child{width:88px;font-size:9px}
             .receipt-details{padding:10px}
-            .note-box{font-size:10px;padding:6px 8px}
+            .note-box{font-size:11px;padding:10px 11px;gap:8px}
+            .note-box i{width:22px;height:22px}
             .auth-info-banner{padding:10px 12px;gap:8px}
             .auth-info-name{font-size:12px}
             .section-label{font-size:10px;margin:16px 0 10px}
@@ -267,6 +271,22 @@
         .toast-icon{font-size:16px}
         .toast.success .toast-icon{color:#16a34a}
         .toast.error .toast-icon{color:#dc2626}
+
+        /* Existing account prompt modal */
+        .signin-modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center;padding:14px;z-index:400}
+        .signin-modal-overlay.show{display:flex}
+        .signin-modal{width:100%;max-width:460px;background:#fff;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 20px 50px rgba(2,6,23,.22);overflow:hidden}
+        .signin-modal-head{padding:16px 18px;background:#eff6ff;border-bottom:1px solid #dbeafe;display:flex;align-items:center;gap:10px}
+        .signin-modal-head i{color:#1d4ed8;font-size:18px}
+        .signin-modal-head h3{font-size:15px;color:#1e3a8a;font-weight:700}
+        .signin-modal-body{padding:16px 18px}
+        .signin-modal-body p{font-size:13px;color:#334155;line-height:1.6;margin-bottom:6px}
+        .signin-modal-email{font-size:12px;color:#0f172a;font-weight:700;word-break:break-word;margin-bottom:10px}
+        .signin-modal-actions{display:flex;gap:8px;justify-content:flex-end;padding-top:8px}
+        .btn-modal-secondary,.btn-modal-primary{font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;border-radius:9px;padding:9px 14px;cursor:pointer}
+        .btn-modal-secondary{background:#fff;border:1.5px solid #cbd5e1;color:#334155}
+        .btn-modal-primary{background:#0056b3;border:1.5px solid #0056b3;color:#fff}
+        .btn-modal-primary:hover{background:#004494;border-color:#004494}
     </style>
     <script src="/js/spa.js" defer></script>
     <script src="/js/form-utils.js" defer></script>
@@ -328,7 +348,8 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Contact Number <span class="opt">(Optional)</span></label>
-                            <input type="tel" id="senderContact" placeholder="e.g. 09171234567" autocomplete="off">
+                            <input type="tel" id="senderContact" placeholder="e.g. 09171234567" autocomplete="off" inputmode="numeric" maxlength="11">
+                            <div class="err-text" id="errSenderContact"><i class="fas fa-exclamation-circle"></i> Contact number must start with 09 and contain 11 digits</div>
                         </div>
                         <div class="form-group">
                             <label>Email Address <span class="req">*</span></label>
@@ -457,10 +478,29 @@
 
     </div>
 
+    <div class="signin-modal-overlay" id="signinModal">
+        <div class="signin-modal" role="dialog" aria-modal="true" aria-labelledby="signinModalTitle">
+            <div class="signin-modal-head">
+                <i class="fas fa-user-lock"></i>
+                <h3 id="signinModalTitle">Account Found</h3>
+            </div>
+            <div class="signin-modal-body">
+                <p>This email is already registered. Please sign in to continue submitting documents.</p>
+                <div class="signin-modal-email" id="signinModalEmail"></div>
+                <p>Your current form details are saved and will stay here after you sign in.</p>
+                <div class="signin-modal-actions">
+                    <button type="button" class="btn-modal-secondary" onclick="closeSigninModal()">Cancel</button>
+                    <button type="button" class="btn-modal-primary" onclick="goToLoginFromSubmit()">Sign In</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
     (function () {
         const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const isLoggedIn = {{ auth()->check() ? 'true' : 'false' }};
+        const guestSubmitDraftKey = 'doctrax.public_submit_draft';
 
         function showToast(msg, type) {
             var toast = document.getElementById('toast');
@@ -482,14 +522,115 @@
             document.querySelectorAll('input,select,textarea').forEach(e => e.classList.remove('err'));
         }
 
+        function normalizeContact(value) {
+            return String(value || '').replace(/\D/g, '').slice(0, 11);
+        }
+
+        function isValidContact(value) {
+            return /^09\d{9}$/.test(value);
+        }
+
+        function getGuestDraft() {
+            return {
+                sender_first_name: document.getElementById('senderFirstName')?.value.trim() || '',
+                sender_last_name: document.getElementById('senderLastName')?.value.trim() || '',
+                sender_contact: document.getElementById('senderContact')?.value.trim() || '',
+                sender_email: document.getElementById('senderEmail')?.value.trim().toLowerCase() || '',
+                type: document.getElementById('docType')?.value || '',
+                others: document.getElementById('othersSpecify')?.value.trim() || '',
+                subject: document.getElementById('subject')?.value.trim() || '',
+                description: document.getElementById('description')?.value.trim() || '',
+            };
+        }
+
+        function saveGuestDraft() {
+            if (isLoggedIn) return;
+            try {
+                localStorage.setItem(guestSubmitDraftKey, JSON.stringify(getGuestDraft()));
+            } catch (_) {}
+        }
+
+        function restoreGuestDraft() {
+            let raw = null;
+            try {
+                raw = localStorage.getItem(guestSubmitDraftKey);
+            } catch (_) {
+                raw = null;
+            }
+            if (!raw) return;
+
+            let draft = null;
+            try {
+                draft = JSON.parse(raw);
+            } catch (_) {
+                return;
+            }
+            if (!draft || typeof draft !== 'object') return;
+
+            // After sign-in, guest-only submitter fields are hidden, but document fields should still be restored.
+            if (!isLoggedIn) {
+                if (draft.sender_first_name) document.getElementById('senderFirstName').value = draft.sender_first_name;
+                if (draft.sender_last_name) document.getElementById('senderLastName').value = draft.sender_last_name;
+                if (draft.sender_contact) document.getElementById('senderContact').value = normalizeContact(draft.sender_contact);
+                if (draft.sender_email) document.getElementById('senderEmail').value = draft.sender_email;
+            }
+            if (draft.type) {
+                document.getElementById('docType').value = draft.type;
+                window.toggleOthers();
+            }
+            if (draft.others) document.getElementById('othersSpecify').value = draft.others;
+            if (draft.subject) document.getElementById('subject').value = draft.subject;
+            if (draft.description) document.getElementById('description').value = draft.description;
+        }
+
+        function removeGuestDraft() {
+            try {
+                localStorage.removeItem(guestSubmitDraftKey);
+            } catch (_) {}
+        }
+
+        window.closeSigninModal = function () {
+            document.getElementById('signinModal').classList.remove('show');
+        };
+
+        window.goToLoginFromSubmit = function () {
+            saveGuestDraft();
+            window.location.href = '/login?next=' + encodeURIComponent('/submit');
+        };
+
+        function showSigninModal(email, message) {
+            document.getElementById('signinModalEmail').textContent = email || '';
+            if (message) {
+                const bodyP = document.querySelector('#signinModal .signin-modal-body p');
+                if (bodyP) bodyP.textContent = message;
+            }
+            document.getElementById('signinModal').classList.add('show');
+        }
+
         // Name fields: letters, spaces, dots, and hyphens only (no numbers)
         ['senderFirstName', 'senderLastName'].forEach(function(id) {
             var el = document.getElementById(id);
             if (el) {
                 el.addEventListener('input', function() {
                     this.value = this.value.replace(/[^a-zA-Z\s.\-]/g, '');
+                    saveGuestDraft();
                 });
             }
+        });
+
+        var contactEl = document.getElementById('senderContact');
+        if (contactEl) {
+            contactEl.addEventListener('input', function () {
+                this.value = normalizeContact(this.value);
+                saveGuestDraft();
+            });
+        }
+
+        ['senderEmail', 'othersSpecify', 'subject', 'description', 'docType'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('input', saveGuestDraft);
+            el.addEventListener('change', saveGuestDraft);
         });
 
         function fieldErr(inputId, errId) {
@@ -506,10 +647,14 @@
             if (!isLoggedIn) {
                 senderFirstName = document.getElementById('senderFirstName').value.trim();
                 senderLastName  = document.getElementById('senderLastName').value.trim();
-                senderContact   = document.getElementById('senderContact').value.trim() || null;
+                senderContact   = normalizeContact(document.getElementById('senderContact').value.trim()) || null;
+                document.getElementById('senderContact').value = senderContact || '';
                 senderEmail     = document.getElementById('senderEmail').value.trim().toLowerCase();
                 if (!senderFirstName) { fieldErr('senderFirstName', 'errSenderFirstName'); valid = false; }
                 if (!senderLastName)  { fieldErr('senderLastName', 'errSenderLastName'); valid = false; }
+                if (senderContact && !isValidContact(senderContact)) {
+                    fieldErr('senderContact', 'errSenderContact'); valid = false;
+                }
                 if (!senderEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(senderEmail)) {
                     fieldErr('senderEmail', 'errSenderEmail'); valid = false;
                 }
@@ -528,6 +673,25 @@
             const finalType = docType === 'Others' ? othersVal : docType;
             const btn = document.getElementById('submitBtn');
             btn.disabled = true;
+
+            if (!isLoggedIn) {
+                saveGuestDraft();
+                try {
+                    const emailCheckRes = await fetch('/api/check-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+                        body: JSON.stringify({ email: senderEmail })
+                    });
+                    const emailCheck = await emailCheckRes.json();
+                    if (emailCheck.exists) {
+                        showSigninModal(senderEmail, emailCheck.message || 'This email is already registered. Please sign in to continue submitting documents.');
+                        btn.disabled = false;
+                        return;
+                    }
+                } catch (_) {
+                    // Continue and let submit endpoint validate if email-check is temporarily unreachable.
+                }
+            }
 
             const payload = {
                 type: finalType,
@@ -550,6 +714,7 @@
                 const data = await res.json();
 
                 if (data.success) {
+                    removeGuestDraft();
                     document.getElementById('formState').style.display    = 'none';
                     document.getElementById('successState').style.display = 'block';
                     document.getElementById('generatedCode').textContent  = data.reference_number || '-';
@@ -566,7 +731,12 @@
                         document.getElementById('dDate').textContent    = data.details.date || '-';
                     }
                 } else {
-                    showToast(data.message || 'Submission failed. Please try again.', 'error');
+                    if (data.requires_login) {
+                        saveGuestDraft();
+                        showSigninModal(senderEmail, data.message || 'This email is already registered. Please sign in to continue submitting documents.');
+                    } else {
+                        showToast(data.message || 'Submission failed. Please try again.', 'error');
+                    }
                     btn.disabled = false;
                 }
             } catch (err) {
@@ -574,6 +744,17 @@
                 btn.disabled = false;
             }
         };
+
+        restoreGuestDraft();
+
+        var signinModalEl = document.getElementById('signinModal');
+        if (signinModalEl) {
+            signinModalEl.addEventListener('click', function (e) {
+                if (e.target === signinModalEl) {
+                    closeSigninModal();
+                }
+            });
+        }
     })();
     </script>
     <!-- Toast -->

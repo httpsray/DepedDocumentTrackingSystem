@@ -1130,17 +1130,16 @@
             document.getElementById('viewDocContent').innerHTML = '<div class="drawer-loader"><span class="loading-dots"><span></span></span>Loading details...</div>';
 
             try {
-                var response = await fetch('/api/track-document', {
+                var data = await window.docTraxFetchJson('/api/track-document', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': csrf,
                         'Accept': 'application/json'
                     },
+                    timeoutMs: 15000,
                     body: JSON.stringify({ tracking_number: trackingNumber })
                 });
-
-                var data = await response.json();
                 if (!data.success || !data.document) {
                     throw new Error(data.message || 'Unable to load tracking details.');
                 }
@@ -1165,9 +1164,9 @@
                     });
                 } else {
                     document.getElementById('viewDocContent').innerHTML =
-                        '<div class="drawer-loader">Failed to load tracking details.</div>';
+                        '<div class="drawer-loader">' + escapeHtml(window.describeRequestError(error, 'Failed to load tracking details.')) + '</div>';
                 }
-                showToast(error.message || 'Failed to load tracking details.', 'error');
+                showToast(window.describeRequestError(error, error.message || 'Failed to load tracking details.'), 'error');
             }
         };
 

@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         // Global middleware — runs on every request
+        $middleware->append(\App\Http\Middleware\RunSchedulerFallback::class);
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
 
         $middleware->alias([

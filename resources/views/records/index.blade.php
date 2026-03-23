@@ -169,10 +169,6 @@
         .drawer-loader{display:flex;align-items:center;justify-content:center;padding:48px;flex-direction:column;gap:12px;color:var(--text-muted);font-size:13px}
         .spin{width:22px;height:22px;border:3px solid #e2e8f0;border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite}
         @keyframes spin{to{transform:rotate(360deg)}}
-        /* Archive warning */
-        .archive-warning{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:12px;font-size:13px;color:#92400e}
-        .archive-warning i{font-size:18px;color:#d97706;flex-shrink:0}
-        .archive-warning strong{font-weight:700}
         /* Mobile */
         .mob-topbar{display:flex;position:sticky;top:0;z-index:100;background:#0056b3;padding:12px 16px;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
         .mob-hamburger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;z-index:1001;user-select:none;padding:4px}
@@ -193,7 +189,6 @@
             .main{padding:68px 12px 40px}
             .page-header-top{flex-direction:column;align-items:flex-start;gap:10px}
             .live-clock{display:none}
-            .archive-warning{font-size:12px;padding:10px 14px}
             .stats-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:16px}
             .stat-card{min-width:0;padding:11px 10px 10px;border-radius:10px}
             .stat-label{display:block;padding:0;margin-bottom:8px;background:none!important;border-radius:0;font-size:8.5px;line-height:1.2;letter-spacing:.06em}
@@ -328,13 +323,6 @@
             </div>
         </div>
     </div>
-
-    @if($stats['archived'] > 0)
-    <div class="archive-warning">
-        <i class="fas fa-exclamation-triangle"></i>
-        <div><strong>{{ \App\Support\UiNumber::compact($stats['archived']) }}</strong> document(s) have been auto-archived after 7 days without being received. Use status filter "Archived" to review them.</div>
-    </div>
-    @endif
 
     <!-- Stats -->
     <div class="stats-grid">
@@ -562,8 +550,36 @@
     </div>
 </footer>
 
+@php
+    $docDrawerData = [];
+    foreach ($documents as $doc) {
+        $fallback = [
+            'reference_number' => $doc->reference_number ?: $doc->tracking_number,
+            'tracking_number' => $doc->tracking_number ?: $doc->reference_number,
+            'subject' => $doc->subject,
+            'type' => $doc->type,
+            'status' => $doc->status,
+            'status_label' => $doc->statusLabel(),
+            'sender_name' => $doc->sender_name,
+            'submitted_to_office' => optional($doc->submittedToOffice)->name,
+            'current_office' => optional($doc->currentOffice)->name,
+            'current_handler' => optional($doc->currentHandler)->name,
+            'date' => optional($doc->created_at)->format('M d, Y'),
+        ];
+        $primaryKey = $doc->tracking_number ?: $doc->reference_number;
+        if ($primaryKey) {
+            $docDrawerData[$primaryKey] = $fallback;
+        }
+        if ($doc->reference_number && $doc->reference_number !== $doc->tracking_number) {
+            $docDrawerData[$doc->reference_number] = $fallback;
+        }
+    }
+@endphp
+<script type="application/json" id="docsData">@json($docDrawerData)</script>
+
 <script>
 var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+var docsData = JSON.parse(document.getElementById('docsData').textContent || '{}');
 
 function escapeHtml(value){
     return String(value === null || value === undefined ? '' : value)
@@ -571,6 +587,7 @@ function escapeHtml(value){
 }
 
 function openDocDetail(ref){
+    ref = (ref || '').toString().trim();
     document.getElementById('drTitle').textContent='—';
     document.getElementById('drRef').textContent=ref;
     document.getElementById('drTrack').textContent='';
@@ -579,12 +596,12 @@ function openDocDetail(ref){
     document.getElementById('docDrawer').classList.add('open');
     document.body.style.overflow='hidden';
 
-    fetch('/api/track-document',{
+    window.docTraxFetchJson('/api/track-document',{
         method:'POST',
         headers:{'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
+        timeoutMs: 15000,
         body:JSON.stringify({ reference_number: ref, tracking_number: ref })
     })
-    .then(function(r){ return r.json(); })
     .then(function(data){
         if(!data.success || !data.document){
             document.getElementById('drawerBody').innerHTML='<div class="drawer-loader">Document not found.</div>';
@@ -592,8 +609,31 @@ function openDocDetail(ref){
         }
         renderDrawer(data.document);
     })
-    .catch(function(){
-        document.getElementById('drawerBody').innerHTML='<div class="drawer-loader">Something went wrong.</div>';
+    .catch(function(error){
+        var fallback = docsData[ref];
+        if (fallback) {
+            renderDrawer({
+                subject: fallback.subject || '-',
+                reference_number: fallback.reference_number || ref,
+                tracking_number: fallback.tracking_number || ref,
+                status: fallback.status || 'unknown',
+                status_label: fallback.status_label || 'Unknown',
+                sender_name: fallback.sender_name || '-',
+                type: fallback.type || '-',
+                submitted_to_office: fallback.submitted_to_office || '-',
+                current_office: fallback.current_office || '-',
+                current_handler: fallback.current_handler || 'Unassigned',
+                date: fallback.date || '-',
+                routing_logs: []
+            });
+            window.showNetworkNotice('Showing basic document details from the current list while the live request is unavailable.', {
+                type: 'warning',
+                duration: 5000
+            });
+            return;
+        }
+        document.getElementById('drawerBody').innerHTML =
+            '<div class="drawer-loader">' + escapeHtml(window.describeRequestError(error, 'Could not load tracking details. Please try again.')) + '</div>';
     });
 }
 
@@ -679,10 +719,11 @@ function logout(){
 // Live stats refresh (silent update every 30s)
 (function(){
     function refreshStats(){
-        fetch('/api/records-stats',{headers:{'Accept':'application/json'}})
-            .then(function(r){ return r.ok ? r.json() : null; })
+        window.docTraxFetchJson('/api/records-stats',{
+            headers:{'Accept':'application/json'},
+            timeoutMs: 10000
+        })
             .then(function(d){
-                if(!d) return;
                 var compactCount = window.formatCompactCount || function(v) { return String(v); };
                 document.getElementById('stat-total').textContent     = compactCount(d.total);
                 document.getElementById('stat-submitted').textContent = compactCount(d.submitted);
@@ -692,8 +733,14 @@ function logout(){
                 // Toggle Reports sidebar link in real-time
                 var rlink = document.getElementById('reports-nav-link');
                 if (rlink) rlink.style.display = d.has_reports_access ? '' : 'none';
+                window.clearStatusNotice('records-dashboard-stats');
             })
-            .catch(function(){});
+            .catch(function(){
+                window.setStatusNotice('records-dashboard-stats', 'Live records statistics are temporarily unavailable. Showing the last known totals.', {
+                    type: 'warning',
+                    priority: 30
+                });
+            });
     }
     if (window.smartInterval) { window.smartInterval(refreshStats, 30000); }
     else { setInterval(refreshStats, 30000); }

@@ -52,6 +52,7 @@ class RoutingLog extends Model
             'submitted'  => 'Document Submitted',
             'received'   => 'Processing',
             'processing' => 'Processing',
+            'handoff'    => 'Internal Handoff',
             'in_review'  => 'Processing',
             'forwarded'  => 'Forwarded',
             'completed'  => 'Completed',

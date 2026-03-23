@@ -296,6 +296,11 @@
     var csrf=document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     var boxes=document.querySelectorAll('.ref-box');
     var alertEl=document.getElementById('searchAlert');
+    var stateCard=document.getElementById('notFoundCard');
+    var stateIcon=stateCard ? stateCard.querySelector('i') : null;
+    var stateTitle=stateCard ? stateCard.querySelector('h3') : null;
+    var stateBody=stateCard ? stateCard.querySelector('p') : null;
+    var defaultStateBody='The tracking number you entered does not match any document in our records.<br>Please double-check and try again.';
 
     /* ── ref-box logic (type, paste, backspace, arrow keys) ── */
     boxes.forEach(function(box,i){
@@ -346,6 +351,22 @@
         alertEl.classList.add('show','err');
     }
 
+    function showResultState(kind, message) {
+        if (!stateCard) return;
+
+        if (kind === 'error') {
+            if (stateIcon) stateIcon.className = 'fas fa-wifi';
+            if (stateTitle) stateTitle.textContent = 'Connection Problem';
+            if (stateBody) stateBody.innerHTML = esc(message || 'Could not load tracking details. Please try again.');
+        } else {
+            if (stateIcon) stateIcon.className = 'fas fa-file-circle-question';
+            if (stateTitle) stateTitle.textContent = 'Tracking Number Not Found';
+            if (stateBody) stateBody.innerHTML = defaultStateBody;
+        }
+
+        stateCard.classList.add('show');
+    }
+
     function dotClass(s){
         if(s==='cancelled'||s==='returned')return 'danger';
         if(s==='completed')return 'done';
@@ -366,21 +387,21 @@
         if(ref.length<8){showAlert('Please enter the full 8-character tracking number.');return;}
         var btn=document.getElementById('trackBtn');
         btn.disabled = true;
-        document.getElementById('notFoundCard').classList.remove('show');
+        if (stateCard) stateCard.classList.remove('show');
         document.getElementById('resultCard').classList.remove('show');
         try{
-            var res=await fetch('/api/track-document',{
+            var data=await window.docTraxFetchJson('/api/track-document',{
                 method:'POST',
-                headers:{'Content-Type':'application/json','X-CSRF-TOKEN':csrf},
+                headers:{'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
+                timeoutMs: 15000,
                 body:JSON.stringify({
                     reference_number:ref,
                     tracking_number:ref
                 })
             });
-            var data=await res.json();
-            if(!data.success||!data.document){document.getElementById('notFoundCard').classList.add('show');}
+            if(!data.success||!data.document){showResultState('not_found');}
             else{renderResult(data.document);}
-        }catch(e){document.getElementById('notFoundCard').classList.add('show');}
+        }catch(e){showResultState('error', window.describeRequestError(e, 'Could not load tracking details. Please try again.'));}
         finally{btn.disabled = false;}
     };
     function renderResult(doc){

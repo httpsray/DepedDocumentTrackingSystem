@@ -119,9 +119,15 @@ Route::get('/receive/{tracking}', function ($tracking) {
     $tracking = strtoupper(trim(strip_tags($tracking)));
     $user = auth()->user();
 
-    // Only office representatives and superadmin can access the receive screen.
-    if ($user && ($user->isSuperAdmin() || ($user->isRepresentative() && $user->office_id))) {
-        return view('office.receive', compact('user', 'tracking'));
+    // Only office accounts and superadmin can access the receive screen.
+    if ($user && ($user->isSuperAdmin() || $user->isOfficeAccount())) {
+        $receiveEndpoint = $user->isSuperAdmin()
+            ? '/api/ict/receive-by-reference'
+            : '/api/office/documents/receive-by-reference';
+
+        $backUrl = $user->isSuperAdmin() ? '/ict/documents' : '/office/dashboard';
+
+        return view('office.receive', compact('user', 'tracking', 'receiveEndpoint', 'backUrl'));
     }
 
     // Everyone else (guests/regular users) is redirected to tracking.

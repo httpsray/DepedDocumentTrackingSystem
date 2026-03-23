@@ -16,17 +16,17 @@
     // Enhanced logout function with complete cleanup
     window.performLogout = function(event) {
         if (event) event.preventDefault();
-        
+
         var csrfToken = csrf.content;
-        
+
         // Clear all browser storage
         try {
             sessionStorage.clear();
             localStorage.clear();
-        } catch(e) {
+        } catch (e) {
             console.warn('Could not clear storage:', e);
         }
-        
+
         // Clear service worker caches
         if ('caches' in window) {
             caches.keys().then(function(names) {
@@ -37,7 +37,7 @@
                 console.warn('Could not clear caches:', e);
             });
         }
-        
+
         // Send logout request
         fetch('/api/logout', {
             method: 'POST',
@@ -47,7 +47,7 @@
                 'Accept': 'application/json'
             },
             credentials: 'same-origin'
-        }).then(function(response) {
+        }).then(function() {
             // Force navigation (not just redirect)
             window.location.replace('/login');
         }).catch(function(error) {
@@ -55,7 +55,7 @@
             console.warn('Logout request failed:', error);
             window.location.replace('/login');
         });
-        
+
         return false;
     };
 
@@ -83,7 +83,7 @@
     // Clear logout event on page load
     try {
         localStorage.removeItem('logout-event');
-    } catch(e) {}
+    } catch (e) {}
 
     // Prevent back button after logout via pageshow event
     window.addEventListener('pageshow', function(event) {
@@ -97,28 +97,34 @@
         }
     });
 
-    // ─── Idle Auto-Logout (20 minutes) ───
-    var IDLE_TIMEOUT = 20 * 60 * 1000; // 20 minutes in ms
-    var _idleTimer = null;
+    // Idle Auto-Logout (30 minutes)
+    if (!window.__docTraxIdleGuardInitialized) {
+        var IDLE_TIMEOUT = 30 * 60 * 1000; // 30 minutes in ms
+        var _idleTimer = null;
 
-    function resetIdleTimer() {
-        if (_idleTimer) clearTimeout(_idleTimer);
-        _idleTimer = setTimeout(function() {
-            // User has been idle for 20 minutes — log out
-            if (window.performLogout) {
-                window.performLogout();
-            } else {
-                window.location.replace('/login');
-            }
-        }, IDLE_TIMEOUT);
+        window.__docTraxIdleGuardInitialized = true;
+        window.__docTraxIdleLogoutMs = IDLE_TIMEOUT;
+
+        function resetIdleTimer() {
+            if (_idleTimer) clearTimeout(_idleTimer);
+            _idleTimer = setTimeout(function() {
+                if (window.performLogout) {
+                    window.performLogout();
+                } else {
+                    window.location.replace('/login');
+                }
+            }, IDLE_TIMEOUT);
+        }
+
+        ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click', 'input'].forEach(function(evt) {
+            document.addEventListener(evt, resetIdleTimer, { passive: true });
+        });
+
+        window.addEventListener('focus', resetIdleTimer);
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) resetIdleTimer();
+        });
+
+        resetIdleTimer();
     }
-
-    // Activity events that reset the idle timer
-    ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'].forEach(function(evt) {
-        document.addEventListener(evt, resetIdleTimer, { passive: true });
-    });
-
-    // Start the timer immediately
-    resetIdleTimer();
-
 })();
