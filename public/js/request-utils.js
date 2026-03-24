@@ -20,7 +20,7 @@
                 if (!immediate) fn.apply(ctx, args);
             }, delay);
 
-            if (callNow) fn.apply(ctx, args);
+            if (callNow) fn.apply(ctx, args);me
         };
     };
 
@@ -94,6 +94,564 @@
 
         return num.toFixed(1).replace(/\.0$/, '') + units[unitIndex];
     };
+
+    function normalizeReceiptText(value, fallback) {
+        var text = String(value === null || value === undefined ? '' : value)
+            .replace(/\s+/g, ' ')
+            .trim();
+        return text || (fallback || '');
+    }
+
+    function sanitizeReceiptFilePart(value) {
+        var cleaned = normalizeReceiptText(value, 'receipt')
+            .replace(/[^A-Za-z0-9._-]+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+        return cleaned || 'receipt';
+    }
+
+    function waitForImageElement(img) {
+        return new Promise(function (resolve, reject) {
+            if (!img) {
+                reject(new Error('QR code is not available yet.'));
+                return;
+            }
+
+            if (img.complete && img.naturalWidth > 0) {
+                resolve(img);
+                return;
+            }
+
+            var settled = false;
+
+            function cleanup() {
+                img.removeEventListener('load', onLoad);
+                img.removeEventListener('error', onError);
+            }
+
+            function onLoad() {
+                if (settled) return;
+                settled = true;
+                cleanup();
+                resolve(img);
+            }
+
+            function onError() {
+                if (settled) return;
+                settled = true;
+                cleanup();
+                reject(new Error('QR code could not be loaded yet.'));
+            }
+
+            img.addEventListener('load', onLoad, { once: true });
+            img.addEventListener('error', onError, { once: true });
+        });
+    }
+
+    function loadReceiptImage(src) {
+        return new Promise(function (resolve, reject) {
+            if (!src) {
+                reject(new Error('QR code is not available yet.'));
+                return;
+            }
+
+            var image = new Image();
+            image.onload = function () { resolve(image); };
+            image.onerror = function () { reject(new Error('QR code image could not be prepared.')); };
+            image.src = src;
+        });
+    }
+
+    function splitReceiptWord(ctx, word, maxWidth) {
+        if (!word) return [''];
+        if (ctx.measureText(word).width <= maxWidth) return [word];
+
+        var parts = [];
+        var current = '';
+
+        for (var i = 0; i < word.length; i++) {
+            var next = current + word.charAt(i);
+            if (current && ctx.measureText(next).width > maxWidth) {
+                parts.push(current);
+                current = word.charAt(i);
+            } else {
+                current = next;
+            }
+        }
+
+        if (current) parts.push(current);
+        return parts.length ? parts : [word];
+    }
+
+    function wrapReceiptCanvasText(ctx, text, maxWidth) {
+        var content = String(text === null || text === undefined ? '' : text)
+            .replace(/\r/g, '')
+            .trim();
+        if (!content) return ['-'];
+
+        var paragraphs = content.split('\n');
+        var lines = [];
+
+        paragraphs.forEach(function (paragraph) {
+            var words = paragraph.trim().split(/\s+/).filter(Boolean);
+            if (!words.length) {
+                lines.push('');
+                return;
+            }
+
+            var line = '';
+
+            words.forEach(function (word) {
+                var segments = splitReceiptWord(ctx, word, maxWidth);
+
+                segments.forEach(function (segment) {
+                    var testLine = line ? line + ' ' + segment : segment;
+                    if (!line || ctx.measureText(testLine).width <= maxWidth) {
+                        line = testLine;
+                        return;
+                    }
+
+                    lines.push(line);
+                    line = segment;
+                });
+            });
+
+            if (line) lines.push(line);
+        });
+
+        return lines.length ? lines : ['-'];
+    }
+
+    function drawReceiptRoundedRect(ctx, x, y, width, height, radius, fillColor, strokeColor, lineWidth) {
+        var safeRadius = Math.max(0, Math.min(radius, width / 2, height / 2));
+        ctx.beginPath();
+        ctx.moveTo(x + safeRadius, y);
+        ctx.lineTo(x + width - safeRadius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + safeRadius);
+        ctx.lineTo(x + width, y + height - safeRadius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - safeRadius, y + height);
+        ctx.lineTo(x + safeRadius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - safeRadius);
+        ctx.lineTo(x, y + safeRadius);
+        ctx.quadraticCurveTo(x, y, x + safeRadius, y);
+        ctx.closePath();
+
+        if (fillColor) {
+            ctx.fillStyle = fillColor;
+            ctx.fill();
+        }
+
+        if (strokeColor) {
+            ctx.lineWidth = lineWidth || 1;
+            ctx.strokeStyle = strokeColor;
+            ctx.stroke();
+        }
+    }
+
+    function drawReceiptLines(ctx, lines, x, y, lineHeight) {
+        lines.forEach(function (line, index) {
+            ctx.fillText(line, x, y + (index * lineHeight));
+        });
+    }
+
+    function readReceiptRows(root, selector) {
+        var table = root.querySelector(selector);
+        if (!table) return [];
+
+        var rows = [];
+        table.querySelectorAll('tr').forEach(function (row) {
+            var cells = row.querySelectorAll('td,th');
+            if (cells.length < 2) return;
+
+            rows.push({
+                label: normalizeReceiptText(cells[0].textContent, 'Detail'),
+                value: normalizeReceiptText(cells[1].textContent, '-')
+            });
+        });
+
+        return rows;
+    }
+
+    function buildReceiptCanvas(data) {
+        var canvasWidth = 1400;
+        var outerPadding = 54;
+        var cardWidth = canvasWidth - (outerPadding * 2);
+        var innerPadding = 56;
+        var contentWidth = cardWidth - (innerPadding * 2);
+        var detailsWidth = contentWidth - 48;
+        var scratchCanvas = document.createElement('canvas');
+        var scratchCtx = scratchCanvas.getContext('2d');
+
+        scratchCtx.font = '600 30px Poppins, "Segoe UI", sans-serif';
+        var preparedRows = data.rows.map(function (row) {
+            var lines = wrapReceiptCanvasText(scratchCtx, row.value, detailsWidth);
+            var rowHeight = 42 + 18 + (lines.length * 36) + 26;
+            return {
+                label: row.label,
+                value: row.value,
+                lines: lines,
+                height: Math.max(112, rowHeight)
+            };
+        });
+
+        var detailsTotalHeight = 0;
+        preparedRows.forEach(function (row, index) {
+            detailsTotalHeight += row.height;
+            if (index < preparedRows.length - 1) detailsTotalHeight += 18;
+        });
+
+        var titleBlockHeight = 118;
+        var trackingBlockHeight = 250;
+        var qrBlockHeight = 392;
+        var detailHeadingHeight = 70;
+        var footerBlockHeight = 116;
+        var sectionGap = 30;
+        var cardHeight =
+            44 +
+            titleBlockHeight +
+            trackingBlockHeight +
+            sectionGap +
+            qrBlockHeight +
+            sectionGap +
+            detailHeadingHeight +
+            detailsTotalHeight +
+            sectionGap +
+            footerBlockHeight +
+            52;
+        var canvasHeight = cardHeight + (outerPadding * 2);
+
+        var canvas = document.createElement('canvas');
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        var ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = '#edf4ff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        var cardX = outerPadding;
+        var cardY = outerPadding;
+        drawReceiptRoundedRect(ctx, cardX, cardY, cardWidth, cardHeight, 34, '#ffffff', '#d7e7ff', 2);
+
+        var cursorY = cardY + 42;
+        var contentX = cardX + innerPadding;
+
+        drawReceiptRoundedRect(ctx, contentX, cursorY, 122, 12, 999, '#0056b3');
+        cursorY += 34;
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '700 52px Poppins, "Segoe UI", sans-serif';
+        ctx.fillText('Document Tracking Receipt', contentX, cursorY + 28);
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = '500 25px Poppins, "Segoe UI", sans-serif';
+        ctx.fillText('DOCTRAX - Schools Division Office of City of San Jose del Monte, Bulacan', contentX, cursorY + 74);
+
+        var savedOn = new Date().toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+        ctx.font = '500 22px Poppins, "Segoe UI", sans-serif';
+        ctx.fillText('Saved on ' + savedOn, contentX, cursorY + 108);
+        cursorY += titleBlockHeight;
+
+        drawReceiptRoundedRect(ctx, contentX, cursorY, contentWidth, trackingBlockHeight, 30, '#f4f8ff', '#cfe0ff', 2);
+        ctx.fillStyle = '#59708b';
+        ctx.font = '700 22px Poppins, "Segoe UI", sans-serif';
+        ctx.fillText('TRACKING NUMBER', contentX + 34, cursorY + 48);
+
+        ctx.fillStyle = '#0056b3';
+        var trackingFontSize = 100;
+        while (trackingFontSize > 54) {
+            ctx.font = '700 ' + trackingFontSize + 'px Consolas, "Courier New", monospace';
+            if (ctx.measureText(data.trackingNumber).width <= contentWidth - 68) break;
+            trackingFontSize -= 4;
+        }
+        ctx.fillText(data.trackingNumber, contentX + 34, cursorY + 142);
+
+        ctx.fillStyle = '#475569';
+        ctx.font = '500 24px Poppins, "Segoe UI", sans-serif';
+        ctx.fillText('Present this tracking number or QR code when following up or claiming your document.', contentX + 34, cursorY + 198);
+        ctx.fillText('Keep this receipt for reference before printing or sharing.', contentX + 34, cursorY + 230);
+        cursorY += trackingBlockHeight + sectionGap;
+
+        drawReceiptRoundedRect(ctx, contentX, cursorY, contentWidth, qrBlockHeight, 30, '#ffffff', '#cfe0ff', 2);
+        ctx.fillStyle = '#59708b';
+        ctx.font = '700 22px Poppins, "Segoe UI", sans-serif';
+        ctx.fillText('RECEIPT QR CODE', contentX + 34, cursorY + 48);
+
+        var qrBoxSize = 282;
+        var qrBoxX = contentX + Math.round((contentWidth - qrBoxSize) / 2);
+        var qrBoxY = cursorY + 74;
+        drawReceiptRoundedRect(ctx, qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, 26, '#ffffff', '#dbeafe', 2);
+        ctx.drawImage(data.qrImage, qrBoxX + 20, qrBoxY + 20, qrBoxSize - 40, qrBoxSize - 40);
+
+        ctx.fillStyle = '#475569';
+        ctx.font = '600 24px Poppins, "Segoe UI", sans-serif';
+        var qrCaption = 'Scan to receive or verify this tracking receipt.';
+        var qrCaptionWidth = ctx.measureText(qrCaption).width;
+        ctx.fillText(qrCaption, contentX + Math.round((contentWidth - qrCaptionWidth) / 2), qrBoxY + qrBoxSize + 54);
+        cursorY += qrBlockHeight + sectionGap;
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '700 38px Poppins, "Segoe UI", sans-serif';
+        ctx.fillText('Document Details', contentX, cursorY + 28);
+        cursorY += detailHeadingHeight;
+
+        preparedRows.forEach(function (row, index) {
+            drawReceiptRoundedRect(ctx, contentX, cursorY, contentWidth, row.height, 24, '#f8fbff', '#dbeafe', 2);
+            ctx.fillStyle = '#59708b';
+            ctx.font = '700 20px Poppins, "Segoe UI", sans-serif';
+            ctx.fillText(row.label.toUpperCase(), contentX + 24, cursorY + 34);
+
+            ctx.fillStyle = '#0f172a';
+            ctx.font = '600 30px Poppins, "Segoe UI", sans-serif';
+            drawReceiptLines(ctx, row.lines, contentX + 24, cursorY + 78, 36);
+            cursorY += row.height;
+            if (index < preparedRows.length - 1) cursorY += 18;
+        });
+
+        cursorY += sectionGap;
+        drawReceiptRoundedRect(ctx, contentX, cursorY, contentWidth, footerBlockHeight, 24, '#eff6ff', '#bfdbfe', 2);
+        ctx.fillStyle = '#1d4ed8';
+        ctx.font = '700 24px Poppins, "Segoe UI", sans-serif';
+        ctx.fillText('Important Reminder', contentX + 28, cursorY + 42);
+        ctx.fillStyle = '#334155';
+        ctx.font = '500 24px Poppins, "Segoe UI", sans-serif';
+        ctx.fillText('Bring this receipt image, QR code, or tracking number whenever you need to track or claim', contentX + 28, cursorY + 76);
+        ctx.fillText('the document. Documents not received by the office within 7 days may be archived.', contentX + 28, cursorY + 106);
+
+        return canvas;
+    }
+
+    function triggerReceiptDownload(url, filename) {
+        var anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = filename;
+        anchor.rel = 'noopener';
+        anchor.style.display = 'none';
+        document.body.appendChild(anchor);
+        anchor.click();
+        setTimeout(function () {
+            if (anchor.parentNode) anchor.parentNode.removeChild(anchor);
+        }, 0);
+    }
+
+    function downloadReceiptCanvas(canvas, filename) {
+        return new Promise(function (resolve, reject) {
+            if (!canvas) {
+                reject(new Error('Receipt image could not be generated.'));
+                return;
+            }
+
+            if (typeof canvas.toBlob === 'function') {
+                canvas.toBlob(function (blob) {
+                    if (!blob) {
+                        reject(new Error('Receipt image could not be generated.'));
+                        return;
+                    }
+
+                    var url = URL.createObjectURL(blob);
+                    triggerReceiptDownload(url, filename);
+                    setTimeout(function () {
+                        URL.revokeObjectURL(url);
+                    }, 1200);
+                    resolve();
+                }, 'image/png');
+                return;
+            }
+
+            try {
+                triggerReceiptDownload(canvas.toDataURL('image/png'), filename);
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    var RECEIPT_MODAL_STYLE_ID = 'doc-trax-receipt-modal-style';
+    var RECEIPT_MODAL_ID = 'doc-trax-receipt-modal';
+
+    function ensureReceiptDownloadModalStyle() {
+        if (document.getElementById(RECEIPT_MODAL_STYLE_ID)) return;
+
+        var style = document.createElement('style');
+        style.id = RECEIPT_MODAL_STYLE_ID;
+        style.textContent =
+            '#' + RECEIPT_MODAL_ID + '{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;' +
+            'padding:20px;background:rgba(15,23,42,.46);opacity:0;pointer-events:none;z-index:100002;' +
+            'transition:opacity .2s ease}' +
+            '#' + RECEIPT_MODAL_ID + '.show{opacity:1;pointer-events:auto}' +
+            '#' + RECEIPT_MODAL_ID + ' .doc-trax-receipt-modal-card{width:min(100%,420px);background:#fff;border-radius:26px;' +
+            'padding:28px 24px 24px;box-shadow:0 24px 50px rgba(15,23,42,.22);text-align:center}' +
+            '#' + RECEIPT_MODAL_ID + ' .doc-trax-receipt-modal-icon{width:58px;height:58px;margin:0 auto 16px;border-radius:999px;' +
+            'display:flex;align-items:center;justify-content:center;background:#eff6ff;color:#1d4ed8;font-size:24px}' +
+            '#' + RECEIPT_MODAL_ID + ' .doc-trax-receipt-modal-title{font:700 22px Poppins,"Segoe UI",sans-serif;color:#0f172a;' +
+            'margin:0 0 10px}' +
+            '#' + RECEIPT_MODAL_ID + ' .doc-trax-receipt-modal-text{font:500 14px/1.65 Poppins,"Segoe UI",sans-serif;color:#475569;' +
+            'margin:0 0 22px}' +
+            '#' + RECEIPT_MODAL_ID + ' .doc-trax-receipt-modal-button{min-width:112px;padding:11px 20px;border:none;border-radius:14px;' +
+            'background:#0056b3;color:#fff;font:600 14px Poppins,"Segoe UI",sans-serif;cursor:pointer}' +
+            '#' + RECEIPT_MODAL_ID + ' .doc-trax-receipt-modal-button:hover{background:#004494}' +
+            '@media (max-width:520px){' +
+            '#' + RECEIPT_MODAL_ID + '{padding:16px}' +
+            '#' + RECEIPT_MODAL_ID + ' .doc-trax-receipt-modal-card{border-radius:22px;padding:24px 18px 20px}' +
+            '#' + RECEIPT_MODAL_ID + ' .doc-trax-receipt-modal-title{font-size:19px}' +
+            '#' + RECEIPT_MODAL_ID + ' .doc-trax-receipt-modal-text{font-size:13px}' +
+            '}';
+        document.head.appendChild(style);
+    }
+
+    function hideReceiptDownloadModal() {
+        var modal = document.getElementById(RECEIPT_MODAL_ID);
+        if (!modal) return;
+        modal.classList.remove('show');
+    }
+
+    function ensureReceiptDownloadModal() {
+        ensureReceiptDownloadModalStyle();
+
+        var existing = document.getElementById(RECEIPT_MODAL_ID);
+        if (existing) return existing;
+        if (!document.body) return null;
+
+        var modal = document.createElement('div');
+        modal.id = RECEIPT_MODAL_ID;
+        modal.innerHTML =
+            '<div class="doc-trax-receipt-modal-card" role="dialog" aria-modal="true" aria-labelledby="docTraxReceiptModalTitle">' +
+                '<div class="doc-trax-receipt-modal-icon" aria-hidden="true"><i class="fas fa-circle-check"></i></div>' +
+                '<h3 class="doc-trax-receipt-modal-title" id="docTraxReceiptModalTitle">Thank you for downloading your receipt.</h3>' +
+                '<p class="doc-trax-receipt-modal-text">Please keep this image for tracking, follow-up, claiming, or printing your document.</p>' +
+                '<button type="button" class="doc-trax-receipt-modal-button">Done</button>' +
+            '</div>';
+
+        modal.addEventListener('click', function (event) {
+            if (event.target === modal) {
+                hideReceiptDownloadModal();
+            }
+        });
+
+        modal.querySelector('.doc-trax-receipt-modal-button').addEventListener('click', hideReceiptDownloadModal);
+        document.body.appendChild(modal);
+        return modal;
+    }
+
+    function showReceiptDownloadModal() {
+        var modal = ensureReceiptDownloadModal();
+        if (!modal) return;
+
+        modal.classList.add('show');
+        var doneButton = modal.querySelector('.doc-trax-receipt-modal-button');
+        if (doneButton) doneButton.focus();
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            hideReceiptDownloadModal();
+        }
+    });
+
+    function setReceiptSaveButtonState(button, busy) {
+        if (!button) return;
+
+        if (busy) {
+            if (!button.dataset.receiptOriginalHtml) {
+                button.dataset.receiptOriginalHtml = button.innerHTML;
+            }
+            button.disabled = true;
+            button.setAttribute('aria-busy', 'true');
+            if (button.hasAttribute('data-receipt-icon-button')) {
+                button.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i>';
+                return;
+            }
+            button.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Saving...';
+            return;
+        }
+
+        button.disabled = false;
+        button.removeAttribute('aria-busy');
+        if (button.dataset.receiptOriginalHtml) {
+            button.innerHTML = button.dataset.receiptOriginalHtml;
+        }
+    }
+
+    async function saveReceiptImageInternal(options) {
+        options = options || {};
+
+        var button = options.button || null;
+        var root = options.root || (button && button.closest ? button.closest('[data-receipt-root]') : null) || document;
+        var trackingSelector = options.trackingSelector || '#generatedCode';
+        var qrSelector = options.qrSelector || '#qrImg';
+        var detailsSelector = options.detailsSelector || '#detailSummary';
+        var trackingNode = root.querySelector(trackingSelector);
+        var qrNode = root.querySelector(qrSelector);
+        var trackingNumber = normalizeReceiptText(trackingNode ? trackingNode.textContent : '', '');
+        var rows = readReceiptRows(root, detailsSelector);
+
+        if (!trackingNumber) {
+            throw new Error('Tracking number is not ready yet.');
+        }
+
+        if (!rows.length) {
+            throw new Error('Receipt details are not ready yet.');
+        }
+
+        if (!qrNode || !normalizeReceiptText(qrNode.getAttribute('src') || qrNode.src, '')) {
+            throw new Error('QR code is not ready yet.');
+        }
+
+        setReceiptSaveButtonState(button, true);
+
+        try {
+            if (document.fonts && document.fonts.ready) {
+                try {
+                    await document.fonts.ready;
+                } catch (_) {}
+            }
+
+            await waitForImageElement(qrNode);
+            var qrImage = await loadReceiptImage(qrNode.currentSrc || qrNode.src);
+            var canvas = buildReceiptCanvas({
+                trackingNumber: trackingNumber,
+                qrImage: qrImage,
+                rows: rows
+            });
+            var filename = 'DOCTRAX-Receipt-' + sanitizeReceiptFilePart(trackingNumber) + '.png';
+            await downloadReceiptCanvas(canvas, filename);
+            showReceiptDownloadModal();
+            return true;
+        } finally {
+            setReceiptSaveButtonState(button, false);
+        }
+    }
+
+    window.saveReceiptImage = function (eventOrOptions) {
+        var options = eventOrOptions || {};
+
+        if (eventOrOptions && typeof eventOrOptions.preventDefault === 'function') {
+            eventOrOptions.preventDefault();
+            options = {
+                button: eventOrOptions.currentTarget || eventOrOptions.target
+            };
+        }
+
+        return saveReceiptImageInternal(options).catch(function (error) {
+            console.error(error);
+            window.alert(error && error.message ? error.message : 'Could not save the receipt image yet. Please try again.');
+            return false;
+        });
+    };
+
+    document.addEventListener('click', function (event) {
+        var button = event.target && event.target.closest ? event.target.closest('[data-save-receipt-image]') : null;
+        if (!button) return;
+
+        event.preventDefault();
+        window.saveReceiptImage({ button: button });
+    });
 
     // Network notices and fetch helpers
     var _fetchTimestamps = {};

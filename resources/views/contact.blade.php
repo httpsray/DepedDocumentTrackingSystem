@@ -16,25 +16,23 @@
     <script src="/js/request-utils.js" defer></script>
     <style>
         .contact-wrapper { max-width:680px; margin:0 auto; padding:40px 20px 60px; flex:1; width:100%; }
-        .contact-hero { text-align:center; margin-bottom:36px; }
-        .contact-hero img { width:clamp(80px,18vw,120px); height:auto; margin-bottom:16px; }
-        .contact-hero h2 { font-size:clamp(20px,4vw,28px); font-weight:700; color:var(--text-dark); margin-bottom:6px; }
-        .contact-hero p { font-size:clamp(13px,2.5vw,15px); color:#64748b; max-width:480px; margin:0 auto; line-height:1.7; }
-        .contact-card { background:#fff; border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,.06); padding:28px 32px; margin-bottom:24px; border:1px solid #e2e8f0; }
-        .contact-card h3 { font-size:16px; font-weight:700; color:var(--text-dark); margin-bottom:16px; display:flex; align-items:center; gap:10px; }
-        .contact-card h3 i { color:var(--primary-color); font-size:18px; }
-        .contact-item { display:flex; align-items:flex-start; gap:14px; padding:14px 0; border-bottom:1px solid #f1f5f9; }
+        .contact-hero { text-align:center; margin-bottom:24px; padding:0 0 6px; }
+        .contact-hero h2 { font-size:clamp(20px,4vw,28px); font-weight:700; color:var(--primary-color); margin-bottom:6px; }
+        .contact-hero p { font-size:clamp(13px,2.5vw,15px); color:#355075; max-width:480px; margin:0 auto; line-height:1.7; }
+        .contact-card { background:#fff; border-radius:18px; box-shadow:0 14px 34px rgba(0,86,179,.10); padding:28px 32px; margin-bottom:24px; border:1px solid rgba(0,86,179,.14); text-align:left; }
+        .contact-item { display:flex; align-items:flex-start; gap:16px; padding:18px 0; border-bottom:1px solid rgba(0,86,179,.10); text-align:left; }
         .contact-item:last-child { border-bottom:none; }
-        .contact-icon { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
-        .contact-detail { flex:1; }
-        .contact-detail .label { font-size:11px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:.5px; margin-bottom:2px; }
+        .contact-icon { width:46px; height:46px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; box-shadow:inset 0 0 0 1px rgba(0,86,179,.08); }
+        .contact-detail { flex:1; width:auto; padding-top:2px; }
+        .contact-detail .label { font-size:11px; font-weight:700; color:var(--primary-color); text-transform:uppercase; letter-spacing:.6px; margin-bottom:4px; }
         .contact-detail .value { font-size:14px; font-weight:600; color:var(--text-dark); }
         .contact-detail .value a { color:var(--primary-color); text-decoration:none; }
         .contact-detail .value a:hover { text-decoration:underline; }
-        .contact-detail .sub { font-size:12px; color:#64748b; margin-top:2px; }
+        .contact-detail .sub { font-size:12px; color:#355075; margin-top:2px; }
         @media(max-width:600px) {
             .contact-wrapper { padding:24px 14px 40px; }
             .contact-card { padding:20px 18px; }
+            .contact-item { flex-direction:column; gap:12px; }
         }
     </style>
 </head>
@@ -59,14 +57,11 @@
 
     <div class="contact-wrapper">
         <div class="contact-hero">
-            <img src="{{ asset('images/DOCTRAXLOGO.svg') }}" alt="DOCTRAX Logo">
             <h2>Contact Us</h2>
             <p>Have a question or need help with your document? Reach out to us through any of the channels below.</p>
         </div>
 
         <div class="contact-card">
-            <h3><i class="fas fa-headset"></i> Get in Touch</h3>
-
             <div class="contact-item">
                 <div class="contact-icon" style="background:rgba(0,86,179,.1);color:var(--primary-color)">
                     <i class="fas fa-envelope"></i>
@@ -79,12 +74,12 @@
             </div>
 
             <div class="contact-item">
-                <div class="contact-icon" style="background:rgba(34,197,94,.1);color:#16a34a">
+                <div class="contact-icon" style="background:rgba(0,86,179,.16);color:var(--primary-color)">
                     <i class="fas fa-clock"></i>
                 </div>
                 <div class="contact-detail">
                     <div class="label">Office Hours</div>
-                    <div class="value">Monday – Friday, 8:00 AM – 4:00 PM</div>
+                    <div class="value">Monday - Friday, 8:00 AM - 4:00 PM</div>
                     <div class="sub">Closed on weekends and national holidays</div>
                 </div>
             </div>

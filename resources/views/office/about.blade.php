@@ -64,20 +64,22 @@
         .main{margin-left:0;flex:1;display:flex;flex-direction:column}
 
         /* ─── Content ─── */
-        .about-wrapper { max-width:800px; width:100%; margin:0 auto; padding:28px 24px 48px; flex:1; }
+        .about-wrapper { max-width:680px; width:100%; margin:0 auto; padding:28px 24px 48px; flex:1; }
         .back-link { display:inline-flex; align-items:center; gap:6px; color:var(--text-muted); font-size:13px; text-decoration:none; margin-bottom:18px; transition:color .15s; }
         .back-link:hover { color:var(--primary); }
-
-        .about-hero { text-align:center; margin-bottom:36px; }
-        .about-hero img { width:clamp(80px,18vw,120px); height:auto; margin-bottom:16px; }
-        .about-hero h2 { font-size:clamp(20px,4vw,28px); font-weight:700; color:var(--text-dark); margin-bottom:6px; }
-        .about-hero p { font-size:clamp(13px,2.5vw,15px); color:#64748b; max-width:520px; margin:0 auto; line-height:1.7; }
-        .about-card { background:#fff; border-radius:12px; box-shadow:var(--shadow-sm); padding:24px 28px; margin-bottom:20px; border:1px solid #e2e8f0; }
-        .about-card h3 { font-size:15px; font-weight:600; color:var(--text-dark); margin-bottom:10px; }
-        .about-card p, .about-card li { font-size:13px; color:#475569; line-height:1.7; }
-        .about-card ul { list-style:none; padding:0; margin:0; }
-        .about-card ul li { padding:5px 0; display:flex; align-items:flex-start; gap:10px; }
-        .about-card ul li i { color:var(--primary); margin-top:3px; flex-shrink:0; font-size:12px; }
+        .about-hero { text-align:center; margin-bottom:20px; }
+        .about-hero h2 { font-size:clamp(20px,4vw,28px); font-weight:700; color:var(--primary); margin:0 0 6px; }
+        .about-hero p { font-size:clamp(13px,2.5vw,15px); color:#355075; max-width:480px; margin:0 auto; line-height:1.7; }
+        .about-card { background:#fff; border-radius:18px; box-shadow:0 14px 34px rgba(0,86,179,.10); padding:28px 32px; margin-bottom:24px; border:1px solid rgba(0,86,179,.14); text-align:left; }
+        .about-item { display:flex; align-items:flex-start; gap:16px; padding:18px 0; border-bottom:1px solid rgba(0,86,179,.10); text-align:left; }
+        .about-item:last-child { border-bottom:none; }
+        .about-icon { width:46px; height:46px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; box-shadow:inset 0 0 0 1px rgba(0,86,179,.08); }
+        .about-detail { width:100%; padding-top:2px; }
+        .about-detail h3 { font-size:14px; font-weight:700; color:var(--primary); margin-bottom:6px; }
+        .about-detail p { font-size:13px; color:#355075; line-height:1.7; margin:0; }
+        .about-steps { list-style:none; padding:0; margin:10px 0 0; max-width:none; text-align:left; }
+        .about-steps li { padding:5px 0; display:flex; align-items:flex-start; gap:10px; color:#355075; font-size:13px; line-height:1.7; }
+        .about-steps li i { color:var(--primary); margin-top:4px; flex-shrink:0; font-size:12px; }
 
         /* ─── Footer ─── */
         .site-footer{width:100%;background:#fff;border-top:1px solid #e2e8f0;padding:20px 5%;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#94a3b8;margin-top:auto}
@@ -89,6 +91,7 @@
         @media(max-width:600px) {
             .about-wrapper { padding:24px 14px 40px; }
             .about-card { padding:20px 18px; }
+            .about-item { flex-direction:column; gap:12px; }
         }
     </style>
     <script src="/js/spa.js" defer></script>
@@ -154,39 +157,40 @@
 <div class="about-wrapper">
 
     @if(request()->query('from') === 'profile')
-    <a href="/profile" class="back-link"><i class="fas fa-arrow-left"></i> Back to Profile</a>
+    <a href="/profile" class="back-link" aria-label="Back to Profile" title="Back to Profile" style="display:inline-flex;align-items:center;justify-content:center;gap:0;padding:0;border:none;background:transparent;border-radius:0;box-shadow:none;color:#0f172a;text-decoration:none;line-height:1.2;width:auto;"><span aria-hidden="true" style="width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 38px;border-radius:999px;background:linear-gradient(135deg,#0f4fd6 0%,#1f8ef1 100%);color:#fff;box-shadow:none;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M5 12l14 0"></path><path d="M5 12l6 6"></path><path d="M5 12l6 -6"></path></svg></span></a>
     @else
-    <a href="/office/dashboard" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    <a href="/office/dashboard" class="back-link" aria-label="Back to Dashboard" title="Back to Dashboard" style="display:inline-flex;align-items:center;justify-content:center;gap:0;padding:0;border:none;background:transparent;border-radius:0;box-shadow:none;color:#0f172a;text-decoration:none;line-height:1.2;width:auto;"><span aria-hidden="true" style="width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 38px;border-radius:999px;background:linear-gradient(135deg,#0f4fd6 0%,#1f8ef1 100%);color:#fff;box-shadow:none;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M5 12l14 0"></path><path d="M5 12l6 6"></path><path d="M5 12l6 -6"></path></svg></span></a>
     @endif
 
     <div class="about-hero">
-        <img src="{{ asset('images/DOCTRAXLOGO.svg') }}" alt="DOCTRAX Logo">
-        <h2>About DOCTRAX</h2>
-        <p>The document tracking system of the Schools Division of City of San Jose del Monte, Bulacan.</p>
+        <h2>About Us</h2>
+        <p>Track, route, and monitor documents more clearly through DOCTRAX.</p>
     </div>
 
     <div class="about-card">
-        <h3>What is DOCTRAX?</h3>
-        <p>DOCTRAX is a web-based system that lets you submit documents online and track them using a unique tracking number. Instead of following up in person or calling the office, you can check your document's status anytime from your phone or computer.</p>
-    </div>
-
-    <div class="about-card">
-        <h3>How it works</h3>
-        <ul>
-            <li><i class="fas fa-check"></i> <div>Submit a document through the online form and get a tracking number.</div></li>
-            <li><i class="fas fa-check"></i> <div>Use the tracking number to check your document's status anytime.</div></li>
-            <li><i class="fas fa-check"></i> <div>Office staff receive, process, and update the document in the system.</div></li>
-            <li><i class="fas fa-check"></i> <div>Once done, the document is marked as completed.</div></li>
-        </ul>
-    </div>
-
-    <div class="about-card">
-        <h3>Who can use it?</h3>
-        <ul>
-            <li><i class="fas fa-user"></i> <div><strong>Clients &amp; school personnel</strong> — submit and track documents.</div></li>
-            <li><i class="fas fa-building"></i> <div><strong>Office representatives</strong> — receive, process, and manage documents.</div></li>
-            <li><i class="fas fa-user-shield"></i> <div><strong>Administrators</strong> — manage accounts and oversee the system.</div></li>
-        </ul>
+        <div class="about-item">
+            <div class="about-icon" style="background:rgba(0,86,179,.1);color:var(--primary)">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="about-detail">
+                <h3>About DOCTRAX</h3>
+                <p>DOCTRAX is the document tracking system of the Schools Division Office of City of San Jose del Monte, Bulacan. It gives clients and personnel a clearer way to submit documents, monitor progress, and receive updates online.</p>
+            </div>
+        </div>
+        <div class="about-item">
+            <div class="about-icon" style="background:rgba(0,86,179,.16);color:var(--primary)">
+                <i class="fas fa-route"></i>
+            </div>
+            <div class="about-detail">
+                <h3>How DOCTRAX Works</h3>
+                <ul class="about-steps">
+                    <li><i class="fas fa-check"></i><span>Submit a document through the system and receive a tracking number.</span></li>
+                    <li><i class="fas fa-check"></i><span>Use that tracking number to check the document's progress online.</span></li>
+                    <li><i class="fas fa-check"></i><span>Office personnel receive, route, and update the document in the system.</span></li>
+                    <li><i class="fas fa-check"></i><span>Once processing is complete, the document is marked as completed.</span></li>
+                </ul>
+            </div>
+        </div>
     </div>
 
 </div>

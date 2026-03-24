@@ -108,6 +108,16 @@
         }
         .tracking-box,
         .qr-box{width:100%;max-width:none}
+        .receipt-qr-panel{
+            display:flex;
+            align-items:flex-start;
+            justify-content:center;
+            gap:8px;
+            width:fit-content;
+            max-width:100%;
+            margin:0 auto
+        }
+        .receipt-qr-panel .qr-box{width:auto}
         .tracking-box{
             background:transparent;
             border:none;
@@ -137,15 +147,36 @@
             flex-direction:column;
             align-items:center;
             gap:6px;
-            padding:12px;
-            background:#fff;
-            border:1px solid #e2e8f0;
-            border-radius:20px;
+            padding:0;
+            background:transparent;
+            border:none;
+            border-radius:0;
             box-shadow:none;
             text-align:center
         }
-        .qr-img{width:min(100%,320px)!important;max-width:320px;height:auto!important;aspect-ratio:1 / 1;object-fit:contain;border:1px solid #e2e8f0;border-radius:14px;padding:9px;background:#fff}
+        .qr-img{width:min(100%,320px)!important;max-width:320px;height:auto!important;aspect-ratio:1 / 1;object-fit:contain;border:none;border-radius:0;padding:0;background:transparent}
         .qr-caption{display:flex;align-items:center;gap:4px;font-size:11px;color:#64748b;font-weight:500}
+        .receipt-save-icon{
+            width:50px;
+            height:50px;
+            flex:0 0 50px;
+            border:none;
+            border-radius:0;
+            background:transparent;
+            color:var(--primary);
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            cursor:pointer;
+            margin-top:2px;
+            transition:color .2s, transform .15s
+        }
+        .receipt-save-icon:hover{background:transparent;color:var(--primary-dark)}
+        .receipt-save-icon:active{transform:scale(.97)}
+        .receipt-save-icon:disabled{opacity:.7;cursor:not-allowed}
+        .receipt-save-icon:focus,
+        .receipt-save-icon:focus-visible{outline:none;box-shadow:none}
+        .receipt-save-icon svg{width:22px;height:22px;display:block;stroke:currentColor}
         .btn-secondary{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border:1.5px solid var(--border);border-radius:10px;color:var(--text-dark);text-decoration:none;font-size:13px;font-weight:500;cursor:pointer;background:#fff;font-family:Poppins,sans-serif;transition:border-color .2s}
         .btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
 
@@ -160,10 +191,14 @@
         .receipt-details .detail-summary{margin-bottom:0}
         .receipt-notes{width:min(100%, 680px);margin:0 auto}
         .receipt-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px}
-        .note-box{font-size:11px;border-radius:10px;padding:9px 12px;margin-bottom:8px;text-align:left}
-        .note-box i{margin-right:4px}
-        .note-warning{color:#92400e;background:#fffbeb;border:1px solid #fde68a}
-        .note-info{color:#1e40af;background:#eff6ff;border:1px solid #bfdbfe}
+        .note-box{display:grid;grid-template-columns:30px 112px minmax(0,1fr);align-items:start;column-gap:14px;font-size:12px;line-height:1.65;border-radius:18px;padding:14px 18px;margin-bottom:12px;text-align:left;border:1px solid #e5e7eb;background:#fff;box-shadow:none}
+        .note-box i{width:30px;height:30px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:13px}
+        .note-title{font-weight:700;color:#0f172a;padding-top:4px}
+        .note-copy{color:#334155;min-width:0}
+        .note-warning{color:#334155;border-left:none}
+        .note-warning i{color:#64748b;background:#f8fafc}
+        .note-info{color:#334155;border-left:none}
+        .note-info i{color:#64748b;background:#f8fafc}
 
         /* ─── Spinner ─── */
         @keyframes spin{to{transform:rotate(360deg)}}
@@ -201,12 +236,17 @@
             .tracking-box::after{max-width:100%;font-size:11px}
             .tracking-box small{font-size:15px;letter-spacing:4px}
             .tracking-number{font-size:48px;letter-spacing:3px}
-            .qr-box{padding:10px}
-            .qr-img{width:min(100%,260px)!important;max-width:260px;padding:8px}
+            .receipt-qr-panel{gap:6px}
+            .qr-box{padding:0}
+            .qr-img{width:min(100%,260px)!important;max-width:260px;padding:0}
+            .receipt-save-icon{width:44px;height:44px;flex-basis:44px;border-radius:0;margin-top:2px}
+            .receipt-save-icon svg{width:20px;height:20px}
             .detail-summary td{padding:4px 6px;font-size:10.5px}
             .detail-summary td:first-child{width:88px;font-size:9px}
             .receipt-details{padding:10px}
-            .note-box{font-size:10px;padding:6px 8px}
+            .note-box{grid-template-columns:26px 88px minmax(0,1fr);column-gap:10px;font-size:11px;padding:12px 14px}
+            .note-box i{width:26px;height:26px}
+            .note-title{padding-top:3px}
         }
 
         /* ─── Toast ─── */
@@ -357,7 +397,7 @@
 
     <!-- Success state -->
     <div id="successState" style="display:none;">
-        <div class="card">
+        <div class="card" data-receipt-root>
             <div class="success-card">
                 <div class="success-icon"><i class="fas fa-check-circle"></i></div>
                 <h2>Document Submitted Successfully!</h2>
@@ -369,34 +409,42 @@
                             <small>Tracking Number</small>
                             <div class="tracking-number" id="generatedCode"></div>
                         </div>
-                        <div id="qrBox" class="qr-box" style="display:none">
-                            <img id="qrImg" alt="QR Code" class="qr-img">
-                            <div class="qr-caption"><i class="fas fa-qrcode" style="margin-right:3px"></i>Scan to receive</div>
+                        <div id="qrBox" class="receipt-qr-panel" style="display:none">
+                            <div class="qr-box">
+                                <img id="qrImg" alt="QR Code" class="qr-img">
+                                <div class="qr-caption"><i class="fas fa-qrcode" style="margin-right:3px"></i>Scan to receive</div>
+                            </div>
+                            <button class="receipt-save-icon" type="button" data-save-receipt-image data-receipt-icon-button aria-label="Save receipt image" title="Save receipt image">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-download"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 11l5 5l5 -5" /><path d="M12 4l0 12" /></svg>
+                            </button>
                         </div>
                     </div>
 
-                    <div class="receipt-details">
-                        <div class="receipt-details-label">Document Details</div>
-                        <table class="detail-summary" id="detailSummary">
-                            <tr><td>Submitted By</td><td id="dSender"></td></tr>
-                            <tr><td>Document Type</td><td id="dType"></td></tr>
-                            <tr><td>Subject</td><td id="dSubject"></td></tr>
-                            <tr><td>Remarks</td><td id="dRemarks"></td></tr>
-                            <tr><td>Submitted To</td><td id="dOffice"></td></tr>
-                            <tr><td>Date Submitted</td><td id="dDate"></td></tr>
-                        </table>
-                    </div>
                 </div>
 
                 <div class="receipt-notes">
                     <div class="note-box note-warning">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <strong>Important:</strong> Please take a screenshot of this page. You will need your Tracking Number to track, follow up, or claim your document.
+                        <div class="note-title">Important:</div>
+                        <div class="note-copy">Please save this receipt image or take a screenshot. You will need your Tracking Number to track, follow up, or claim your document.</div>
                     </div>
                     <div class="note-box note-info">
                         <i class="fas fa-info-circle"></i>
-                        <strong>Please note:</strong> Documents that are not received by the office within <strong>7 days</strong> of submission will be automatically archived. Make sure to follow up if needed.
+                        <div class="note-title">Please note:</div>
+                        <div class="note-copy">Documents that are not received by the office within <strong>7 days</strong> of submission will be automatically archived. Make sure to follow up if needed.</div>
                     </div>
+                </div>
+
+                <div class="receipt-details">
+                    <div class="receipt-details-label">Document Details</div>
+                    <table class="detail-summary" id="detailSummary">
+                        <tr><td>Submitted By</td><td id="dSender"></td></tr>
+                        <tr><td>Document Type</td><td id="dType"></td></tr>
+                        <tr><td>Subject</td><td id="dSubject"></td></tr>
+                        <tr><td>Remarks</td><td id="dRemarks"></td></tr>
+                        <tr><td>Submitted To</td><td id="dOffice"></td></tr>
+                        <tr><td>Date Submitted</td><td id="dDate"></td></tr>
+                    </table>
                 </div>
 
                 <div class="receipt-actions">
@@ -498,7 +546,7 @@
                 document.getElementById('generatedCode').textContent  = data.reference_number || '-';
                 if (data.reference_number) {
                     document.getElementById('qrImg').src = '/qr/' + encodeURIComponent(data.reference_number);
-                    document.getElementById('qrBox').style.display = 'block';
+                    document.getElementById('qrBox').style.display = '';
                 }
                 if (data.details) {
                     document.getElementById('dSender').textContent  = data.details.sender_name || '-';

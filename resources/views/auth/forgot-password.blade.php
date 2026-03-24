@@ -105,10 +105,7 @@
     <div class="main-wrapper">
         <div class="auth-container">
             <div class="auth-header" id="formHeader">
-                <a href="/login" class="back-link" style="margin-bottom: 12px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M5 12l6 6" /><path d="M5 12l6 -6" /></svg>
-                    Back to login
-                </a>
+                <a href="/login" class="back-link"  style="margin-bottom: 12px;display:inline-flex;align-items:center;justify-content:center;gap:0;padding:0;border:none;background:transparent;border-radius:0;box-shadow:none;color:#0f172a;text-decoration:none;line-height:1.2;width:auto;" aria-label="Back to login" title="Back to login"><span aria-hidden="true" style="width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 38px;border-radius:999px;background:linear-gradient(135deg,#0f4fd6 0%,#1f8ef1 100%);color:#fff;box-shadow:none;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M5 12l14 0"></path><path d="M5 12l6 6"></path><path d="M5 12l6 -6"></path></svg></span></a>
                 <h2>Forgot your password?</h2>
                 <p>Enter the email address associated with your account and we'll send you a reset link.</p>
             </div>
@@ -146,7 +143,7 @@
                 <p>We sent a password reset link to:</p>
                 <div class="sent-email" id="sentEmail"></div>
                 <p style="margin-bottom:20px;">Didn't get it? Check your spam folder or resend below.</p>
-                <a href="/login" class="btn-back-login">Back to Login</a>
+                <a href="/login" class="btn-back-login" aria-label="Back to Login" title="Back to Login" style="display:inline-flex;align-items:center;justify-content:center;gap:0;padding:0;border:none;background:transparent;border-radius:0;box-shadow:none;color:#0f172a;text-decoration:none;line-height:1.2;width:auto;"><span aria-hidden="true" style="width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 38px;border-radius:999px;background:linear-gradient(135deg,#0f4fd6 0%,#1f8ef1 100%);color:#fff;box-shadow:none;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M5 12l14 0"></path><path d="M5 12l6 6"></path><path d="M5 12l6 -6"></path></svg></span></a>
                 <div class="resend-row">
                     <button id="resendBtn" onclick="resend()">Resend email</button>
                     <span id="cooldownText"></span>
