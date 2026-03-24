@@ -56,6 +56,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Always persist email addresses in normalized form.
+     */
+    public function setEmailAttribute($value): void
+    {
+        $this->attributes['email'] = strtolower(trim((string) $value));
+    }
+
+    /**
      * Check if the user account is active.
      */
     public function isActive(): bool

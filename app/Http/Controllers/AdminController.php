@@ -177,6 +177,12 @@ class AdminController extends Controller
     {
         $this->authorize();
 
+        if ($request->has('email')) {
+            $request->merge([
+                'email' => strtolower(trim((string) $request->input('email'))),
+            ]);
+        }
+
         $target = User::findOrFail($id);
 
         // Prevent editing self
@@ -208,7 +214,7 @@ class AdminController extends Controller
         }
 
         if ($request->has('name'))      $target->name      = $request->name;
-        if ($request->has('email'))     $target->email     = strtolower(trim($request->email));
+        if ($request->has('email'))     $target->email     = $request->email;
         if ($request->has('mobile'))    $target->mobile    = $request->mobile ?: null;
         if ($request->has('office_id')) $target->office_id = $request->office_id ?: null;
 
@@ -386,6 +392,10 @@ class AdminController extends Controller
     public function createOfficeAccount(Request $request)
     {
         $this->authorize();
+
+        $request->merge([
+            'email' => strtolower(trim((string) $request->input('email'))),
+        ]);
 
         $request->validate([
             'name'             => 'required|string|max:255',

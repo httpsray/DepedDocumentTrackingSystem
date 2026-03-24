@@ -26,6 +26,10 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
+        $request->merge([
+            'email' => strtolower(trim((string) $request->input('email'))),
+        ]);
+
         $request->validate([
             'name'  => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -39,7 +43,7 @@ class AuthController extends Controller
             $user = DB::transaction(function () use ($request) {
                 $user = new User([
                     'name'         => $request->name,
-                    'email'        => strtolower(trim($request->email)),
+                    'email'        => $request->email,
                     'mobile'       => $request->mobile,
                     'account_type' => $request->account_type ?? 'individual',
                     'password'     => Hash::make(Str::random(64)), // placeholder — never usable

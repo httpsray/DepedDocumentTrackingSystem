@@ -43,6 +43,10 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
+        $request->merge([
+            'email' => strtolower(trim((string) $request->input('email'))),
+        ]);
+
         $request->validate([
             'name'   => 'required|string|max:255',
             'email'  => 'required|email|max:255|unique:users,email,' . $user->id,
@@ -50,9 +54,10 @@ class ProfileController extends Controller
         ]);
 
         $newName = $request->name;
+        $newEmail = $request->email;
 
         $hasChanges = $user->name  !== $newName
-                   || $user->email !== strtolower(trim($request->email))
+               || $user->email !== $newEmail
                    || $user->mobile !== ($request->mobile ?: null);
 
         if (!$hasChanges) {
@@ -68,7 +73,7 @@ class ProfileController extends Controller
         }
 
         $user->name   = $newName;
-        $user->email  = strtolower(trim($request->email));
+        $user->email  = $newEmail;
         $user->mobile = $request->mobile;
         $user->save();
 
