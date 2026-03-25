@@ -12,6 +12,19 @@
 (function () {
     'use strict';
 
+    // Fallback used by tracking drawers when request-utils.js fails to load.
+    if (typeof window.describeRequestError !== 'function') {
+        window.describeRequestError = function (error, fallbackMessage) {
+            if (error && typeof error.userMessage === 'string' && error.userMessage.trim() !== '') {
+                return error.userMessage;
+            }
+            if (error && typeof error.message === 'string' && error.message.trim() !== '') {
+                return error.message;
+            }
+            return fallbackMessage || 'Could not load tracking details. Please try again.';
+        };
+    }
+
     var EXCLUDE = /email|password|mobile|phone|track/i;
 
     function toTitleCase(str) {

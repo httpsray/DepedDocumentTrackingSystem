@@ -120,9 +120,9 @@
             <form id="forgotForm" novalidate autocomplete="off">
                 <div class="form-group">
                     <label class="form-label">Email address</label>
-                    <input type="text" id="emailInput" class="form-control"
+                          <input type="email" id="emailInput" class="form-control"
                            placeholder="ex: myname@example.com"
-                           autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
+                              autocomplete="email" autocapitalize="off" autocorrect="off" readonly onfocus="this.removeAttribute('readonly');">
                     <div class="error-alert" id="emailErr" style="display:none; margin-top:8px;">
                         <i class="fas fa-exclamation-circle"></i>
                         <span id="emailErrText"></span>

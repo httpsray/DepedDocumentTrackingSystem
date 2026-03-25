@@ -277,11 +277,11 @@
             .tracking-box,.qr-box{width:100%}
             .tracking-box{padding:0}
             .tracking-box::after{max-width:100%;font-size:11px}
-            .tracking-box small{font-size:15px;letter-spacing:4px}
-            .tracking-number{font-size:48px;letter-spacing:3px}
+            .tracking-box small{font-size:clamp(18px, 2.6vw, 22px);letter-spacing:6px}
+            .tracking-number{font-size:clamp(56px, 9vw, 82px);letter-spacing:5px}
             .receipt-qr-panel{gap:6px}
             .qr-box{padding:0}
-            .qr-img{width:min(100%,260px)!important;max-width:260px;padding:0}
+            .qr-img{width:min(100%,320px)!important;max-width:320px;padding:0}
             .receipt-save-icon{width:44px;height:44px;flex-basis:44px;border-radius:0;margin-top:2px}
             .receipt-save-icon svg{width:20px;height:20px}
             .detail-summary td{padding:4px 6px;font-size:10.5px}
