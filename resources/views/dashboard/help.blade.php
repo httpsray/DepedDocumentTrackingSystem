@@ -121,7 +121,7 @@
         .help-section {
             background: var(--white); border: 1px solid var(--border);
             border-radius: 12px; box-shadow: var(--shadow-sm);
-            overflow: hidden; margin-bottom: 24px;
+            overflow: hidden; margin-bottom: 24px; scroll-margin-top: 96px;
         }
         .help-section-head {
             display: flex; align-items: center; gap: 14px;
@@ -813,16 +813,50 @@
     };
 
     // ─── Smooth scroll for TOC links ───
+    function getHelpScrollOffset() {
+        return window.innerWidth <= 900 ? 88 : 28;
+    }
+
+    function scrollToHelpSection(hash, updateHash) {
+        if (!hash || hash.charAt(0) !== '#') return false;
+
+        var target = document.querySelector(hash);
+        if (!target) return false;
+
+        var top = target.getBoundingClientRect().top + window.pageYOffset - getHelpScrollOffset();
+        window.scrollTo({
+            top: Math.max(0, top),
+            behavior: 'smooth'
+        });
+
+        if (updateHash) {
+            if (history && typeof history.replaceState === 'function') {
+                history.replaceState(history.state, '', hash);
+            } else {
+                window.location.hash = hash;
+            }
+        }
+
+        return true;
+    }
+
     document.querySelectorAll('.toc-item').forEach(function(a) {
         a.addEventListener('click', function(e) {
-            var target = document.querySelector(this.getAttribute('href'));
-            if (target) {
+            var hash = this.getAttribute('href');
+            if (scrollToHelpSection(hash, true)) {
                 e.preventDefault();
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // offset for sticky navbar
-                setTimeout(function() { window.scrollBy(0, -80); }, 0);
             }
         });
+    });
+
+    if (window.location.hash) {
+        setTimeout(function() {
+            scrollToHelpSection(window.location.hash, false);
+        }, 60);
+    }
+
+    window.addEventListener('hashchange', function() {
+        scrollToHelpSection(window.location.hash, false);
     });
 })();
 </script>

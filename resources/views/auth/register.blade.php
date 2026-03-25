@@ -222,7 +222,7 @@
                     
                     <div class="form-group">
                         <label class="form-label">Email Address</label>
-                        <input type="email" class="form-control" id="regEmail" autocomplete="email" autocapitalize="off" autocorrect="off" readonly onfocus="this.removeAttribute('readonly');">
+                        <input type="email" class="form-control" id="regEmail" autocomplete="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');">
                         <div class="error-alert" id="regEmailError"><i class="fas fa-exclamation-circle"></i><span>Required</span></div>
                     </div>
                 </div>

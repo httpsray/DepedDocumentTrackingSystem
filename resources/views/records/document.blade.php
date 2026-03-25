@@ -295,7 +295,7 @@
                         @if($document->user)
                         <div style="margin-bottom:12px">
                             <strong style="color:var(--text-dark)">Registered User:</strong> {{ $document->user->name }}
-                            <div style="font-size:11px;color:#94a3b8">{{ $document->user->email }}</div>
+                            <div style="font-size:11px;color:#94a3b8"><!--email_off-->{{ $document->user->email }}<!--/email_off--></div>
                         </div>
                         @endif
                         <div style="margin-bottom:12px">

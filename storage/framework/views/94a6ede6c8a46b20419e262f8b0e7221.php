@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="{{ asset('images/DOCTRAXLOGO.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="<?php echo e(asset('images/DOCTRAXLOGO.svg')); ?>" type="image/svg+xml">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>Track Document - DepEd DOCTRAX</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -181,11 +181,11 @@
     <script src="/js/request-utils.js" defer></script>
 </head>
 <body>
-@php
+<?php
     $initials = collect(explode(' ', trim($user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
     $firstName = explode(' ', trim($user->name))[0];
     $roleBadge = ucfirst($user->role ?? 'User');
-@endphp
+?>
 
 <!-- Mobile top bar -->
 <div class="mob-topbar">
@@ -200,7 +200,7 @@
 <!-- ─── Sidebar ─── -->
 <div class="sidebar" id="mainSidebar">
     <div class="sb-brand">
-        <img src="{{ asset('images/DOCTRAXLOGO.svg') }}" alt="DOCTRAX Logo">
+        <img src="<?php echo e(asset('images/DOCTRAXLOGO.svg')); ?>" alt="DOCTRAX Logo">
         <h2>DOCTRAX</h2>
         <small>DepEd Document Tracking System</small>
     </div>
@@ -216,10 +216,10 @@
     </nav>
     <div class="sb-footer">
         <div class="sb-user">
-            <div class="sb-avatar">{{ $initials }}</div>
+            <div class="sb-avatar"><?php echo e($initials); ?></div>
             <div class="sb-user-info">
-                <small>{{ $roleBadge }}</small>
-                <span>{{ $firstName }}</span>
+                <small><?php echo e($roleBadge); ?></small>
+                <span><?php echo e($firstName); ?></span>
             </div>
         </div>
         <button onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -262,29 +262,29 @@
     </div>
 
     <!-- My submitted docs quick-list -->
-    @if(!is_null($myDocs))
+    <?php if(!is_null($myDocs)): ?>
     <div class="my-docs-card">
         <div class="my-docs-head">
             <h3>My Submitted Documents</h3>
             <span>Click a row to track it</span>
         </div>
-        @if($myDocs->isEmpty())
+        <?php if($myDocs->isEmpty()): ?>
             <div class="my-docs-empty"><i class="fas fa-inbox" style="font-size:24px;color:#cbd5e1;display:block;margin-bottom:8px"></i>You have no submitted documents yet.</div>
-        @else
-            @foreach($myDocs as $doc)
-            <a class="my-doc-row" href="#" data-tracking="{{ $doc->reference_number }}">
+        <?php else: ?>
+            <?php $__currentLoopData = $myDocs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $doc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <a class="my-doc-row" href="#" data-tracking="<?php echo e($doc->reference_number); ?>">
                 <div class="my-doc-icon"><i class="fas fa-file-alt"></i></div>
                 <div class="my-doc-info">
-                    <div class="my-doc-subject">{{ $doc->subject }}</div>
-                    <div class="my-doc-ref">{{ $doc->reference_number }}</div>
+                    <div class="my-doc-subject"><?php echo e($doc->subject); ?></div>
+                    <div class="my-doc-ref"><?php echo e($doc->reference_number); ?></div>
                 </div>
-                <div class="my-doc-badge" style="background:{{ $doc->statusColor() }}1a;color:{{ $doc->statusColor() }};border:1.5px solid {{ $doc->statusColor() }}55">{{ $doc->statusLabel() }}</div>
+                <div class="my-doc-badge" style="background:<?php echo e($doc->statusColor()); ?>1a;color:<?php echo e($doc->statusColor()); ?>;border:1.5px solid <?php echo e($doc->statusColor()); ?>55"><?php echo e($doc->statusLabel()); ?></div>
                 <i class="fas fa-chevron-right my-doc-arr"></i>
             </a>
-            @endforeach
-        @endif
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        <?php endif; ?>
     </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Not Found Card -->
     <div class="result-card" id="notFoundCard">
@@ -314,7 +314,7 @@
 
 <footer class="dash-footer">
     <div class="footer-left">
-        <span>&copy; {{ date('Y') }} DepEd Document Tracking System</span>
+        <span>&copy; <?php echo e(date('Y')); ?> DepEd Document Tracking System</span>
     </div>
     <div class="footer-right">
         Developed by Raymond Bautista
@@ -521,3 +521,4 @@ document.addEventListener('keydown', function(e) { if (e.key === 'Escape') close
 </script>
 </body>
 </html>
+<?php /**PATH C:\Users\iamra\Desktop\DepedDocumentTrackingSystem\resources\views/dashboard/track.blade.php ENDPATH**/ ?>

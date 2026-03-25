@@ -442,7 +442,7 @@
             <div class="profile-avatar" id="profileAvatar">{{ $initials }}</div>
             <div class="profile-meta">
                 <h2 id="profileName">{{ $user->name }}</h2>
-                <p>{{ $user->email }}</p>
+                <p><!--email_off-->{{ $user->email }}<!--/email_off--></p>
                 <span class="role-badge">Admin</span>
             </div>
         </div>
@@ -453,7 +453,7 @@
             </div>
             <div class="info-item">
                 <div class="info-label">Email Address</div>
-                <div class="info-value" id="infoEmail">{{ $user->email }}</div>
+                <div class="info-value" id="infoEmail"><!--email_off-->{{ $user->email }}<!--/email_off--></div>
             </div>
             <div class="info-item">
                 <div class="info-label">Mobile Number</div>
@@ -522,9 +522,9 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="email">Email Address <span style="color:#dc2626">*</span></label>
-                        <input type="text" id="email"
+                        <input type="email" id="email"
                                value="{{ $user->email }}"
-                               maxlength="255" autocomplete="off">
+                               maxlength="255" autocomplete="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false">
                         <div class="field-err" id="err-email"><i class="fas fa-exclamation-circle"></i><span></span></div>
                     </div>
                     <div class="form-group">

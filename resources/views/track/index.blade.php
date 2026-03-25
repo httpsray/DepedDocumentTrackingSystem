@@ -228,7 +228,6 @@
             <div>
                 <div class="doc-title" id="rDocTitle"></div>
                 <div class="doc-ref"   id="rDocRef"></div>
-                <div class="doc-meta-line" id="rDocMeta"></div>
             </div>
             <div class="status-badge" id="rStatusBadge"></div>
         </div>
@@ -361,9 +360,6 @@
     function renderResult(doc){
         document.getElementById('rDocTitle').textContent=doc.subject;
         document.getElementById('rDocRef').textContent=doc.reference_number || doc.tracking_number || '-';
-        var office = doc.current_office || 'Unassigned';
-        var handler = doc.current_handler || 'Not yet assigned';
-        document.getElementById('rDocMeta').innerHTML = '<strong>Current Office:</strong> ' + esc(office) + ' &nbsp;|&nbsp; <strong>Current Handler:</strong> ' + esc(handler);
         var badge=document.getElementById('rStatusBadge');
         badge.textContent=doc.status_label;
         badge.style.background=(doc.status_color||'#6b7280')+'1a';

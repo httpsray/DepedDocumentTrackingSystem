@@ -204,10 +204,26 @@
         // on password fields — browsers tend to ignore autocomplete=off for those.
         // Instead use one-time-code which signals it's not a login field.
         var type = (el.getAttribute('type') || '').toLowerCase();
+        var fieldId = (el.getAttribute('id') || '').toLowerCase();
+        var fieldName = (el.getAttribute('name') || '').toLowerCase();
+        var isEmailField = type === 'email' || fieldId.indexOf('email') !== -1 || fieldName.indexOf('email') !== -1;
         if (type === 'hidden' || type === 'checkbox' || type === 'radio' || type === 'file') {
             el.dataset.acOff = '1';
             return;
         }
+
+        if (isEmailField) {
+            if (!el.getAttribute('autocomplete') || el.getAttribute('autocomplete') === 'off') {
+                el.setAttribute('autocomplete', 'email');
+            }
+            el.setAttribute('inputmode', 'email');
+            el.setAttribute('autocapitalize', 'none');
+            el.setAttribute('autocorrect', 'off');
+            el.setAttribute('spellcheck', 'false');
+            el.dataset.acOff = '1';
+            return;
+        }
+
         el.setAttribute('autocomplete', 'off');
         el.dataset.acOff = '1';
     }

@@ -731,7 +731,7 @@
                                 {{ ($isRep && $u->office_id) ? 'Office' : ($isRep ? 'Representative' : 'Individual') }}
                             </span>
                         </td>
-                        <td>{{ $u->email }}</td>
+                        <td><!--email_off-->{{ $u->email }}<!--/email_off--></td>
                         <td>{{ $u->mobile ?? 'No number provided' }}</td>
                         <td class="t-docs">{{ $u->documents_count }}</td>
                         <td>
@@ -801,7 +801,7 @@
                     </div>
                     <div class="mob-card-row">
                         <span class="label">Email</span>
-                        <span class="value">{{ $u->email }}</span>
+                        <span class="value"><!--email_off-->{{ $u->email }}<!--/email_off--></span>
                     </div>
                     <div class="mob-card-row">
                         <span class="label">Mobile</span>

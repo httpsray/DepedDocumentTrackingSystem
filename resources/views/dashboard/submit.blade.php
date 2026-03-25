@@ -373,7 +373,7 @@
                     <i class="fas fa-user-check"></i>
                     <div>
                         <div class="auth-info-name">{{ $user->name }}</div>
-                        <div class="auth-info-email">{{ $user->email }}</div>
+                        <div class="auth-info-email"><!--email_off-->{{ $user->email }}<!--/email_off--></div>
                     </div>
                 </div>
 

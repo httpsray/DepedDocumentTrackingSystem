@@ -122,7 +122,7 @@
                     <label class="form-label">Email address</label>
                           <input type="email" id="emailInput" class="form-control"
                            placeholder="ex: myname@example.com"
-                              autocomplete="email" autocapitalize="off" autocorrect="off" readonly onfocus="this.removeAttribute('readonly');">
+                              autocomplete="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly');">
                     <div class="error-alert" id="emailErr" style="display:none; margin-top:8px;">
                         <i class="fas fa-exclamation-circle"></i>
                         <span id="emailErrText"></span>

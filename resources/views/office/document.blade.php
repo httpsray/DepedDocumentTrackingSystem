@@ -254,7 +254,7 @@
                         </div>
                         <div class="info-item">
                             <div class="label">Email Address</div>
-                            <div class="value">{{ $document->sender_email ?: 'No email provided' }}</div>
+                            <div class="value"><!--email_off-->{{ $document->sender_email ?: 'No email provided' }}<!--/email_off--></div>
                         </div>
 
                         @if($document->description)

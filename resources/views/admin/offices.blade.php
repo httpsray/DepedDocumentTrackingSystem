@@ -341,7 +341,7 @@
                                 {{ $acc->office->name ?? 'No office assigned' }}
                             </span>
                         </td>
-                        <td>{{ $acc->email }}</td>
+                        <td><!--email_off-->{{ $acc->email }}<!--/email_off--></td>
                         <td>{{ $acc->mobile ?? 'No number provided' }}</td>
                         <td>
                             <span class="badge-reports {{ $acc->has_reports_access ? 'on' : 'off' }}" id="acc-reports-badge-{{ $acc->id }}">
@@ -393,7 +393,7 @@
                     </div>
                     <div class="mob-card-row">
                         <span class="label">Email</span>
-                        <span class="value">{{ $acc->email }}</span>
+                        <span class="value"><!--email_off-->{{ $acc->email }}<!--/email_off--></span>
                     </div>
                     <div class="mob-card-row">
                         <span class="label">Mobile</span>
@@ -473,7 +473,7 @@
                 </div>
                 <div class="modal-field">
                     <label>Email Address <span style="color:#dc2626">*</span></label>
-                    <input type="text" class="modal-input" id="createEmail" placeholder="Email" maxlength="255" autocomplete="off">
+                    <input type="email" class="modal-input" id="createEmail" placeholder="Email" maxlength="255" autocomplete="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false">
                     <div class="field-err" id="err-createEmail"><i class="fas fa-exclamation-circle"></i><span></span></div>
                 </div>
                 <div class="modal-field">

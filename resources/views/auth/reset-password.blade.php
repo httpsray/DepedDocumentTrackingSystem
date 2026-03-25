@@ -145,7 +145,7 @@
             {{-- ─── Valid token — show the form ─── --}}
             <div class="auth-header">
                 <h2>Set a new password</h2>
-                <p>Create a strong password for <strong>{{ $email }}</strong>. You'll be signed in automatically after.</p>
+                <p>Create a strong password for <strong><!--email_off-->{{ $email }}<!--/email_off--></strong>. You'll be signed in automatically after.</p>
             </div>
 
             <div id="success-message" class="sp-alert success" style="display: none;">

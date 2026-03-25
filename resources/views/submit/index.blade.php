@@ -360,7 +360,7 @@
                         <i class="fas fa-user-check"></i>
                         <div>
                             <div class="auth-info-name">{{ auth()->user()->name }}</div>
-                            <div class="auth-info-email">{{ auth()->user()->email }}</div>
+                            <div class="auth-info-email"><!--email_off-->{{ auth()->user()->email }}<!--/email_off--></div>
                         </div>
                     </div>
                     @else
@@ -384,7 +384,7 @@
                         </div>
                         <div class="form-group">
                             <label>Email Address <span class="req">*</span></label>
-                            <input type="email" id="senderEmail" placeholder="e.g. juan@example.com" autocomplete="off">
+                            <input type="email" id="senderEmail" placeholder="e.g. juan@example.com" autocomplete="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false">
                             <div style="font-size:11px;color:#64748b;margin-top:4px;">Use the same email when creating your account so your submitted documents can be linked automatically.</div>
                             <div class="err-text" id="errSenderEmail"><i class="fas fa-exclamation-circle"></i> Please enter a valid email address</div>
                         </div>
