@@ -715,7 +715,24 @@
                 headers: { 'Content-Type':'application/json', 'X-CSRF-TOKEN':csrf, 'Accept':'application/json' },
                 body: JSON.stringify(payload)
             })
-            .then(function(r) { return r.json(); })
+            .then(function(r) {
+                return r.text().then(function(text) {
+                    var data = {};
+                    if (text) {
+                        try {
+                            data = JSON.parse(text);
+                        } catch (e) {
+                            throw new Error('Unexpected server response. Please try again.');
+                        }
+                    }
+
+                    if (!r.ok && !data.message) {
+                        throw new Error('Server error (' + r.status + '). Please try again.');
+                    }
+
+                    return data;
+                });
+            })
             .then(function(data) {
                 btn.disabled = false;
                 if (data.success) {
@@ -733,9 +750,9 @@
                     showToast(data.message || 'Failed to create account.', 'error');
                 }
             })
-            .catch(function() {
+            .catch(function(err) {
                 btn.disabled = false;
-                showToast('Something went wrong.', 'error');
+                showToast((err && err.message) ? err.message : 'Something went wrong.', 'error');
             });
         };
         document.getElementById('createModal').addEventListener('click', function(e) {

@@ -405,42 +405,82 @@ class AdminController extends Controller
             'new_office_name'  => 'required_without:office_id|nullable|string|max:255',
         ]);
 
-        $user = DB::transaction(function () use ($request) {
-            // If a custom office name was provided, create or find the office
-            $officeId = $request->office_id;
-            if ($request->filled('new_office_name') && !$officeId) {
-                $office = Office::firstOrCreate(
-                    ['name' => trim($request->new_office_name)],
-                    ['code' => strtoupper(Str::slug(trim($request->new_office_name), '_')), 'is_active' => true]
-                );
-                $officeId = $office->id;
-            }
-
-            $user = new User([
-                'name'         => $request->name,
-                'email'        => $request->email,
-                'mobile'       => $request->mobile ?: null,
-                'account_type' => 'representative',
-                'office_id'    => $officeId,
-                'password'     => Hash::make(Str::random(64)),
-            ]);
-            $user->status = 'pending';
-            $user->role   = 'user';
-            $user->save();
-            return $user;
-        });
-
-        $rawToken = $this->activationService->createToken($user);
-
         try {
+            $user = DB::transaction(function () use ($request) {
+                // If a custom office name was provided, create or find the office.
+                $officeId = $request->office_id;
+                if ($request->filled('new_office_name') && !$officeId) {
+                    $officeName = trim((string) $request->new_office_name);
+
+                    $existingOffice = Office::whereRaw('LOWER(name) = ?', [strtolower($officeName)])->first();
+                    if ($existingOffice) {
+                        $officeId = $existingOffice->id;
+                    } else {
+                        $baseCode = strtoupper(Str::slug($officeName, '_'));
+                        $baseCode = preg_replace('/[^A-Z0-9_]/', '', $baseCode);
+                        if ($baseCode === '') {
+                            $baseCode = 'OFFICE';
+                        }
+                        $baseCode = substr($baseCode, 0, 20);
+
+                        $candidateCode = $baseCode;
+                        $suffix = 1;
+                        while (Office::where('code', $candidateCode)->exists()) {
+                            $suffixText = (string) $suffix;
+                            $maxBaseLength = max(1, 20 - strlen($suffixText) - 1);
+                            $candidateCode = substr($baseCode, 0, $maxBaseLength) . '_' . $suffixText;
+                            $suffix++;
+
+                            if ($suffix > 999) {
+                                throw new \RuntimeException('Unable to generate a unique office code.');
+                            }
+                        }
+
+                        $office = Office::create([
+                            'name' => $officeName,
+                            'code' => $candidateCode,
+                            'is_active' => true,
+                        ]);
+
+                        $officeId = $office->id;
+                    }
+                }
+
+                $user = new User([
+                    'name'         => $request->name,
+                    'email'        => $request->email,
+                    'mobile'       => $request->mobile ?: null,
+                    'account_type' => 'representative',
+                    'office_id'    => $officeId,
+                    'password'     => Hash::make(Str::random(64)),
+                ]);
+                $user->status = 'pending';
+                $user->role   = 'user';
+                $user->save();
+
+                return $user;
+            });
+        } catch (\Throwable $e) {
+            \Log::error('Office account creation failed: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Could not create office account. Please try again.',
+            ], 500);
+        }
+
+        $message = 'Office account created. Activation email sent to ' . $user->email . '.';
+        try {
+            $rawToken = $this->activationService->createToken($user);
             Mail::to($user->email)->send(new ActivationMail($user, $rawToken));
-        } catch (\Exception $e) {
-            \Log::warning('Activation email failed for office account ' . $user->email . ': ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            \Log::warning('Office account created but activation email failed for ' . $user->email . ': ' . $e->getMessage());
+            $message = 'Office account created, but activation email could not be sent right now. Please use Resend Activation.';
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'Office account created. Activation email sent to ' . $user->email . '.',
+            'message' => $message,
             'user'    => $user->load('office'),
         ]);
     }
