@@ -17,14 +17,10 @@
         body{background:var(--bg);font-family:Poppins,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
         .receive-container{width:100%;max-width:480px}
         .brand{text-align:center;margin-bottom:24px}
-        .brand img{width:56px;height:56px;margin-bottom:8px}
         .brand h1{font-size:20px;font-weight:700;color:var(--text-dark)}
-        .brand small{font-size:11px;color:var(--text-muted)}
         .card{background:#fff;border-radius:14px;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,.06);overflow:hidden}
-        .card-head{background:linear-gradient(135deg,#0056b3 0%,#004494 100%);padding:20px 24px;color:#fff;display:flex;align-items:center;gap:12px}
-        .card-head i{font-size:22px;opacity:.9}
+        .card-head{background:linear-gradient(135deg,#0056b3 0%,#004494 100%);padding:20px 24px;color:#fff}
         .card-head h2{font-size:16px;font-weight:700;margin:0}
-        .card-head p{font-size:12px;opacity:.8;margin:2px 0 0}
         .card-body{padding:24px}
         /* Loading state */
         .loading-state{text-align:center;padding:30px 20px}
@@ -50,38 +46,33 @@
         .btn-row{display:flex;gap:10px;justify-content:flex-end}
         .btn{padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;font-family:Poppins,sans-serif;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text-dark);transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
         .btn:hover{background:#f1f5f9}
-        .btn.confirm{background:#16a34a;color:#fff;border-color:#16a34a}
-        .btn.confirm:hover{background:#15803d}
+        .btn.confirm{background:var(--primary);color:#fff;border-color:var(--primary)}
+        .btn.confirm:hover{background:var(--primary-dark);border-color:var(--primary-dark)}
         .btn:disabled{opacity:.5;cursor:not-allowed}
         /* Success state */
         .success-state{text-align:center;padding:24px 20px;display:none}
-        .success-state i{font-size:42px;color:#16a34a;margin-bottom:12px;display:block}
+        .success-state i{font-size:42px;color:var(--primary);margin-bottom:12px;display:block}
         .success-state h3{font-size:16px;font-weight:700;color:var(--text-dark);margin-bottom:6px}
         .success-state p{font-size:13px;color:var(--text-muted);line-height:1.5}
-        .success-state .btn-dashboard{margin-top:18px;display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:Poppins,sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:background .2s}
-        .success-state .btn-dashboard:hover{background:var(--primary-dark)}
+        .success-state .btn{margin-top:18px}
         /* Toast */
         .toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e293b;color:#fff;padding:12px 22px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;display:flex;align-items:center;gap:10px;opacity:0;transition:all .35s ease;pointer-events:none;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.18)}
         .toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
-        .toast.success{background:#16a34a}
+        .toast.success{background:var(--primary)}
         .toast.error{background:#dc2626}
     </style>
 </head>
 <body>
-<div class="receive-container">
-    <div class="brand">
-        <img src="{{ asset('images/DOCTRAXLOGO.svg') }}" alt="DOCTRAX Logo">
-        <h1>DOCTRAX</h1>
-        <small>DepEd Document Tracking System</small>
-    </div>
-    <div class="card">
-        <div class="card-head">
-            <i class="fas fa-file-import"></i>
-            <div>
-                <h2>Receive Document</h2>
-                <p>Confirm receipt of this document into your office</p>
-            </div>
+    <div class="receive-container">
+        <div class="brand">
+            <h1>DOCTRAX</h1>
         </div>
+        <div class="card">
+            <div class="card-head">
+                <div>
+                    <h2>Receive Document</h2>
+                </div>
+            </div>
         <div class="card-body">
             <!-- Loading -->
             <div class="loading-state" id="loadingState">
@@ -119,7 +110,7 @@
                 <i class="fas fa-check-circle"></i>
                 <h3>Document Received!</h3>
                 <p id="successMsg">The document has been received into your office.</p>
-                <a href="{{ $backUrl ?? '/office/dashboard' }}" class="btn-dashboard"><i class="fas fa-tachometer-alt"></i> Go to Dashboard</a>
+                <a href="{{ $backUrl ?? '/office/dashboard' }}" class="btn confirm">Go to Dashboard</a>
             </div>
         </div>
     </div>

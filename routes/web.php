@@ -103,7 +103,7 @@ Route::post('/api/resend-activation', [AuthController::class, 'resendActivation'
 Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
 Route::get('/reset-password', [AuthController::class, 'showResetPassword'])->name('password.reset');
 Route::post('/api/forgot-password', [AuthController::class, 'sendResetLink'])
-    ->middleware('throttle:5,60')
+    ->middleware('throttle:5,15')
     ->name('password.email');
 Route::post('/api/reset-password', [AuthController::class, 'resetPassword'])
     ->middleware('throttle:5,60')
