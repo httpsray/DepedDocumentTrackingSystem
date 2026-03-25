@@ -253,7 +253,7 @@
     </style>
     <script src="/js/spa.js" defer></script>
     <script src="/js/form-utils.js" defer></script>
-    <script src="/js/request-utils.js" defer></script>
+    <script src="{{ asset('js/request-utils.js') }}?v={{ filemtime(public_path('js/request-utils.js')) }}" defer></script>
 </head>
 <body>
 @php

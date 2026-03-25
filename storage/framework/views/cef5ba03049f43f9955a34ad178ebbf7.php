@@ -300,7 +300,7 @@
     </style>
     <script src="/js/spa.js" defer></script>
     <script src="/js/form-utils.js" defer></script>
-    <script src="/js/request-utils.js" defer></script>
+    <script src="<?php echo e(asset('js/request-utils.js')); ?>?v=<?php echo e(filemtime(public_path('js/request-utils.js'))); ?>" defer></script>
 </head>
 <body>
 <?php
@@ -373,7 +373,7 @@
                     <i class="fas fa-user-check"></i>
                     <div>
                         <div class="auth-info-name"><?php echo e($user->name); ?></div>
-                        <div class="auth-info-email"><?php echo e($user->email); ?></div>
+                        <div class="auth-info-email"><!--email_off--><?php echo e($user->email); ?><!--/email_off--></div>
                     </div>
                 </div>
 
