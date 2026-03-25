@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="{{ asset('images/DOCTRAXLOGO.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="<?php echo e(asset('images/DOCTRAXLOGO.svg')); ?>" type="image/svg+xml">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>Submit Document - DepEd DOCTRAX</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -303,11 +303,11 @@
     <script src="/js/request-utils.js" defer></script>
 </head>
 <body>
-@php
+<?php
     $initials = collect(explode(' ', trim($user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
     $firstName = explode(' ', trim($user->name))[0];
     $roleBadge = ucfirst($user->role ?? 'User');
-@endphp
+?>
 
 <!-- Mobile top bar -->
 <div class="mob-topbar">
@@ -322,7 +322,7 @@
 <!-- ─── Sidebar ─── -->
 <div class="sidebar" id="mainSidebar">
     <div class="sb-brand">
-        <img src="{{ asset('images/DOCTRAXLOGO.svg') }}" alt="DOCTRAX Logo">
+        <img src="<?php echo e(asset('images/DOCTRAXLOGO.svg')); ?>" alt="DOCTRAX Logo">
         <h2>DOCTRAX</h2>
         <small>DepEd Document Tracking System</small>
     </div>
@@ -338,10 +338,10 @@
     </nav>
     <div class="sb-footer">
         <div class="sb-user">
-            <div class="sb-avatar">{{ $initials }}</div>
+            <div class="sb-avatar"><?php echo e($initials); ?></div>
             <div class="sb-user-info">
-                <small>{{ $roleBadge }}</small>
-                <span>{{ $firstName }}</span>
+                <small><?php echo e($roleBadge); ?></small>
+                <span><?php echo e($firstName); ?></span>
             </div>
         </div>
         <button onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -372,8 +372,8 @@
                 <div class="auth-info-banner">
                     <i class="fas fa-user-check"></i>
                     <div>
-                        <div class="auth-info-name">{{ $user->name }}</div>
-                        <div class="auth-info-email">{{ $user->email }}</div>
+                        <div class="auth-info-name"><?php echo e($user->name); ?></div>
+                        <div class="auth-info-email"><?php echo e($user->email); ?></div>
                     </div>
                 </div>
 
@@ -400,7 +400,8 @@
                     <div class="form-group">
                         <label>Submit To</label>
                         <div class="fixed-office">
-                            {{ $recordsOfficeName ?? 'Records Section' }}
+                            <?php echo e($recordsOfficeName ?? 'Records Section'); ?>
+
                             <small>All submissions are automatically routed to Records Section first.</small>
                         </div>
                     </div>
@@ -504,7 +505,7 @@
 
 <footer class="dash-footer">
     <div class="footer-left">
-        <span>&copy; {{ date('Y') }} DepEd Document Tracking System</span>
+        <span>&copy; <?php echo e(date('Y')); ?> DepEd Document Tracking System</span>
     </div>
     <div class="footer-right">
         Developed by Raymond Bautista
@@ -638,3 +639,4 @@ document.addEventListener('keydown', function(e) { if (e.key === 'Escape') close
 </script>
 </body>
 </html>
+<?php /**PATH C:\Users\iamra\Desktop\DepedDocumentTrackingSystem\resources\views/dashboard/submit.blade.php ENDPATH**/ ?>

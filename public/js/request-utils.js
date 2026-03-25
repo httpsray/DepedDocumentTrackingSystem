@@ -254,6 +254,113 @@
         });
     }
 
+    function measureReceiptSpacedText(ctx, text, spacing) {
+        var value = String(text === null || text === undefined ? '' : text);
+        if (!value) return 0;
+
+        var totalWidth = 0;
+        for (var i = 0; i < value.length; i++) {
+            totalWidth += ctx.measureText(value.charAt(i)).width;
+            if (i < value.length - 1) totalWidth += spacing;
+        }
+
+        return totalWidth;
+    }
+
+    function drawReceiptSpacedText(ctx, text, x, y, spacing, align) {
+        var value = String(text === null || text === undefined ? '' : text);
+        if (!value) return 0;
+
+        var totalWidth = measureReceiptSpacedText(ctx, value, spacing);
+        var cursorX = align === 'center' ? (x - (totalWidth / 2)) : x;
+
+        for (var i = 0; i < value.length; i++) {
+            var character = value.charAt(i);
+            ctx.fillText(character, cursorX, y);
+            cursorX += ctx.measureText(character).width;
+            if (i < value.length - 1) cursorX += spacing;
+        }
+
+        return totalWidth;
+    }
+
+    function drawReceiptCenteredLines(ctx, lines, centerX, y, lineHeight) {
+        lines.forEach(function (line, index) {
+            var width = ctx.measureText(line).width;
+            ctx.fillText(line, centerX - (width / 2), y + (index * lineHeight));
+        });
+    }
+
+    function drawReceiptQrGlyph(ctx, x, y, size, color) {
+        var cell = Math.max(2, Math.round(size / 7));
+        var finderSize = cell * 3;
+        var dotSize = Math.max(2, Math.round(cell * 1.4));
+
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = Math.max(1, Math.round(cell * 0.7));
+
+        ctx.strokeRect(x, y, finderSize, finderSize);
+        ctx.fillRect(x + cell, y + cell, cell, cell);
+
+        ctx.strokeRect(x + (cell * 4), y, finderSize, finderSize);
+        ctx.fillRect(x + (cell * 5), y + cell, cell, cell);
+
+        ctx.strokeRect(x, y + (cell * 4), finderSize, finderSize);
+        ctx.fillRect(x + cell, y + (cell * 5), cell, cell);
+
+        ctx.fillRect(x + (cell * 4.7), y + (cell * 4.7), dotSize, dotSize);
+        ctx.fillRect(x + (cell * 4.7), y + (cell * 5.9), dotSize, dotSize);
+        ctx.fillRect(x + (cell * 5.9), y + (cell * 4.7), dotSize, dotSize);
+    }
+
+    function drawReceiptCaption(ctx, text, centerX, y, color) {
+        var iconSize = 14;
+        var gap = 10;
+        var textWidth = ctx.measureText(text).width;
+        var totalWidth = iconSize + gap + textWidth;
+        var startX = centerX - (totalWidth / 2);
+
+        drawReceiptQrGlyph(ctx, startX, y - 11, iconSize, color);
+        ctx.fillStyle = color;
+        ctx.fillText(text, startX + iconSize + gap, y);
+    }
+
+    function readReceiptNotes(root) {
+        var fallback = [
+            {
+                tone: 'warning',
+                title: 'Important:',
+                copy: 'Please save this receipt image or take a screenshot. You will need your Tracking Number to track, follow up, or claim your document.'
+            },
+            {
+                tone: 'info',
+                title: 'Please note:',
+                copy: 'Documents that are not received by the office within 7 days of submission will be automatically archived. Make sure to follow up if needed.'
+            }
+        ];
+
+        if (!root || !root.querySelectorAll) return fallback;
+
+        var notes = [];
+        root.querySelectorAll('.receipt-notes .note-box').forEach(function (note) {
+            var titleNode = note.querySelector('.note-title');
+            var copyNode = note.querySelector('.note-copy');
+            var title = normalizeReceiptText(titleNode ? titleNode.textContent : '', '');
+            var copy = normalizeReceiptText(copyNode ? copyNode.textContent : '', '');
+
+            if (!title || !copy) return;
+
+            notes.push({
+                tone: note.classList.contains('note-warning') ? 'warning' : 'info',
+                title: title,
+                copy: copy
+            });
+        });
+
+        return notes.length ? notes : fallback;
+    }
+
     function readReceiptRows(root, selector) {
         var table = root.querySelector(selector);
         if (!table) return [];
@@ -273,155 +380,205 @@
     }
 
     function buildReceiptCanvas(data) {
-        var canvasWidth = 1400;
-        var outerPadding = 54;
-        var cardWidth = canvasWidth - (outerPadding * 2);
-        var innerPadding = 56;
-        var contentWidth = cardWidth - (innerPadding * 2);
-        var detailsWidth = contentWidth - 48;
+        var notes = Array.isArray(data.notes) && data.notes.length
+            ? data.notes
+            : readReceiptNotes(null);
+        var canvasWidth = 1080;
+        var outerPadding = 36;
+        var sectionWidth = canvasWidth - (outerPadding * 2);
+        var sectionX = outerPadding;
+        var centerX = Math.round(canvasWidth / 2);
+        var qrSize = 340;
+        var sectionGap = 28;
+        var noteGap = 14;
+        var detailsPaddingX = 28;
+        var detailsLabelWidth = 210;
+        var detailsValueWidth = sectionWidth - (detailsPaddingX * 2) - detailsLabelWidth - 28;
+        var notePaddingX = 22;
+        var notePaddingY = 20;
+        var noteIconSize = 42;
+        var noteTitleWidth = 170;
+        var noteContentWidth = sectionWidth - (notePaddingX * 2) - noteIconSize - noteTitleWidth - 40;
+        var trackingDescription = 'Present this number or let the office scan the QR below.';
+        var qrCaption = 'Scan to receive';
         var scratchCanvas = document.createElement('canvas');
         var scratchCtx = scratchCanvas.getContext('2d');
 
-        scratchCtx.font = '600 30px Poppins, "Segoe UI", sans-serif';
+        scratchCtx.font = '500 23px Poppins, "Segoe UI", sans-serif';
+        var descriptionLines = wrapReceiptCanvasText(scratchCtx, trackingDescription, sectionWidth - 120);
+
         var preparedRows = data.rows.map(function (row) {
-            var lines = wrapReceiptCanvasText(scratchCtx, row.value, detailsWidth);
-            var rowHeight = 42 + 18 + (lines.length * 36) + 26;
+            scratchCtx.font = '500 22px Poppins, "Segoe UI", sans-serif';
+            var lines = wrapReceiptCanvasText(scratchCtx, row.value, detailsValueWidth);
+            var rowHeight = Math.max(76, 22 + (lines.length * 30) + 20);
             return {
                 label: row.label,
                 value: row.value,
                 lines: lines,
-                height: Math.max(112, rowHeight)
+                height: rowHeight
+            };
+        });
+
+        var preparedNotes = notes.map(function (note) {
+            scratchCtx.font = '500 20px Poppins, "Segoe UI", sans-serif';
+            var lines = wrapReceiptCanvasText(scratchCtx, note.copy, noteContentWidth);
+            var textHeight = lines.length * 28;
+            var height = Math.max(92, (notePaddingY * 2) + textHeight);
+            return {
+                tone: note.tone,
+                title: note.title,
+                copy: note.copy,
+                lines: lines,
+                height: height
             };
         });
 
         var detailsTotalHeight = 0;
         preparedRows.forEach(function (row, index) {
             detailsTotalHeight += row.height;
-            if (index < preparedRows.length - 1) detailsTotalHeight += 18;
+            if (index < preparedRows.length - 1) detailsTotalHeight += 0;
         });
 
-        var titleBlockHeight = 118;
-        var trackingBlockHeight = 250;
-        var qrBlockHeight = 392;
-        var detailHeadingHeight = 70;
-        var footerBlockHeight = 116;
-        var sectionGap = 30;
-        var cardHeight =
-            44 +
-            titleBlockHeight +
-            trackingBlockHeight +
+        var notesTotalHeight = 0;
+        preparedNotes.forEach(function (note, index) {
+            notesTotalHeight += note.height;
+            if (index < preparedNotes.length - 1) notesTotalHeight += noteGap;
+        });
+
+        var trackingFontSize = 132;
+        while (trackingFontSize > 82) {
+            scratchCtx.font = '700 ' + trackingFontSize + 'px Consolas, "Courier New", monospace';
+            if (scratchCtx.measureText(data.trackingNumber).width <= sectionWidth - 60) break;
+            trackingFontSize -= 4;
+        }
+
+        var trackingSectionHeight = 46 + trackingFontSize + 32 + (descriptionLines.length * 30);
+        var qrSectionHeight = qrSize + 50 + 26;
+        var detailsCardHeight = 60 + detailsTotalHeight + 18;
+        var canvasHeight =
+            54 +
+            trackingSectionHeight +
             sectionGap +
-            qrBlockHeight +
+            qrSectionHeight +
             sectionGap +
-            detailHeadingHeight +
-            detailsTotalHeight +
-            sectionGap +
-            footerBlockHeight +
-            52;
-        var canvasHeight = cardHeight + (outerPadding * 2);
+            notesTotalHeight +
+            18 +
+            detailsCardHeight +
+            42;
 
         var canvas = document.createElement('canvas');
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
         var ctx = canvas.getContext('2d');
 
-        ctx.fillStyle = '#edf4ff';
+        ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        var cardX = outerPadding;
-        var cardY = outerPadding;
-        drawReceiptRoundedRect(ctx, cardX, cardY, cardWidth, cardHeight, 34, '#ffffff', '#d7e7ff', 2);
+        var cursorY = 54;
 
-        var cursorY = cardY + 42;
-        var contentX = cardX + innerPadding;
-
-        drawReceiptRoundedRect(ctx, contentX, cursorY, 122, 12, 999, '#0056b3');
-        cursorY += 34;
-
-        ctx.fillStyle = '#0f172a';
-        ctx.font = '700 52px Poppins, "Segoe UI", sans-serif';
-        ctx.fillText('Document Tracking Receipt', contentX, cursorY + 28);
-
-        ctx.fillStyle = '#64748b';
-        ctx.font = '500 25px Poppins, "Segoe UI", sans-serif';
-        ctx.fillText('DOCTRAX - Schools Division Office of City of San Jose del Monte, Bulacan', contentX, cursorY + 74);
-
-        var savedOn = new Date().toLocaleString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit'
-        });
-        ctx.font = '500 22px Poppins, "Segoe UI", sans-serif';
-        ctx.fillText('Saved on ' + savedOn, contentX, cursorY + 108);
-        cursorY += titleBlockHeight;
-
-        drawReceiptRoundedRect(ctx, contentX, cursorY, contentWidth, trackingBlockHeight, 30, '#f4f8ff', '#cfe0ff', 2);
-        ctx.fillStyle = '#59708b';
-        ctx.font = '700 22px Poppins, "Segoe UI", sans-serif';
-        ctx.fillText('TRACKING NUMBER', contentX + 34, cursorY + 48);
+        ctx.fillStyle = '#334155';
+        ctx.font = '700 34px Poppins, "Segoe UI", sans-serif';
+        drawReceiptSpacedText(ctx, 'TRACKING NUMBER', centerX, cursorY + 34, 10, 'center');
 
         ctx.fillStyle = '#0056b3';
-        var trackingFontSize = 100;
-        while (trackingFontSize > 54) {
-            ctx.font = '700 ' + trackingFontSize + 'px Consolas, "Courier New", monospace';
-            if (ctx.measureText(data.trackingNumber).width <= contentWidth - 68) break;
-            trackingFontSize -= 4;
-        }
-        ctx.fillText(data.trackingNumber, contentX + 34, cursorY + 142);
+        ctx.font = '700 ' + trackingFontSize + 'px Consolas, "Courier New", monospace';
+        var trackingWidth = ctx.measureText(data.trackingNumber).width;
+        ctx.fillText(data.trackingNumber, centerX - (trackingWidth / 2), cursorY + 34 + 34 + trackingFontSize);
 
-        ctx.fillStyle = '#475569';
-        ctx.font = '500 24px Poppins, "Segoe UI", sans-serif';
-        ctx.fillText('Present this tracking number or QR code when following up or claiming your document.', contentX + 34, cursorY + 198);
-        ctx.fillText('Keep this receipt for reference before printing or sharing.', contentX + 34, cursorY + 230);
-        cursorY += trackingBlockHeight + sectionGap;
+        ctx.fillStyle = '#64748b';
+        ctx.font = '500 23px Poppins, "Segoe UI", sans-serif';
+        drawReceiptCenteredLines(
+            ctx,
+            descriptionLines,
+            centerX,
+            cursorY + 34 + 34 + trackingFontSize + 34,
+            30
+        );
 
-        drawReceiptRoundedRect(ctx, contentX, cursorY, contentWidth, qrBlockHeight, 30, '#ffffff', '#cfe0ff', 2);
-        ctx.fillStyle = '#59708b';
-        ctx.font = '700 22px Poppins, "Segoe UI", sans-serif';
-        ctx.fillText('RECEIPT QR CODE', contentX + 34, cursorY + 48);
+        cursorY += trackingSectionHeight + sectionGap;
 
-        var qrBoxSize = 282;
-        var qrBoxX = contentX + Math.round((contentWidth - qrBoxSize) / 2);
-        var qrBoxY = cursorY + 74;
-        drawReceiptRoundedRect(ctx, qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, 26, '#ffffff', '#dbeafe', 2);
-        ctx.drawImage(data.qrImage, qrBoxX + 20, qrBoxY + 20, qrBoxSize - 40, qrBoxSize - 40);
+        var qrX = centerX - Math.round(qrSize / 2);
+        ctx.drawImage(data.qrImage, qrX, cursorY, qrSize, qrSize);
 
-        ctx.fillStyle = '#475569';
-        ctx.font = '600 24px Poppins, "Segoe UI", sans-serif';
-        var qrCaption = 'Scan to receive or verify this tracking receipt.';
-        var qrCaptionWidth = ctx.measureText(qrCaption).width;
-        ctx.fillText(qrCaption, contentX + Math.round((contentWidth - qrCaptionWidth) / 2), qrBoxY + qrBoxSize + 54);
-        cursorY += qrBlockHeight + sectionGap;
+        ctx.fillStyle = '#64748b';
+        ctx.font = '600 23px Poppins, "Segoe UI", sans-serif';
+        drawReceiptCaption(ctx, qrCaption, centerX, cursorY + qrSize + 40, '#64748b');
 
-        ctx.fillStyle = '#0f172a';
-        ctx.font = '700 38px Poppins, "Segoe UI", sans-serif';
-        ctx.fillText('Document Details', contentX, cursorY + 28);
-        cursorY += detailHeadingHeight;
+        cursorY += qrSectionHeight + sectionGap;
 
-        preparedRows.forEach(function (row, index) {
-            drawReceiptRoundedRect(ctx, contentX, cursorY, contentWidth, row.height, 24, '#f8fbff', '#dbeafe', 2);
-            ctx.fillStyle = '#59708b';
-            ctx.font = '700 20px Poppins, "Segoe UI", sans-serif';
-            ctx.fillText(row.label.toUpperCase(), contentX + 24, cursorY + 34);
+        preparedNotes.forEach(function (note, index) {
+            drawReceiptRoundedRect(ctx, sectionX, cursorY, sectionWidth, note.height, 18, '#ffffff', '#e5e7eb', 2);
+
+            var circleX = sectionX + notePaddingX + Math.round(noteIconSize / 2);
+            var circleY = cursorY + notePaddingY + Math.round(noteIconSize / 2);
+            ctx.beginPath();
+            ctx.arc(circleX, circleY, Math.round(noteIconSize / 2), 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.fillStyle = '#f8fafc';
+            ctx.fill();
+
+            ctx.fillStyle = '#64748b';
+            ctx.font = note.tone === 'warning'
+                ? '700 28px Poppins, "Segoe UI", sans-serif'
+                : '700 26px Poppins, "Segoe UI", sans-serif';
+            var iconText = note.tone === 'warning' ? '!' : 'i';
+            var iconWidth = ctx.measureText(iconText).width;
+            ctx.fillText(iconText, circleX - (iconWidth / 2), circleY + 10);
 
             ctx.fillStyle = '#0f172a';
-            ctx.font = '600 30px Poppins, "Segoe UI", sans-serif';
-            drawReceiptLines(ctx, row.lines, contentX + 24, cursorY + 78, 36);
-            cursorY += row.height;
-            if (index < preparedRows.length - 1) cursorY += 18;
+            ctx.font = '700 18px Poppins, "Segoe UI", sans-serif';
+            ctx.fillText(note.title, sectionX + notePaddingX + noteIconSize + 18, cursorY + 42);
+
+            ctx.fillStyle = '#334155';
+            ctx.font = '500 20px Poppins, "Segoe UI", sans-serif';
+            drawReceiptLines(
+                ctx,
+                note.lines,
+                sectionX + notePaddingX + noteIconSize + noteTitleWidth + 34,
+                cursorY + 42,
+                28
+            );
+
+            cursorY += note.height;
+            if (index < preparedNotes.length - 1) cursorY += noteGap;
         });
 
-        cursorY += sectionGap;
-        drawReceiptRoundedRect(ctx, contentX, cursorY, contentWidth, footerBlockHeight, 24, '#eff6ff', '#bfdbfe', 2);
-        ctx.fillStyle = '#1d4ed8';
-        ctx.font = '700 24px Poppins, "Segoe UI", sans-serif';
-        ctx.fillText('Important Reminder', contentX + 28, cursorY + 42);
-        ctx.fillStyle = '#334155';
-        ctx.font = '500 24px Poppins, "Segoe UI", sans-serif';
-        ctx.fillText('Bring this receipt image, QR code, or tracking number whenever you need to track or claim', contentX + 28, cursorY + 76);
-        ctx.fillText('the document. Documents not received by the office within 7 days may be archived.', contentX + 28, cursorY + 106);
+        cursorY += 18;
+
+        drawReceiptRoundedRect(ctx, sectionX, cursorY, sectionWidth, detailsCardHeight, 22, '#ffffff', '#e2e8f0', 2);
+        ctx.fillStyle = '#64748b';
+        ctx.font = '700 18px Poppins, "Segoe UI", sans-serif';
+        drawReceiptSpacedText(ctx, 'DOCUMENT DETAILS', sectionX + 26, cursorY + 32, 4, 'left');
+
+        var rowY = cursorY + 54;
+        preparedRows.forEach(function (row, index) {
+            var rowTop = rowY;
+
+            ctx.fillStyle = '#59708b';
+            ctx.font = '700 18px Poppins, "Segoe UI", sans-serif';
+            ctx.fillText(String(row.label || '').toUpperCase(), sectionX + detailsPaddingX, rowTop + 28);
+
+            ctx.fillStyle = '#1b263b';
+            ctx.font = '500 22px Poppins, "Segoe UI", sans-serif';
+            drawReceiptLines(
+                ctx,
+                row.lines,
+                sectionX + detailsPaddingX + detailsLabelWidth,
+                rowTop + 28,
+                30
+            );
+
+            rowY += row.height;
+
+            if (index < preparedRows.length - 1) {
+                ctx.beginPath();
+                ctx.moveTo(sectionX + detailsPaddingX, rowY);
+                ctx.lineTo(sectionX + sectionWidth - detailsPaddingX, rowY);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.stroke();
+            }
+        });
 
         return canvas;
     }
@@ -558,24 +715,13 @@
         if (!button) return;
 
         if (busy) {
-            if (!button.dataset.receiptOriginalHtml) {
-                button.dataset.receiptOriginalHtml = button.innerHTML;
-            }
             button.disabled = true;
             button.setAttribute('aria-busy', 'true');
-            if (button.hasAttribute('data-receipt-icon-button')) {
-                button.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i>';
-                return;
-            }
-            button.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Saving...';
             return;
         }
 
         button.disabled = false;
         button.removeAttribute('aria-busy');
-        if (button.dataset.receiptOriginalHtml) {
-            button.innerHTML = button.dataset.receiptOriginalHtml;
-        }
     }
 
     async function saveReceiptImageInternal(options) {
@@ -617,7 +763,8 @@
             var canvas = buildReceiptCanvas({
                 trackingNumber: trackingNumber,
                 qrImage: qrImage,
-                rows: rows
+                rows: rows,
+                notes: readReceiptNotes(root)
             });
             var filename = 'DOCTRAX-Receipt-' + sanitizeReceiptFilePart(trackingNumber) + '.png';
             await downloadReceiptCanvas(canvas, filename);

@@ -73,7 +73,7 @@
             <form id="loginForm" novalidate autocomplete="off">
                 <div class="form-group">
                     <label class="form-label">Email</label>
-                    <input type="text" id="email" class="form-control" placeholder="ex: myname@example.com" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly');">
+                    <input type="email" id="email" class="form-control" placeholder="ex: myname@example.com" autocomplete="email" autocapitalize="off" autocorrect="off" readonly onfocus="this.removeAttribute('readonly');">
                     <div id="emailDisplay" style="display:none; width:100%; padding:12px 16px; border:2px solid #e2e8f0; border-radius:8px; font-size:16px; font-family:inherit; background:#f1f5f9; color:#64748b; box-sizing:border-box;"></div>
 
                     <!-- Custom Error Alert -->

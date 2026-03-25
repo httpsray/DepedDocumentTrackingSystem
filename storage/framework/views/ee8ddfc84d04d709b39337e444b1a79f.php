@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="{{ asset('images/DOCTRAXLOGO.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="<?php echo e(asset('images/DOCTRAXLOGO.svg')); ?>" type="image/svg+xml">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>My Documents - DepEd DOCTRAX</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -242,14 +242,14 @@
     <script src="/js/request-utils.js" defer></script>
 </head>
 <body>
-@php
+<?php
     $initials = collect(explode(' ', trim($user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
     $firstName = explode(' ', trim($user->name))[0];
     $isAdmin = $user->isAdmin();
     $isRep = $user->isRepresentative();
     $backUrl = $isAdmin ? '/dashboard' : ($isRep ? '/office/dashboard' : '/dashboard');
     $roleBadge = $user->isSuperAdmin() ? 'Super Admin' : ($isAdmin ? 'Admin' : ($isRep ? 'Representative' : ucfirst($user->role ?? 'User')));
-@endphp
+?>
 
 <!-- Mobile top bar -->
 <div class="mob-topbar">
@@ -264,13 +264,13 @@
 <!-- ─── Sidebar ─── -->
 <div class="sidebar" id="mainSidebar">
     <div class="sb-brand">
-        <img src="{{ asset('images/DOCTRAXLOGO.svg') }}" alt="DOCTRAX Logo">
+        <img src="<?php echo e(asset('images/DOCTRAXLOGO.svg')); ?>" alt="DOCTRAX Logo">
         <h2>DOCTRAX</h2>
         <small>DepEd Document Tracking System</small>
     </div>
     <nav class="sb-nav">
         <span class="nav-section">Overview</span>
-        <a href="{{ $backUrl }}"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="<?php echo e($backUrl); ?>"><i class="fas fa-th-large"></i> Dashboard</a>
         <span class="nav-section">Documents</span>
         <a href="/submit"><i class="fas fa-paper-plane"></i> Submit Document</a>
         <a href="/my-documents" class="active"><i class="fas fa-folder-open"></i> My Documents</a>
@@ -280,10 +280,10 @@
     </nav>
     <div class="sb-footer">
         <div class="sb-user">
-            <div class="sb-avatar">{{ $initials }}</div>
+            <div class="sb-avatar"><?php echo e($initials); ?></div>
             <div class="sb-user-info">
-                <small>{{ $roleBadge }}</small>
-                <span>{{ $firstName }}</span>
+                <small><?php echo e($roleBadge); ?></small>
+                <span><?php echo e($firstName); ?></span>
             </div>
         </div>
         <button onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -295,7 +295,7 @@
 
 <div class="dash-wrapper">
 
-    <a href="{{ $backUrl }}" class="back-link" aria-label="Back to Dashboard" title="Back to Dashboard" style="display:inline-flex;align-items:center;justify-content:center;gap:0;padding:0;border:none;background:transparent;border-radius:0;box-shadow:none;color:#0f172a;text-decoration:none;line-height:1.2;width:auto;"><span aria-hidden="true" style="width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 38px;border-radius:999px;background:linear-gradient(135deg,#0f4fd6 0%,#1f8ef1 100%);color:#fff;box-shadow:none;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M5 12l14 0"></path><path d="M5 12l6 6"></path><path d="M5 12l6 -6"></path></svg></span></a>
+    <a href="<?php echo e($backUrl); ?>" class="back-link" aria-label="Back to Dashboard" title="Back to Dashboard" style="display:inline-flex;align-items:center;justify-content:center;gap:0;padding:0;border:none;background:transparent;border-radius:0;box-shadow:none;color:#0f172a;text-decoration:none;line-height:1.2;width:auto;"><span aria-hidden="true" style="width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 38px;border-radius:999px;background:linear-gradient(135deg,#0f4fd6 0%,#1f8ef1 100%);color:#fff;box-shadow:none;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M5 12l14 0"></path><path d="M5 12l6 6"></path><path d="M5 12l6 -6"></path></svg></span></a>
 
     <div class="page-header">
         <h1>My Documents</h1>
@@ -307,30 +307,30 @@
         <div class="search-wrap">
             <i class="fas fa-search"></i>
             <input type="text" id="searchInput" placeholder="Search by tracking no., subject, or type..." data-clearable data-no-capitalize
-                   value="{{ $search }}" oninput="filterDocs()">
+                   value="<?php echo e($search); ?>" oninput="filterDocs()">
         </div>
         <select class="status-select" id="statusFilter" onchange="filterDocs(true)">
             <option value="">All Statuses</option>
-            @foreach(\App\Models\Document::STATUSES as $key => $label)
-                <option value="{{ $key }}" {{ $status === $key ? 'selected' : '' }}>{{ $label }}</option>
-            @endforeach
+            <?php $__currentLoopData = \App\Models\Document::STATUSES; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <option value="<?php echo e($key); ?>" <?php echo e($status === $key ? 'selected' : ''); ?>><?php echo e($label); ?></option>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </select>
         <span class="search-count" id="resultCount"></span>
     </div>
 
     <!-- Documents Table -->
-    <div class="table-card list-table-card{{ $documents->count() ? ' has-list' : '' }}">
+    <div class="table-card list-table-card<?php echo e($documents->count() ? ' has-list' : ''); ?>">
         <div class="table-head">
-            <span class="table-title">Results <span id="totalCount" style="font-weight:400;color:var(--text-muted)">({{ \App\Support\UiNumber::compact($documents->total()) }})</span></span>
+            <span class="table-title">Results <span id="totalCount" style="font-weight:400;color:var(--text-muted)">(<?php echo e(\App\Support\UiNumber::compact($documents->total())); ?>)</span></span>
         </div>
 
-        @if($documents->isEmpty() && !$search && !$status)
+        <?php if($documents->isEmpty() && !$search && !$status): ?>
             <div class="empty-state">
                 <i class="fas fa-inbox"></i>
                 <h3>No Documents Yet</h3>
                 <p>Documents you submit will appear here.</p>
             </div>
-        @else
+        <?php else: ?>
             <div class="table-scroll">
             <table id="docsTable">
                 <thead>
@@ -345,31 +345,31 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($documents as $doc)
+                    <?php $__empty_1 = true; $__currentLoopData = $documents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $doc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr class="doc-row"
-                        data-search="{{ strtolower($doc->reference_number . ' ' . $doc->subject . ' ' . $doc->type) }}"
-                        data-status="{{ $doc->status }}"
-                        data-ref="{{ $doc->reference_number }}"
-                        data-tracking="{{ $doc->reference_number }}">
+                        data-search="<?php echo e(strtolower($doc->reference_number . ' ' . $doc->subject . ' ' . $doc->type)); ?>"
+                        data-status="<?php echo e($doc->status); ?>"
+                        data-ref="<?php echo e($doc->reference_number); ?>"
+                        data-tracking="<?php echo e($doc->reference_number); ?>">
                         <td>
-                            <span class="t-num">{{ $doc->reference_number }}</span>
+                            <span class="t-num"><?php echo e($doc->reference_number); ?></span>
                         </td>
-                        <td class="t-subject" title="{{ $doc->subject }}">{{ $doc->subject }}</td>
-                        <td class="t-type"><div class="cell-ellipsis" style="max-width:160px" title="{{ $doc->type }}">{{ $doc->type }}</div></td>
+                        <td class="t-subject" title="<?php echo e($doc->subject); ?>"><?php echo e($doc->subject); ?></td>
+                        <td class="t-type"><div class="cell-ellipsis" style="max-width:160px" title="<?php echo e($doc->type); ?>"><?php echo e($doc->type); ?></div></td>
                         <td>
-                            <span class="pill pill-{{ $doc->status }}">{{ $doc->statusLabel() }}</span>
+                            <span class="pill pill-<?php echo e($doc->status); ?>"><?php echo e($doc->statusLabel()); ?></span>
                         </td>
                         <td class="t-office">
-                            @if($doc->status === 'submitted')
-                                <div class="cell-ellipsis" title="{{ 'Awaiting acceptance by ' . ($doc->submittedToOffice->name ?? 'Records Section') }}">{{ 'Awaiting acceptance by ' . ($doc->submittedToOffice->name ?? 'Records Section') }}</div>
-                            @else
-                                <div class="cell-ellipsis" title="{{ $doc->currentOffice->name ?? $doc->submittedToOffice->name ?? 'No office assigned' }}">{{ $doc->currentOffice->name ?? $doc->submittedToOffice->name ?? 'No office assigned' }}</div>
-                            @endif
+                            <?php if($doc->status === 'submitted'): ?>
+                                <div class="cell-ellipsis" title="<?php echo e('Awaiting acceptance by ' . ($doc->submittedToOffice->name ?? 'Records Section')); ?>"><?php echo e('Awaiting acceptance by ' . ($doc->submittedToOffice->name ?? 'Records Section')); ?></div>
+                            <?php else: ?>
+                                <div class="cell-ellipsis" title="<?php echo e($doc->currentOffice->name ?? $doc->submittedToOffice->name ?? 'No office assigned'); ?>"><?php echo e($doc->currentOffice->name ?? $doc->submittedToOffice->name ?? 'No office assigned'); ?></div>
+                            <?php endif; ?>
                         </td>
-                        <td class="t-date">{{ $doc->created_at->format('M d, Y') }}</td>
+                        <td class="t-date"><?php echo e($doc->created_at->format('M d, Y')); ?></td>
                         <td class="td-action"><span class="row-arrow"><i class="fas fa-chevron-right"></i></span></td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="7">
                             <div class="empty-state">
@@ -379,7 +379,7 @@
                             </div>
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                     <tr id="noResultRow">
                         <td colspan="7"><i class="fas fa-search" style="margin-right:6px;opacity:.4"></i>No documents match your search.</td>
                     </tr>
@@ -387,27 +387,27 @@
             </table>
             </div>
 
-            @if($documents->hasPages())
+            <?php if($documents->hasPages()): ?>
             <div class="pagination-bar">
-                <span>Showing {{ $documents->firstItem() }}–{{ $documents->lastItem() }} of {{ $documents->total() }}</span>
+                <span>Showing <?php echo e($documents->firstItem()); ?>–<?php echo e($documents->lastItem()); ?> of <?php echo e($documents->total()); ?></span>
                 <div class="pagination-links">
-                    @if($documents->onFirstPage())
+                    <?php if($documents->onFirstPage()): ?>
                         <span class="page-btn disabled"><i class="fas fa-chevron-left"></i></span>
-                    @else
-                        <a href="{{ $documents->previousPageUrl() }}" class="page-btn"><i class="fas fa-chevron-left"></i></a>
-                    @endif
-                    @foreach($documents->getUrlRange(1, $documents->lastPage()) as $page => $url)
-                        <a href="{{ $url }}" class="page-btn {{ $page == $documents->currentPage() ? 'active' : '' }}">{{ $page }}</a>
-                    @endforeach
-                    @if($documents->hasMorePages())
-                        <a href="{{ $documents->nextPageUrl() }}" class="page-btn"><i class="fas fa-chevron-right"></i></a>
-                    @else
+                    <?php else: ?>
+                        <a href="<?php echo e($documents->previousPageUrl()); ?>" class="page-btn"><i class="fas fa-chevron-left"></i></a>
+                    <?php endif; ?>
+                    <?php $__currentLoopData = $documents->getUrlRange(1, $documents->lastPage()); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $page => $url): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <a href="<?php echo e($url); ?>" class="page-btn <?php echo e($page == $documents->currentPage() ? 'active' : ''); ?>"><?php echo e($page); ?></a>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    <?php if($documents->hasMorePages()): ?>
+                        <a href="<?php echo e($documents->nextPageUrl()); ?>" class="page-btn"><i class="fas fa-chevron-right"></i></a>
+                    <?php else: ?>
                         <span class="page-btn disabled"><i class="fas fa-chevron-right"></i></span>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
-            @endif
-        @endif
+            <?php endif; ?>
+        <?php endif; ?>
     </div>
 
 </div>
@@ -460,7 +460,7 @@
 
 <footer class="dash-footer">
     <div class="footer-left">
-        <span>&copy; {{ date('Y') }} DepEd Document Tracking System</span>
+        <span>&copy; <?php echo e(date('Y')); ?> DepEd Document Tracking System</span>
     </div>
     <div class="footer-right">
         Developed by Raymond Bautista
@@ -470,7 +470,7 @@
 </div><!-- /.main -->
 
 <script type="application/json" id="docsData">
-    @php
+    <?php
         $docData = [];
         foreach($documents as $doc) {
             $entry = [
@@ -491,8 +491,8 @@
                 $docData[$doc->reference_number] = $entry;
             }
         }
-    @endphp
-    @json($docData)
+    ?>
+    <?php echo json_encode($docData, 15, 512) ?>
 </script>
 
 <script>
@@ -817,3 +817,4 @@ if (document.readyState !== 'loading') {
 </script>
 </body>
 </html>
+<?php /**PATH C:\Users\iamra\Desktop\DepedDocumentTrackingSystem\resources\views/dashboard/documents.blade.php ENDPATH**/ ?>

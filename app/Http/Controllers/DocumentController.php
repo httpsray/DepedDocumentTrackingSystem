@@ -247,8 +247,19 @@ class DocumentController extends Controller
                 return sprintf('%s-%010d', $log->created_at?->format('YmdHis') ?? '00000000000000', (int) $log->id);
             })
             ->values();
+
+        // Hide internal legacy action entries from public/user-facing timeline.
+        $timelineLogs = $orderedLogs->reject(function ($log) {
+            $action = strtolower(trim((string) $log->action));
+            return str_contains($action, 'kumuha') || str_contains($action, 'stamp');
+        })->values();
+
+        if ($timelineLogs->isEmpty()) {
+            $timelineLogs = $orderedLogs;
+        }
+
         $timelineNow = now();
-        $logCount = $orderedLogs->count();
+        $logCount = $timelineLogs->count();
         $submittedOfficeName = $document->submittedToOffice?->name ?: 'Records Section';
 
         // Build office segments to derive clear time-in/time-out per office
@@ -256,7 +267,7 @@ class DocumentController extends Controller
         $segments = [];
 
         for ($i = 0; $i < $logCount; $i++) {
-            $log = $orderedLogs->get($i);
+            $log = $timelineLogs->get($i);
             $isSubmissionPending = $log->action === 'submitted' && $log->status_after === 'submitted';
             $officeId = null;
             if (!$isSubmissionPending) {
@@ -297,12 +308,12 @@ class DocumentController extends Controller
             $segment = $segments[$segIndex];
             $nextSegment = $segments[$segIndex + 1] ?? null;
 
-            $startLog = $orderedLogs->get($segment['start_index']);
+            $startLog = $timelineLogs->get($segment['start_index']);
             $timeInAt = $startLog->created_at;
             // Time-out = when the next office received the document (the only log they create).
             // There are no separate "forwarded" logs, so using endLog->created_at equals timeInAt
             // for single-log segments, giving 0s. Use the next segment's start timestamp instead.
-            $nextInAt = $nextSegment ? $orderedLogs->get($nextSegment['start_index'])->created_at : null;
+            $nextInAt = $nextSegment ? $timelineLogs->get($nextSegment['start_index'])->created_at : null;
             $timeOutAt = $nextInAt; // null when this is the current/last office (open segment)
 
             $officeDurationSeconds = $nextInAt !== null
@@ -334,7 +345,7 @@ class DocumentController extends Controller
                 : $performer->name;
         };
 
-        $logs = $orderedLogs->map(function ($log, $index) use ($submittedOfficeName, $arrivalMetaByLogIndex, $formatPerformerName) {
+        $logs = $timelineLogs->map(function ($log, $index) use ($submittedOfficeName, $arrivalMetaByLogIndex, $formatPerformerName) {
             $isSubmissionPending = $log->action === 'submitted' && $log->status_after === 'submitted';
             $arrivalMeta = $arrivalMetaByLogIndex[$index] ?? null;
             $officeDurationSeconds = $arrivalMeta['office_duration_seconds'] ?? null;
@@ -380,7 +391,7 @@ class DocumentController extends Controller
             ? $submittedOfficeName
             : ($document->currentOffice?->name ?: $submittedOfficeName);
 
-        $latestHandlerLog = $orderedLogs
+        $latestHandlerLog = $timelineLogs
             ->sortByDesc(function ($log) {
                 return sprintf('%s-%010d', $log->created_at?->format('YmdHis') ?? '00000000000000', (int) $log->id);
             })

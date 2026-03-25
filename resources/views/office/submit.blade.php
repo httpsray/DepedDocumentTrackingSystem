@@ -106,18 +106,21 @@
             border-radius:0;
             box-shadow:none
         }
-        .tracking-box,
-        .qr-box{width:100%;max-width:none}
+        .tracking-box{width:100%;max-width:none}
         .receipt-qr-panel{
-            display:flex;
-            align-items:flex-start;
+            display:grid;
+            grid-template-columns:minmax(0, 320px) 50px;
+            grid-template-areas:
+                "qr action"
+                "caption .";
+            align-items:center;
             justify-content:center;
-            gap:8px;
-            width:fit-content;
+            column-gap:8px;
+            row-gap:6px;
+            width:min(100%, 378px);
             max-width:100%;
             margin:0 auto
         }
-        .receipt-qr-panel .qr-box{width:auto}
         .tracking-box{
             background:transparent;
             border:none;
@@ -142,24 +145,13 @@
         }
         .tracking-box small{font-size:clamp(18px, 2.6vw, 22px);text-transform:uppercase;letter-spacing:6px;color:#334155;font-weight:700;margin:0;line-height:1}
         .tracking-number{font-size:clamp(56px, 9vw, 82px);font-weight:700;color:var(--primary);font-family:monospace;letter-spacing:5px;line-height:.95;margin:0;word-break:break-word;text-shadow:none}
-        .qr-box{
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            gap:6px;
-            padding:0;
-            background:transparent;
-            border:none;
-            border-radius:0;
-            box-shadow:none;
-            text-align:center
-        }
-        .qr-img{width:min(100%,320px)!important;max-width:320px;height:auto!important;aspect-ratio:1 / 1;object-fit:contain;border:none;border-radius:0;padding:0;background:transparent}
-        .qr-caption{display:flex;align-items:center;gap:4px;font-size:11px;color:#64748b;font-weight:500}
+        .qr-img{grid-area:qr;display:block;width:100%!important;max-width:320px;height:auto!important;aspect-ratio:1 / 1;object-fit:contain;border:none;border-radius:0;padding:0;background:transparent}
+        .qr-caption{grid-area:caption;display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#64748b;font-weight:500;text-align:center}
         .receipt-save-icon{
-            width:50px;
-            height:50px;
-            flex:0 0 50px;
+            grid-area:action;
+            width:56px;
+            height:56px;
+            flex:0 0 56px;
             border:none;
             border-radius:0;
             background:transparent;
@@ -167,8 +159,10 @@
             display:inline-flex;
             align-items:center;
             justify-content:center;
+            justify-self:center;
+            align-self:start;
             cursor:pointer;
-            margin-top:2px;
+            margin-top:12px;
             transition:color .2s, transform .15s
         }
         .receipt-save-icon:hover{background:transparent;color:var(--primary-dark)}
@@ -176,7 +170,7 @@
         .receipt-save-icon:disabled{opacity:.7;cursor:not-allowed}
         .receipt-save-icon:focus,
         .receipt-save-icon:focus-visible{outline:none;box-shadow:none}
-        .receipt-save-icon svg{width:22px;height:22px;display:block;stroke:currentColor}
+        .receipt-save-icon svg{width:24px;height:24px;display:block;stroke:currentColor}
         .btn-secondary{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border:1.5px solid var(--border);border-radius:10px;color:var(--text-dark);text-decoration:none;font-size:13px;font-weight:500;cursor:pointer;background:#fff;font-family:Poppins,sans-serif;transition:border-color .2s}
         .btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
 
@@ -231,16 +225,15 @@
             .success-card h2{font-size:16px}
             .receipt-layout{gap:8px}
             .receipt-top{gap:6px}
-            .tracking-box,.qr-box{width:100%}
+            .tracking-box{width:100%}
             .tracking-box{padding:0}
             .tracking-box::after{max-width:100%;font-size:11px}
             .tracking-box small{font-size:clamp(18px, 2.6vw, 22px);letter-spacing:6px}
             .tracking-number{font-size:clamp(56px, 9vw, 82px);letter-spacing:5px}
-            .receipt-qr-panel{gap:6px}
-            .qr-box{padding:0}
-            .qr-img{width:min(100%,320px)!important;max-width:320px;padding:0}
-            .receipt-save-icon{width:44px;height:44px;flex-basis:44px;border-radius:0;margin-top:2px}
-            .receipt-save-icon svg{width:20px;height:20px}
+            .receipt-qr-panel{grid-template-columns:minmax(0,320px) 48px;column-gap:6px;row-gap:6px;width:min(100%,374px)}
+            .qr-img{width:100%!important;max-width:320px;padding:0}
+            .receipt-save-icon{width:48px;height:48px;flex-basis:48px;border-radius:0;margin-top:10px}
+            .receipt-save-icon svg{width:22px;height:22px}
             .detail-summary td{padding:4px 6px;font-size:10.5px}
             .detail-summary td:first-child{width:88px;font-size:9px}
             .receipt-details{padding:10px}
@@ -405,19 +398,17 @@
 
                 <div class="receipt-layout">
                     <div class="receipt-top">
-                        <div class="tracking-box">
-                            <small>Tracking Number</small>
-                            <div class="tracking-number" id="generatedCode"></div>
-                        </div>
-                        <div id="qrBox" class="receipt-qr-panel" style="display:none">
-                            <div class="qr-box">
-                                <img id="qrImg" alt="QR Code" class="qr-img">
-                                <div class="qr-caption"><i class="fas fa-qrcode" style="margin-right:3px"></i>Scan to receive</div>
-                            </div>
-                            <button class="receipt-save-icon" type="button" data-save-receipt-image data-receipt-icon-button aria-label="Save receipt image" title="Save receipt image">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-download"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 11l5 5l5 -5" /><path d="M12 4l0 12" /></svg>
-                            </button>
-                        </div>
+                    <div class="tracking-box">
+                        <small>Tracking Number</small>
+                        <div class="tracking-number" id="generatedCode"></div>
+                    </div>
+                    <div id="qrBox" class="receipt-qr-panel" style="display:none">
+                        <img id="qrImg" alt="QR Code" class="qr-img">
+                        <button class="receipt-save-icon" type="button" data-save-receipt-image data-receipt-icon-button aria-label="Save receipt image" title="Save receipt image">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-download"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 11l5 5l5 -5" /><path d="M12 4l0 12" /></svg>
+                        </button>
+                        <div class="qr-caption"><i class="fas fa-qrcode" style="margin-right:3px"></i>Scan to receive</div>
+                    </div>
                     </div>
 
                 </div>
