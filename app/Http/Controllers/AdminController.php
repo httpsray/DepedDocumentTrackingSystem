@@ -298,7 +298,7 @@ class AdminController extends Controller
 
         // Status filter
         if ($status = $request->get('status')) {
-            if (array_key_exists($status, Document::STATUSES)) {
+            if (array_key_exists($status, Document::FILTER_STATUSES)) {
                 $query->where('status', $status);
             }
         }
@@ -612,7 +612,7 @@ class AdminController extends Controller
         }
 
         $status = trim((string) $request->get('status', ''));
-        if ($status !== '' && array_key_exists($status, Document::STATUSES)) {
+        if ($status !== '' && array_key_exists($status, Document::FILTER_STATUSES)) {
             $query->where('status', $status);
         }
 
@@ -639,9 +639,12 @@ class AdminController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
         }
 
+        $office = $user->office;
+
         $request->validate([
             'reference_number' => 'nullable|string|max:100',
             'tracking_number'  => 'nullable|string|max:100',
+            'remarks'          => 'nullable|string|max:1000',
         ]);
 
         $lookupInput = strtoupper(trim(strip_tags((string)($request->reference_number ?: $request->tracking_number))));
@@ -649,7 +652,7 @@ class AdminController extends Controller
             return response()->json(['success' => false, 'message' => 'Reference number is required.'], 422);
         }
 
-        return DB::transaction(function () use ($lookupInput, $user) {
+        return DB::transaction(function () use ($lookupInput, $user, $office, $request) {
             $document = Document::with('currentHandler')->where(function ($q) use ($lookupInput) {
                 $q->whereRaw('UPPER(reference_number) = ?', [$lookupInput])
                   ->orWhereRaw('UPPER(tracking_number) = ?', [$lookupInput]);
@@ -659,20 +662,42 @@ class AdminController extends Controller
             return response()->json(['success' => false, 'message' => 'Reference number not found.'], 404);
         }
 
-        if (in_array($document->status, ['completed', 'returned', 'cancelled'], true)) {
+        if (in_array($document->status, ['completed', 'returned', 'cancelled', 'archived'], true)) {
             return response()->json(['success' => false, 'message' => 'This document is already closed and cannot be received.'], 422);
         }
 
-        if ($user->office_id
-            && (int) $document->current_office_id === (int) $user->office_id
+        if ($office
+            && (int) $document->current_office_id === (int) $office->id
             && in_array($document->status, ['received', 'in_review', 'for_pickup'], true)) {
             if ($document->current_handler_id && (int) $document->current_handler_id === (int) $user->id) {
-                return response()->json(['success' => false, 'message' => 'This document is already tagged to you (' . $document->statusLabel() . ').'], 422);
+                return response()->json(['success' => false, 'message' => 'This document is already at your office and tagged to you (' . $document->statusLabel() . ').'], 422);
             }
 
             if ($document->current_handler_id && (int) $document->current_handler_id !== (int) $user->id) {
-                $handlerName = optional($document->currentHandler)->name ?: 'another office user';
-                return response()->json(['success' => false, 'message' => "This document is already at your office and tagged to {$handlerName}."], 409);
+                $previousHandlerName = optional($document->currentHandler)->name ?: 'another office user';
+                $document->current_handler_id = $user->id;
+                $document->last_action_at = now();
+                $document->save();
+
+                $officeName = $office->name ?? 'ICT Unit';
+                RoutingLog::create([
+                    'document_id'   => $document->id,
+                    'performed_by'  => $user->id,
+                    'from_office_id'=> $office->id,
+                    'to_office_id'  => $office->id,
+                    'action'        => 'handoff',
+                    'status_after'  => $document->status,
+                    'remarks'       => $request->input('remarks', "Internal handoff within {$officeName}: {$previousHandlerName} to {$user->name} via scan."),
+                ]);
+
+                return response()->json([
+                    'success'          => true,
+                    'message'          => 'Document handoff complete. You are now the handler.',
+                    'status'           => $document->status,
+                    'reference_number' => $document->reference_number ?: $document->tracking_number,
+                    'tracking_number'  => $document->tracking_number,
+                    'current_handler'  => $user->name,
+                ]);
             }
 
             $document->current_handler_id = $user->id;
@@ -689,18 +714,23 @@ class AdminController extends Controller
         }
 
         $fromOfficeId = $document->current_office_id;
-        $toOfficeId   = $user->office_id ?: $document->current_office_id;
+        $fromOfficeName = $fromOfficeId ? Office::whereKey($fromOfficeId)->value('name') : null;
+        $toOfficeId   = $office?->id ?: $document->current_office_id;
 
         $document->current_handler_id = $user->id;
-        if ($user->office_id) {
-            $document->current_office_id = $user->office_id;
+        if ($office) {
+            $document->current_office_id = $office->id;
         }
         $document->status = 'in_review';
         $document->last_action_at = now();
-        if (!$document->submitted_to_office_id && $user->office_id) {
-            $document->submitted_to_office_id = $user->office_id;
+        if (!$document->submitted_to_office_id && $office) {
+            $document->submitted_to_office_id = $office->id;
         }
         $document->save();
+
+        $defaultRemarks = $fromOfficeName
+            ? "Document handed off from {$fromOfficeName} to " . ($office->name ?? 'ICT Unit') . '.'
+            : 'Document is now being processed at ' . ($office->name ?? 'ICT Unit') . '.';
 
         RoutingLog::create([
             'document_id'   => $document->id,
@@ -709,15 +739,20 @@ class AdminController extends Controller
             'to_office_id'  => $toOfficeId,
             'action'        => 'processing',
             'status_after'  => 'in_review',
-            'remarks'       => 'Document is now being processed by ICT Unit (Super Admin).',
+            'remarks'       => $request->input('remarks', $defaultRemarks),
         ]);
+
+            $message = $fromOfficeName
+                ? "Document accepted from {$fromOfficeName}."
+                : 'Document is now being processed.';
 
             return response()->json([
                 'success'          => true,
-                'message'          => 'Document is now being processed.',
+                'message'          => $message,
                 'status'           => 'in_review',
                 'reference_number' => $document->reference_number ?: $document->tracking_number,
                 'tracking_number'  => $document->tracking_number,
+                'current_office'   => $office?->name,
                 'current_handler'  => $user->name,
             ]);
         }, 3);
@@ -733,19 +768,30 @@ class AdminController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
         }
 
+        $office = $user->office;
+
         $document = Document::findOrFail($id);
 
         if ($document->status !== 'submitted') {
             return response()->json(['success' => false, 'message' => 'Document cannot be accepted at its current status.'], 422);
         }
 
-        $fromOfficeId = $document->current_office_id;
-        $toOfficeId   = $user->office_id ?: $document->current_office_id;
+        if (!$office || (int) $document->submitted_to_office_id !== (int) $office->id) {
+            return response()->json(['success' => false, 'message' => 'This document is not addressed to your office.'], 403);
+        }
+
+        if ($document->current_handler_id && (int) $document->current_handler_id !== (int) $user->id) {
+            $handlerName = optional($document->currentHandler)->name ?: 'another office user';
+            return response()->json([
+                'success' => false,
+                'message' => "This document is currently tagged to {$handlerName}.",
+            ], 409);
+        }
+
+        $fromOfficeId = null;
 
         $document->current_handler_id = $user->id;
-        if ($user->office_id) {
-            $document->current_office_id = $user->office_id;
-        }
+        $document->current_office_id = $office->id;
         $document->status = 'in_review';
         $document->last_action_at = now();
         $document->save();
@@ -754,10 +800,10 @@ class AdminController extends Controller
             'document_id'   => $document->id,
             'performed_by'  => $user->id,
             'from_office_id'=> $fromOfficeId,
-            'to_office_id'  => $toOfficeId,
+            'to_office_id'  => $office->id,
             'action'        => 'processing',
             'status_after'  => 'in_review',
-            'remarks'       => 'Document accepted by ICT Unit (Super Admin).',
+            'remarks'       => $request->input('remarks', 'Document is now being processed.'),
         ]);
 
         return response()->json([

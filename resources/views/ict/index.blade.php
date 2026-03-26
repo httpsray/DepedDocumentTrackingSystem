@@ -190,7 +190,7 @@
         .badge-returned,
         .badge-cancelled,
         .badge-archived{background:#fff7ed;color:#c2410c}
-        .td-action{width:140px;text-align:center}
+        .td-action{text-align:center}
         .btn-view{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;text-decoration:none;transition:background .2s}
         .btn-view:hover{background:var(--primary-dark)}
         .btn-accept{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;background:#16a34a;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;transition:background .2s;margin-bottom:3px}
@@ -199,17 +199,85 @@
         .btn-manage:hover{background:#1e293b}
         tr.doc-row{cursor:pointer}
         .cell-ellipsis{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .table-doc-count{font-size:11px;color:#94a3b8;font-weight:500}
+        .queue-panel .table-head{padding:14px 20px;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap}
+        .queue-panel .table-head-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+        .queue-panel .filters{display:flex;gap:8px;align-items:center;flex-wrap:nowrap}
+        .queue-panel .filter-row{display:contents}
+        .queue-panel .btn-clear{display:none}
+        .queue-panel table{width:100%;table-layout:fixed}
+        .queue-panel .table-card-scroll{overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable}
+        .queue-panel th{padding:10px 10px;background:#fff}
+        .queue-panel td{padding:10px 10px;border-bottom:1px solid #f1f5f9}
+        .queue-panel tr:last-child td{border-bottom:none}
+        .queue-panel .col-ref{width:15%}
+        .queue-panel .col-track{width:18%}
+        .queue-panel .col-subject{width:23%}
+        .queue-panel .col-submitted{width:20%}
+        .queue-panel .col-status{width:12%}
+        .queue-panel .col-cta{width:92px}
+        .queue-panel .col-action{width:44px}
+        .queue-panel .t-ref,.queue-panel .t-track{font-family:monospace;font-size:12px;font-weight:600;white-space:nowrap}
+        .queue-panel .t-ref{color:var(--primary)}
+        .queue-panel .t-track{color:var(--text-dark)}
+        .queue-panel .t-status{white-space:nowrap;min-width:0}
+        .queue-panel .submission-person{font-size:12px;color:var(--text-dark);font-weight:500}
+        .queue-panel .submission-date{display:inline-flex;align-items:center;gap:5px;margin-top:4px;font-size:11px;color:#94a3b8;white-space:nowrap}
+        .queue-panel .submission-date i{font-size:10px}
+        .queue-panel .td-cta{white-space:nowrap}
+        .queue-panel .td-cta .btn-accept{width:100%;justify-content:center;padding:8px 10px;border-radius:8px;margin-bottom:0}
+        .queue-panel .td-action{width:44px;text-align:center}
+        .mob-cards{display:none;padding:12px}
+        .mob-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.04);cursor:pointer;transition:border-color .15s,box-shadow .15s}
+        .mob-card + .mob-card{margin-top:10px}
+        .mob-card:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(0,86,179,.08)}
+        .mob-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+        .mob-card-ids{min-width:0}
+        .mob-card-ref{font-size:11.5px;font-weight:700;color:var(--primary);font-family:monospace;line-height:1.25}
+        .mob-card-track{font-size:10px;color:var(--text-muted);font-family:monospace;margin-top:2px;line-height:1.25}
+        .mob-card-arrow{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;color:#94a3b8;font-size:11px;flex-shrink:0;background:#f8fafc}
+        .mob-card-subject{font-size:13.5px;font-weight:600;color:var(--text-dark);margin-bottom:8px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .mob-card-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+        .mob-card-status{display:inline-flex;align-items:center;gap:5px;min-width:0}
+        .mob-card-date{font-size:10.5px;color:var(--text-muted);display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+        .mob-card-actions{display:flex;gap:8px;margin-top:10px}
+        .mob-card-actions .btn-accept{flex:1;justify-content:center;padding:8px 10px;border-radius:10px;font-size:11px}
+        .mob-card-row{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--text-muted)}
+        .mob-card-row i{font-size:11px;opacity:.75;flex-shrink:0}
+        .mob-card.hidden-row{display:none}
 
         /* ─── Drawer ─── */
         .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:998;display:none;backdrop-filter:blur(2px)}
         .drawer-overlay.open{display:block}
         .doc-drawer{position:fixed;top:0;right:-480px;width:480px;max-width:100vw;height:100vh;background:#fff;z-index:999;box-shadow:-4px 0 32px rgba(0,0,0,.14);transition:right .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
         .doc-drawer.open{right:0}
-        .drawer-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
-        .drawer-head h3{font-size:15px;font-weight:700;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .drawer-close{background:none;border:none;cursor:pointer;font-size:18px;color:var(--text-muted);padding:4px;line-height:1;transition:color .15s}
-        .drawer-close:hover{color:#dc2626}
-        .drawer-body{padding:20px;flex:1;overflow-y:auto}
+        .drawer-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;flex-shrink:0}
+        .drawer-head-info{flex:1;min-width:0}
+        .drawer-head h3{font-size:16px;font-weight:700;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+        .drawer-ref{font-size:13px;color:var(--text-muted);font-family:monospace;letter-spacing:.4px;margin-bottom:2px}
+        .drawer-track{font-size:11px;color:var(--text-muted);font-family:monospace;letter-spacing:.4px;margin-bottom:4px}
+        .drawer-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#f8fafc;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px;flex-shrink:0;transition:all .15s}
+        .drawer-close:hover{background:#fee2e2;color:#dc2626;border-color:#fca5a5}
+        .drawer-body{flex:1;overflow-y:auto}
+        .drawer-tl-head{padding:14px 20px 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);display:flex;align-items:center;gap:6px}
+        .drawer-timeline{padding:10px 20px 24px}
+        .tl{position:relative}
+        .tl::before{content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:var(--border);z-index:-1}
+        .tl-item{position:relative;margin-bottom:20px;padding-left:24px}
+        .tl-item:last-child{margin-bottom:0}
+        .tl-dot{width:16px;height:16px;border-radius:50%;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+        .tl-dot.c-active{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
+        .tl-dot.c-done{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
+        .tl-dot.c-warn{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
+        .tl-dot.c-danger{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
+        .tl-dot.c-latest{background:#f59e0b;box-shadow:0 0 0 2px #f59e0b}
+        .tl-action{font-size:12px;font-weight:500;color:#64748b}
+        .tl-meta{font-size:12px;color:#64748b;margin:2px 0}
+        .tl-remarks{font-size:12px;color:#64748b;background:#f8fafc;border-left:3px solid var(--border);padding:5px 9px;border-radius:4px;margin-top:5px}
+        .tl-office-hdr{display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--text-dark);text-transform:none;letter-spacing:0;margin:18px 0 8px -7px;padding-left:7px;padding-bottom:6px;position:relative}
+        .tl-office-hdr::after{content:'';position:absolute;left:21px;right:0;bottom:0;height:1.5px;background:var(--border)}
+        .tl-office-hdr:first-child{margin-top:0}
+        .drawer-loader{display:flex;align-items:center;justify-content:center;padding:48px;flex-direction:column;gap:12px;color:var(--text-muted);font-size:13px}
         .d-section{margin-bottom:18px}
         .d-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#94a3b8;margin-bottom:8px;display:flex;align-items:center;gap:6px}
         .d-row{display:flex;gap:12px;margin-bottom:8px;align-items:flex-start}
@@ -272,23 +340,24 @@
             .stat-label{font-size:10px;margin-bottom:6px}
             .site-footer{flex-direction:column;gap:6px;text-align:center;padding:16px 5%}
             .dashboard-table-card.has-list{max-height:min(68vh,560px)}
-            /* Table head */
-            .table-head{padding:12px 14px 12px}
-            .filters input{font-size:12px;padding:8px 10px 8px 32px}
-            .filters select{font-size:12px;padding:8px 28px 8px 10px}
-            .btn-clear{font-size:11px;padding:7px 12px}
-            /* Hide Type(3), Sender(4), Date(6), arrow(8) on mobile */
-            th:nth-child(3),td:nth-child(3),
-            th:nth-child(4),td:nth-child(4),
-            th:nth-child(6),td:nth-child(6),
-            th:nth-child(8),td:nth-child(8){display:none}
-            td{padding:10px 12px;font-size:12px}
-            th{padding:9px 12px;font-size:9px}
+            .table-head{flex-direction:column;align-items:stretch;gap:10px;padding:14px 16px}
+            .filters{gap:6px}
+            .filters input{font-size:11px;padding:6px 8px 6px 26px}
+            .filters input::placeholder{font-size:10px}
+            .filters select{font-size:11px;padding:6px 22px 6px 8px;min-width:100px}
+            .dashboard-table-card.has-list .table-card-scroll{display:none!important}
+            .dashboard-table-card.has-list .mob-cards{display:block!important;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:10px}
+            .mob-cards{display:block;padding:10px}
             .table-card{border-radius:10px}
-            .btn-accept,.btn-manage{font-size:10px;padding:4px 8px}
+            .mob-card-actions .btn-accept{font-size:10.5px}
+        }
+        @media(max-width:1024px){
+            .dashboard-table-card.has-list .table-card-scroll{display:none!important}
+            .dashboard-table-card.has-list .mob-cards{display:block!important;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
         }
         @media(max-width:480px){
             .stats-grid{grid-template-columns:1fr}
+            .mob-card-actions{flex-direction:column}
         }
     </style>
     <script src="/js/auth-guard.js"></script>
@@ -419,13 +488,11 @@
     </div>
 
     <!-- Table Card -->
-    <div class="table-card dashboard-table-card{{ $documents->count() ? ' has-list' : '' }}">
+    <div class="table-card dashboard-table-card queue-panel{{ $documents->count() ? ' has-list' : '' }}">
         <div class="table-head">
-            <div class="table-head-row">
-                <div>
-                    <div class="table-title">Document Queue</div>
-                    <div class="table-count">{{ \App\Support\UiNumber::compact($documents->total()) }} document{{ $documents->total() !== 1 ? 's' : '' }} in your office queue</div>
-                </div>
+            <div class="table-head-left">
+                <span class="table-title">Document Queue</span>
+                <span class="table-doc-count">{{ \App\Support\UiNumber::compact($documents->count()) }} showing</span>
             </div>
             <div class="filters">
                 <div class="filter-row">
@@ -437,7 +504,7 @@
                 <div class="filter-row">
                     <select id="tblStatus" onchange="filterTable()">
                         <option value="">All Statuses</option>
-                        @foreach(\App\Models\Document::STATUSES as $val => $label)
+                        @foreach(\App\Models\Document::FILTER_STATUSES as $val => $label)
                             <option value="{{ $val }}">{{ $label }}</option>
                         @endforeach
                     </select>
@@ -449,48 +516,83 @@
         @if($documents->count())
         <div class="table-scroll table-card-scroll">
         <table id="docTable">
+            <colgroup>
+                <col class="col-ref">
+                <col class="col-track">
+                <col class="col-subject">
+                <col class="col-submitted">
+                <col class="col-status">
+                <col class="col-cta">
+                <col class="col-action">
+            </colgroup>
             <thead>
                 <tr>
                     <th>Reference #</th>
+                    <th>Tracking #</th>
                     <th>Subject</th>
-                    <th>Type</th>
-                    <th>Submitted By</th>
+                    <th>Submitted</th>
                     <th>Status</th>
-                    <th>Date</th>
-                    <th class="td-action">Actions</th>
-                    <th style="width:24px"></th>
+                    <th>Action</th>
+                    <th class="td-action"></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($documents as $doc)
                 @php $sender = $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest'); @endphp
-                <tr class="doc-row" data-search="{{ strtolower(($doc->reference_number ?: $doc->tracking_number).' '.$doc->subject.' '.$sender.' '.($doc->type ?? '')) }}" data-status="{{ $doc->status }}" onclick='openDocDetail("{{ $doc->tracking_number }}")'>
-                    <td>
-                        <span class="t-num">{{ $doc->reference_number ?: $doc->tracking_number }}</span>
-                        @if($doc->reference_number && $doc->reference_number !== $doc->tracking_number)
-                            <span class="t-num-sub">{{ $doc->tracking_number }}</span>
-                        @endif
+                <tr class="doc-row" data-search="{{ strtolower(($doc->reference_number ?: $doc->tracking_number).' '.$doc->subject.' '.$sender.' '.($doc->type ?? '')) }}" data-status="{{ $doc->status }}" onclick='openDocDetail("{{ $doc->reference_number ?: $doc->tracking_number }}")'>
+                    <td class="t-ref"><div class="cell-ellipsis" title="{{ $doc->reference_number ?: 'N/A' }}">{{ $doc->reference_number ?: 'N/A' }}</div></td>
+                    <td class="t-track"><div class="cell-ellipsis" title="{{ $doc->tracking_number ?: ($doc->reference_number ?: 'N/A') }}">{{ $doc->tracking_number ?: ($doc->reference_number ?: 'N/A') }}</div></td>
+                    <td class="t-subject" style="max-width:200px"><div class="cell-ellipsis" style="font-weight:600" title="{{ $doc->subject }}">{{ $doc->subject }}</div></td>
+                    <td class="t-submitted">
+                        <div class="cell-ellipsis submission-person" title="{{ $sender }}">{{ $sender }}</div>
+                        <div class="submission-date"><i class="fas fa-calendar-alt"></i>{{ $doc->created_at->format('M d, Y') }}</div>
                     </td>
-                    <td style="max-width:200px"><div class="cell-ellipsis" title="{{ $doc->subject }}">{{ $doc->subject }}</div></td>
-                    <td style="font-size:12px;color:var(--text-muted)"><div class="cell-ellipsis" style="max-width:160px" title="{{ $doc->type ?? 'No type specified' }}">{{ $doc->type ?? 'No type specified' }}</div></td>
-                    <td style="font-size:12px"><div class="cell-ellipsis" style="max-width:170px" title="{{ $sender }}">{{ $sender }}</div></td>
-                    <td>
+                    <td class="t-status">
                         <span class="badge badge-{{ $doc->status }}">{{ $doc->statusLabel() }}</span>
                     </td>
-                    <td class="t-date">{{ $doc->created_at->format('M d, Y') }}</td>
-                    <td class="td-action" onclick="event.stopPropagation()">
+                    <td class="td-cta" onclick="event.stopPropagation()">
                         @if($doc->status === 'submitted')
-                        <div style="margin-bottom:3px">
                             <button class="btn-accept" onclick="quickAccept({{ $doc->id }}, this)"><i class="fas fa-check"></i> Accept</button>
-                        </div>
                         @endif
-                        <a href="/office/documents/{{ $doc->id }}" class="btn-manage" onclick="event.stopPropagation()"><i class="fas fa-folder-open"></i> Manage</a>
                     </td>
-                    <td style="color:#cbd5e1;font-size:11px"><i class="fas fa-chevron-right"></i></td>
+                    <td class="td-action"><span class="row-arrow"><i class="fas fa-chevron-right"></i></span></td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
+        </div>
+        <div class="mob-cards">
+            @foreach($documents as $doc)
+            @php $sender = $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest'); @endphp
+            <div class="mob-card" data-search="{{ strtolower(($doc->reference_number ?: $doc->tracking_number).' '.$doc->subject.' '.$sender.' '.($doc->type ?? '')) }}" data-status="{{ $doc->status }}" onclick='openDocDetail("{{ $doc->reference_number ?: $doc->tracking_number }}")'>
+                <div class="mob-card-top">
+                    <div class="mob-card-ids">
+                        <div class="mob-card-ref">{{ $doc->reference_number ?: 'N/A' }}</div>
+                        <div class="mob-card-track">Tracking: {{ $doc->tracking_number ?: ($doc->reference_number ?: 'N/A') }}</div>
+                    </div>
+                    <span class="mob-card-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="mob-card-subject">{{ $doc->subject }}</div>
+                <div class="mob-card-meta">
+                    <span class="badge badge-{{ $doc->status }}">{{ $doc->statusLabel() }}</span>
+                    <span class="mob-card-date"><i class="fas fa-calendar"></i>{{ $doc->created_at->format('M d, Y') }}</span>
+                </div>
+                <div class="mob-card-row">
+                    <i class="fas fa-user"></i>
+                    <span class="cell-ellipsis" title="{{ $sender }}">{{ $sender }}</span>
+                </div>
+                @if($doc->status === 'submitted')
+                <div class="mob-card-actions">
+                    <button class="btn-accept" onclick="event.stopPropagation(); quickAccept({{ $doc->id }}, this)"><i class="fas fa-check"></i> Accept</button>
+                </div>
+                @endif
+            </div>
+            @endforeach
+            <div class="empty-state" id="noResultsMobile" style="display:none">
+                <i class="fas fa-search"></i>
+                <h3>No results</h3>
+                <p>No documents match your filter.</p>
+            </div>
         </div>
 
         @if($documents->hasPages())
@@ -535,11 +637,15 @@
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 <div class="doc-drawer" id="docDrawer">
     <div class="drawer-head">
-        <h3 id="drawerTitle">Document Details</h3>
+        <div class="drawer-head-info">
+            <h3 id="drTitle">—</h3>
+            <div class="drawer-ref" id="drRef">—</div>
+            <div class="drawer-track" id="drTrack"></div>
+        </div>
         <button class="drawer-close" onclick="closeDrawer()"><i class="fas fa-times"></i></button>
     </div>
     <div class="drawer-body" id="drawerBody">
-        <div style="text-align:center;padding:40px 0;color:var(--text-muted)"><i class="fas fa-circle-notch fa-spin" style="font-size:24px"></i></div>
+        <div class="drawer-loader"><span class="loading-dots"><span></span></span>Loading details...</div>
     </div>
 </div>
 
@@ -679,7 +785,7 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
         if(scanBtn) scanBtn.disabled = true;
 
         try{
-            var res = await fetch('/api/office/documents/receive-by-reference', {
+            var res = await fetch('/api/ict/receive-by-reference', {
                 method: 'POST',
                 headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
                 body: JSON.stringify({
@@ -732,7 +838,7 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
     window.confirmAccept = function() {
         if (!_acceptDocId) return;
         document.getElementById('acceptModal').classList.remove('open');
-        fetch('/api/office/documents/' + _acceptDocId + '/accept', {
+        fetch('/api/ict/documents/' + _acceptDocId + '/accept', {
             method:'POST',
             headers:{'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
             body: JSON.stringify({})
@@ -747,6 +853,7 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
         var q = (document.getElementById('tblSearch').value || '').toLowerCase();
         var s = document.getElementById('tblStatus').value || '';
         var rows = document.querySelectorAll('#docTable tbody tr.doc-row');
+        var cards = document.querySelectorAll('.mob-cards .mob-card');
         var visible = 0;
         rows.forEach(function(tr) {
             var ds = (tr.getAttribute('data-search') || '').toLowerCase();
@@ -755,24 +862,48 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
             tr.style.display = show ? '' : 'none';
             if (show) visible++;
         });
+        cards.forEach(function(card) {
+            var ds = (card.getAttribute('data-search') || '').toLowerCase();
+            var dstat = card.getAttribute('data-status') || '';
+            var show = (!q || ds.indexOf(q) > -1) && (!s || dstat === s);
+            card.classList.toggle('hidden-row', !show);
+        });
         var nr = document.getElementById('noResults');
         if (nr) nr.style.display = (visible === 0 && rows.length > 0) ? 'block' : 'none';
+        var nrMobile = document.getElementById('noResultsMobile');
+        if (nrMobile) nrMobile.style.display = (visible === 0 && cards.length > 0) ? 'block' : 'none';
     };
 
     // ─── Document Drawer ───
     window.openDocDetail = function(trackingNumber) {
-        document.getElementById('drawerTitle').textContent = trackingNumber;
-        document.getElementById('drawerBody').innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text-muted)"><i class="fas fa-circle-notch fa-spin" style="font-size:24px"></i></div>';
+        trackingNumber = String(trackingNumber || '').trim().toUpperCase();
+        if (!trackingNumber) return;
+        document.getElementById('drTitle').textContent = '-';
+        document.getElementById('drRef').textContent = trackingNumber;
+        document.getElementById('drTrack').textContent = '';
+        document.getElementById('drawerBody').innerHTML = '<div class="drawer-loader"><span class="loading-dots"><span></span></span>Loading details...</div>';
         document.getElementById('docDrawer').classList.add('open');
         document.getElementById('drawerOverlay').classList.add('open');
         document.body.style.overflow = 'hidden';
-        fetch('/api/track-document?ref=' + encodeURIComponent(trackingNumber), {
-            headers:{'Accept':'application/json','X-CSRF-TOKEN':csrf}
-        }).then(function(r){return r.json();}).then(function(d) {
-            if(d.found) renderDrawer(d);
-            else document.getElementById('drawerBody').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><h3>Not found</h3><p>'+( d.message || 'Document not found.')+'</p></div>';
-        }).catch(function(){
-            document.getElementById('drawerBody').innerHTML = '<div class="empty-state"><i class="fas fa-wifi"></i><h3>Network error</h3><p>Could not load document.</p></div>';
+        window.docTraxFetchJson('/api/track-document', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
+            timeoutMs: 15000,
+            body: JSON.stringify({
+                reference_number: trackingNumber,
+                tracking_number: trackingNumber
+            })
+        }).then(function(d) {
+            if (!d.success || !d.document) {
+                document.getElementById('drawerBody').innerHTML = '<div class="drawer-loader">' + escapeHtml(d.message || 'Document not found.') + '</div>';
+                return;
+            }
+            renderDrawer(d.document);
+        }).catch(function(error){
+            var message = window.describeRequestError
+                ? window.describeRequestError(error, 'Could not load document.')
+                : 'Could not load document.';
+            document.getElementById('drawerBody').innerHTML = '<div class="drawer-loader">' + escapeHtml(message) + '</div>';
         });
     };
     window.closeDrawer = function() {
@@ -786,29 +917,49 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
         d.appendChild(document.createTextNode(s));
         return d.innerHTML;
     }
-    function renderDrawer(d) {
-        var doc = d.document;
-        var logs = d.logs || [];
-        var logsHtml = logs.length ? logs.map(function(l){
-            return '<div class="d-log-item"><div class="d-log-action">' + escapeHtml(l.action_label) + '</div><div class="d-log-meta">' + escapeHtml(l.performed_by_name || 'System') + ' &mdash; ' + escapeHtml(l.created_at) + '</div>' + (l.remarks ? '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">' + escapeHtml(l.remarks) + '</div>' : '') + '</div>';
-        }).join('') : '<p style="font-size:12px;color:var(--text-muted)">No routing history yet.</p>';
+    function dotClass(s){
+        if(s==='cancelled' || s==='returned') return 'c-danger';
+        if(s==='completed') return 'c-done';
+        if(s==='forwarded') return 'c-warn';
+        return 'c-active';
+    }
+    function renderDrawer(doc){
+        var ref = doc.reference_number || doc.tracking_number || '-';
+        var trackingNo = doc.tracking_number || '';
+        document.getElementById('drTitle').textContent = doc.subject || '-';
+        document.getElementById('drRef').textContent = 'Ref # ' + ref;
+        document.getElementById('drTrack').textContent = (trackingNo && trackingNo !== ref) ? ('Tracking # ' + trackingNo) : '';
+
+        var logs = Array.isArray(doc.routing_logs) ? doc.routing_logs : [];
+        var tlHtml = '';
+        if (!logs.length) {
+            tlHtml = '<div style="color:var(--text-muted);font-size:13px;padding:4px 0">No routing history yet.</div>';
+        } else {
+            var prevGroupKey = null;
+            logs.slice().reverse().forEach(function(log, idx) {
+                var isLatest = idx === 0;
+                var dc = isLatest ? 'c-latest' : dotClass(log.status_after);
+                var dotIcon = isLatest ? 'fa-arrow-up' : 'fa-check';
+                var groupKey = (log.action === 'submitted') ? '__pending__' :
+                               (log.action === 'forwarded' ? (log.from_office || 'Unknown') :
+                               (log.to_office || log.from_office || 'Unknown'));
+                var groupLabel = (groupKey === '__pending__') ? 'Submitted - Pending Acceptance' : groupKey;
+                if (groupKey !== prevGroupKey) {
+                    prevGroupKey = groupKey;
+                    tlHtml += '<div class="tl-office-hdr"><div class="tl-dot ' + dc + '" style="margin-right:5px"><i class="fas ' + dotIcon + '" style="font-size:5px"></i></div><span>' + escapeHtml(groupLabel) + '</span></div>';
+                }
+                tlHtml += '<div class="tl-item">' +
+                    (log.performed_by ? '<div class="tl-action">' + escapeHtml(log.performed_by) + '</div>' : '') +
+                    '<div class="tl-meta"><i class="fas fa-clock" style="margin-right:3px;font-size:10px"></i>' + escapeHtml(log.timestamp || '-') + '</div>' +
+                    '<div class="tl-meta"><i class="fas fa-tasks" style="margin-right:3px;font-size:10px"></i>' + escapeHtml(log.action_label || 'Status Updated') + '</div>' +
+                    (log.remarks ? '<div class="tl-remarks">' + escapeHtml(log.remarks) + '</div>' : '') +
+                    '</div>';
+            });
+        }
+
         document.getElementById('drawerBody').innerHTML =
-            '<div class="d-section">' +
-                '<div class="d-section-title"><i class="fas fa-file-alt"></i> Document Info</div>' +
-                '<div class="d-row"><span class="d-label">Tracking #</span><span class="d-val t-num">' + escapeHtml(doc.tracking_number || 'N/A') + '</span></div>' +
-                '<div class="d-row"><span class="d-label">Reference #</span><span class="d-val">' + escapeHtml(doc.reference_number || 'N/A') + '</span></div>' +
-                '<div class="d-row"><span class="d-label">Subject</span><span class="d-val">' + escapeHtml(doc.subject || 'No subject') + '</span></div>' +
-                '<div class="d-row"><span class="d-label">Type</span><span class="d-val">' + escapeHtml(doc.type || 'No type specified') + '</span></div>' +
-                '<div class="d-row"><span class="d-label">Status</span><span class="d-val"><span class="badge badge-' + escapeHtml(doc.status) + '">' + escapeHtml(doc.status_label || doc.status) + '</span></span></div>' +
-                '<div class="d-row"><span class="d-label">Description</span><span class="d-val">' + escapeHtml(doc.description || 'No description provided') + '</span></div>' +
-            '</div>' +
-            '<div class="d-section">' +
-                '<div class="d-section-title"><i class="fas fa-route"></i> Routing History</div>' +
-                logsHtml +
-            '</div>' +
-            '<div style="padding-top:8px">' +
-                '<a href="/office/documents/' + parseInt(doc.id) + '" class="btn-view" style="width:100%;justify-content:center"><i class="fas fa-folder-open"></i> Full Record</a>' +
-            '</div>';
+            '<div class="drawer-tl-head"><i class="fas fa-history"></i> Routing History</div>' +
+            '<div class="drawer-timeline"><div class="tl">' + tlHtml + '</div></div>';
     }
 
     // ─── Live Stats (silent update every 30s) ───
@@ -924,6 +1075,7 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
         }
 
         function fillRefBoxes(tracking){
+            if (!/^[A-Z0-9]{1,8}$/.test(tracking)) return;
             var boxes = document.querySelectorAll('#refBoxes .ref-box');
             if (!boxes.length) return;
             for (var i = 0; i < boxes.length; i++) {
@@ -936,17 +1088,44 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
             }
         }
 
+        function normalizeScannedLookup(text) {
+            var raw = String(text || '').trim();
+            if (!raw) return '';
+
+            try {
+                var parsed = new URL(raw, window.location.origin);
+                var receiveMatch = parsed.pathname.match(/\/receive\/([A-Za-z0-9\-]+)/i);
+                if (receiveMatch) {
+                    raw = receiveMatch[1];
+                } else {
+                    var lookupParam = parsed.searchParams.get('ref')
+                        || parsed.searchParams.get('tracking')
+                        || parsed.searchParams.get('reference');
+                    if (lookupParam) raw = lookupParam;
+                }
+            } catch (e) {}
+
+            var fallbackMatch = raw.match(/\/receive\/([A-Za-z0-9\-]+)/i);
+            if (fallbackMatch) raw = fallbackMatch[1];
+
+            raw = raw.trim().toUpperCase();
+            if (!raw) return '';
+
+            var compact = raw.replace(/[^A-Z0-9]/g, '');
+            if (/^[A-Z0-9]{8}$/.test(compact)) {
+                return compact;
+            }
+
+            return raw.replace(/[^A-Z0-9\-]/g, '').replace(/^-+|-+$/g, '');
+        }
+
         function processScannedText(text) {
-            var tracking = String(text || '').trim();
-            if (!tracking) return;
-            var match = tracking.match(/\/receive\/([A-Za-z0-9\-]+)/i);
-            if (match) tracking = match[1];
-            tracking = tracking.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            if (!tracking || tracking.length < 4) return;
+            var lookup = normalizeScannedLookup(text);
+            if (!lookup || lookup.length < 8) return;
 
             window.closeScanner();
-            fillRefBoxes(tracking);
-            window.submitReceiveLookup(tracking, 'QR detected. Receiving document...');
+            fillRefBoxes(lookup);
+            window.submitReceiveLookup(lookup, 'QR detected. Receiving document...');
         }
 
         window.openScanner = function() {
@@ -959,6 +1138,7 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
                 clearTimeout(scanTimer);
                 scanTimer = null;
             }
+            stopCamera();
             startCamera();
         };
 
@@ -998,6 +1178,79 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
                 return Promise.reject(new Error('GET_USER_MEDIA_UNAVAILABLE'));
             }
             return navigator.mediaDevices.getUserMedia({ video: constraints, audio: false });
+        }
+
+        function listVideoInputs() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+                return Promise.resolve([]);
+            }
+            return navigator.mediaDevices.enumerateDevices()
+                .then(function(devices) {
+                    return (devices || []).filter(function(device) {
+                        return device && device.kind === 'videoinput';
+                    });
+                })
+                .catch(function() {
+                    return [];
+                });
+        }
+
+        function cameraScore(device, isMobile) {
+            var label = String((device && device.label) || '').toLowerCase();
+            var score = 0;
+
+            if (isMobile) {
+                if (/back|rear|environment|world|traseira|trasera|externa/.test(label)) score += 50;
+                if (/front|user|selfie|facetime|integrated|frontal|frente/.test(label)) score -= 25;
+            } else {
+                if (/usb|external|rear|back|environment/.test(label)) score += 20;
+                if (/integrated|front|facetime|user/.test(label)) score += 5;
+            }
+
+            return score;
+        }
+
+        function buildCameraAttempts(isMobile, devices) {
+            var attempts = [];
+            var seen = {};
+            var hdHint = { width: { ideal: 1280 }, height: { ideal: 720 } };
+
+            function addAttempt(constraints) {
+                var key = typeof constraints === 'boolean'
+                    ? ('bool:' + constraints)
+                    : JSON.stringify(constraints);
+                if (seen[key]) return;
+                seen[key] = true;
+                attempts.push(constraints);
+            }
+
+            if (isMobile) {
+                addAttempt({
+                    facingMode: { ideal: 'environment' },
+                    width: hdHint.width,
+                    height: hdHint.height
+                });
+            }
+
+            (devices || []).slice().sort(function(a, b) {
+                return cameraScore(b, isMobile) - cameraScore(a, isMobile);
+            }).forEach(function(device) {
+                if (!device.deviceId) return;
+                addAttempt({
+                    deviceId: { exact: device.deviceId },
+                    width: hdHint.width,
+                    height: hdHint.height
+                });
+            });
+
+            addAttempt(true);
+            addAttempt({
+                facingMode: 'user',
+                width: hdHint.width,
+                height: hdHint.height
+            });
+
+            return attempts;
         }
 
 
@@ -1062,33 +1315,48 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
             function doStart() {
                 showStatus('Requesting camera access...');
                 var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                var attempts = isMobile
-                    ? [{ facingMode: { ideal: 'environment' } }, { facingMode: 'user' }, true]
-                    : [true, { facingMode: 'user' }];
+                listVideoInputs().then(function(devices) {
+                    var attempts = buildCameraAttempts(isMobile, devices);
+                    var seenFailures = {};
 
-                function tryNext(idx) {
-                    if (idx >= attempts.length) {
+                    function finishFailure() {
+                        if (seenFailures.security) {
+                            showStatus('Camera access requires HTTPS or localhost. Open this app on localhost or HTTPS and try again.');
+                            return;
+                        }
+                        if (seenFailures.notfound) {
+                            showStatus('No available camera was found on this device. Allow camera access, then reopen the scanner to try another camera.');
+                            return;
+                        }
                         showStatus('Camera could not start. Close any app using your webcam (Zoom, Teams, OBS), then reload the page.');
-                        return;
                     }
-                    getCameraStream(attempts[idx])
-                        .then(function(stream) {
-                            activeStream = stream;
-                            return attachPreview(stream);
-                        })
-                        .then(function() {
-                            scannerRunning = true;
-                            showStatus('Camera live. Point it at a QR code.');
-                            startDetectLoop();
-                        })
-                        .catch(function(err) {
-                            var kind = normalizeCameraError(err);
-                            if (kind === 'denied') { showPermissionDenied(); return; }
-                            if (kind === 'busy') { showStatus('Camera is in use by another app. Close Zoom, Teams, or OBS and retry.'); return; }
-                            tryNext(idx + 1);
-                        });
-                }
-                tryNext(0);
+
+                    function tryNext(idx) {
+                        if (idx >= attempts.length) {
+                            finishFailure();
+                            return;
+                        }
+                        getCameraStream(attempts[idx])
+                            .then(function(stream) {
+                                activeStream = stream;
+                                return attachPreview(stream);
+                            })
+                            .then(function() {
+                                scannerRunning = true;
+                                showStatus('Camera live. Point it at a QR code.');
+                                startDetectLoop();
+                            })
+                            .catch(function(err) {
+                                var kind = normalizeCameraError(err);
+                                seenFailures[kind] = true;
+                                if (kind === 'denied') { showPermissionDenied(); return; }
+                                if (kind === 'busy') { showStatus('Camera is in use by another app. Close Zoom, Teams, or OBS and retry.'); return; }
+                                tryNext(idx + 1);
+                            });
+                    }
+
+                    tryNext(0);
+                });
             }
 
             doStart();

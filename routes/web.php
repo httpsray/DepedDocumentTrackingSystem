@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RepresentativeController;
 use App\Http\Controllers\RecordsController;
+use App\Models\Document;
 use App\Models\Office;
 
 Route::get('/', function () {
@@ -86,22 +87,22 @@ Route::get('/submit', function () {
 
 Route::get('/login', function () {
     return view('auth.login');
-})->name('login');
+})->middleware('no-cache')->name('login');
 
 Route::get('/register', function () {
     return view('auth.register');
-})->name('register');
+})->middleware('no-cache')->name('register');
 
 // Activation routes
-Route::get('/activate/{token}', [AuthController::class, 'showActivationForm'])->name('activation.form');
+Route::get('/activate/{token}', [AuthController::class, 'showActivationForm'])->middleware('no-cache')->name('activation.form');
 Route::post('/api/activate', [AuthController::class, 'activate'])->name('activation.activate');
 Route::post('/api/resend-activation', [AuthController::class, 'resendActivation'])
     ->middleware('throttle:3,60')
     ->name('activation.resend');
 
 // Forgot / Reset Password routes
-Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
-Route::get('/reset-password', [AuthController::class, 'showResetPassword'])->name('password.reset');
+Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->middleware('no-cache')->name('password.request');
+Route::get('/reset-password', [AuthController::class, 'showResetPassword'])->middleware('no-cache')->name('password.reset');
 Route::post('/api/forgot-password', [AuthController::class, 'sendResetLink'])
     ->middleware('throttle:5,15')
     ->name('password.email');
@@ -118,6 +119,14 @@ Route::get('/qr/{tracking}', [DocumentController::class, 'qrCode'])
 Route::get('/receive/{tracking}', function ($tracking) {
     $tracking = strtoupper(trim(strip_tags($tracking)));
     $user = auth()->user();
+    $document = Document::query()
+        ->select(['reference_number', 'tracking_number'])
+        ->where(function ($q) use ($tracking) {
+            $q->whereRaw('UPPER(reference_number) = ?', [$tracking])
+              ->orWhereRaw('UPPER(tracking_number) = ?', [$tracking]);
+        })
+        ->first();
+    $publicLookup = $document?->reference_number ?: $tracking;
 
     // Only office accounts and superadmin can access the receive screen.
     if ($user && ($user->isSuperAdmin() || $user->isOfficeAccount())) {
@@ -130,14 +139,15 @@ Route::get('/receive/{tracking}', function ($tracking) {
         return view('office.receive', compact('user', 'tracking', 'receiveEndpoint', 'backUrl'));
     }
 
-    // Everyone else (guests/regular users) is redirected to tracking.
-    return redirect('/track?ref=' . urlencode($tracking));
+    // Everyone else (guests/regular users/non-office reps/admins) is redirected to tracking
+    // using the user-facing reference number when available.
+    return redirect('/track?ref=' . urlencode($publicLookup));
 })->middleware('throttle:60,1')->where('tracking', '[A-Za-z0-9\-]+')->name('office.receive');
 
 // Public API Routes
 Route::post('/api/submit-document', [DocumentController::class, 'submit'])
     ->middleware('throttle:10,1');
-Route::post('/api/track-document', [DocumentController::class, 'track'])
+Route::match(['GET', 'POST'], '/api/track-document', [DocumentController::class, 'track'])
     ->middleware('throttle:30,1');
 Route::post('/api/check-email', [AuthController::class, 'checkEmail'])
     ->middleware('throttle:10,1');

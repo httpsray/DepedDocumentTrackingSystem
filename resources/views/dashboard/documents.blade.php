@@ -311,7 +311,7 @@
         </div>
         <select class="status-select" id="statusFilter" onchange="filterDocs(true)">
             <option value="">All Statuses</option>
-            @foreach(\App\Models\Document::STATUSES as $key => $label)
+            @foreach(\App\Models\Document::FILTER_STATUSES as $key => $label)
                 <option value="{{ $key }}" {{ $status === $key ? 'selected' : '' }}>{{ $label }}</option>
             @endforeach
         </select>

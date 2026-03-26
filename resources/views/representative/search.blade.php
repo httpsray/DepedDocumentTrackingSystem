@@ -148,7 +148,7 @@
                    placeholder="Tracking number, subject, sender name...">
             <select name="status">
                 <option value="">All Statuses</option>
-                @foreach(['submitted','in_review','forwarded','completed','for_pickup','returned','cancelled'] as $s)
+                @foreach(['submitted','in_review','forwarded','completed','for_pickup','returned'] as $s)
                     <option value="{{ $s }}" {{ request('status') === $s ? 'selected' : '' }}>
                         {{ ucwords(str_replace('_',' ',$s)) }}
                     </option>

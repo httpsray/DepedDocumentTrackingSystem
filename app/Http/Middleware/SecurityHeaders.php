@@ -30,11 +30,16 @@ class SecurityHeaders
         // Referrer policy — send origin only on cross-origin requests
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-        // Permissions policy — disable features the app doesn't use by default,
-        // while allowing individual responses to opt in when needed.
-        if (!$response->headers->has('Permissions-Policy')) {
-            $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
-        }
+        // Permissions policy — this app uses SPA-style body swaps for authenticated pages,
+        // so camera access must stay consistent for the whole document, not per swapped view.
+        $user = $request->user();
+        $allowCamera = $user && ($user->isAdmin() || $user->isOfficeAccount());
+        $response->headers->set(
+            'Permissions-Policy',
+            $allowCamera
+                ? 'camera=(self), microphone=(), geolocation=(), payment=()'
+                : 'camera=(), microphone=(), geolocation=(), payment=()'
+        );
 
         // Content Security Policy — allow same-origin + trusted CDNs
         $response->headers->set('Content-Security-Policy', implode('; ', [

@@ -600,7 +600,7 @@
             <input type="text" name="search" class="filter-input" placeholder="Search tracking/reference no. or subject..." value="{{ $search }}" data-clearable data-no-capitalize>
             <select name="status" class="filter-select">
                 <option value="">All Status</option>
-                @foreach(\App\Models\Document::STATUSES as $key => $label)
+                @foreach(\App\Models\Document::FILTER_STATUSES as $key => $label)
                     <option value="{{ $key }}" {{ $status === $key ? 'selected' : '' }}>{{ $label }}</option>
                 @endforeach
             </select>
@@ -820,49 +820,7 @@
                 });
             }
 
-            var currentOfficeText = (doc.status === 'submitted')
-                ? ('Awaiting acceptance by ' + (doc.submitted_to_office || doc.current_office || 'Records Section'))
-                : (doc.current_office || doc.submitted_to_office || '-');
-
-            var receiveActions = ['processing', 'received', 'in_review'];
-            var takeActions = ['handoff', 'processing', 'received', 'in_review'];
-            var receivedByText = 'Not recorded';
-            var takenByText = 'Not recorded';
-
-            for (var i = 0; i < logs.length; i++) {
-                var firstLog = logs[i] || {};
-                var firstAction = String(firstLog.action || '').toLowerCase();
-                var firstPerformer = String(firstLog.performed_by || '').trim();
-                if (firstPerformer && receiveActions.indexOf(firstAction) !== -1) {
-                    receivedByText = firstPerformer;
-                    break;
-                }
-            }
-
-            for (var j = logs.length - 1; j >= 0; j--) {
-                var latestLog = logs[j] || {};
-                var latestAction = String(latestLog.action || '').toLowerCase();
-                var latestPerformer = String(latestLog.performed_by || '').trim();
-                if (latestPerformer && takeActions.indexOf(latestAction) !== -1) {
-                    takenByText = latestPerformer;
-                    break;
-                }
-            }
-
-            if (takenByText === 'Not recorded' && doc.current_handler) {
-                takenByText = doc.current_handler;
-            }
-            if (receivedByText === 'Not recorded' && takenByText !== 'Not recorded') {
-                receivedByText = takenByText;
-            }
-
             document.getElementById('viewDocContent').innerHTML =
-                '<div class="drawer-meta">' +
-                    '<div class="dm-item"><div class="dm-label">Current Office</div><div class="dm-value">' + escapeHtml(currentOfficeText) + '</div></div>' +
-                    '<div class="dm-item"><div class="dm-label">Nag Receive (Stamp)</div><div class="dm-value">' + escapeHtml(receivedByText) + '</div></div>' +
-                    '<div class="dm-item"><div class="dm-label">Kumuha (Latest)</div><div class="dm-value">' + escapeHtml(takenByText) + '</div></div>' +
-                    '<div class="dm-item"><div class="dm-label">Status</div><div class="dm-value">' + escapeHtml(doc.status_label || '-') + '</div></div>' +
-                '</div>' +
                 '<div class="drawer-tl-head"><i class="fas fa-history"></i> Routing History</div>' +
                 '<div class="drawer-timeline"><div class="tl">' + tlHtml + '</div></div>';
 

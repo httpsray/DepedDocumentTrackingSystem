@@ -95,6 +95,18 @@ class Document extends Model
         'archived'   => 'Archived',
     ];
 
+    // Statuses exposed in document search/filter dropdowns.
+    // Keep legacy/internal statuses in STATUSES so existing records still render correctly.
+    const FILTER_STATUSES = [
+        'submitted'  => 'Submitted',
+        'received'   => 'Received',
+        'in_review'  => 'Processing',
+        'completed'  => 'Completed',
+        'for_pickup' => 'For Pickup',
+        'returned'   => 'Returned',
+        'archived'   => 'Archived',
+    ];
+
     const STATUS_COLORS = [
         'submitted'  => '#c2410c',
         'received'   => '#c2410c',

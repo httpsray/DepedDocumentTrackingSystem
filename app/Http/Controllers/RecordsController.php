@@ -54,7 +54,7 @@ class RecordsController extends Controller
 
         // Status filter
         $status = trim((string) $request->get('status', ''));
-        if ($status !== '' && array_key_exists($status, Document::STATUSES)) {
+        if ($status !== '' && array_key_exists($status, Document::FILTER_STATUSES)) {
             $query->where('status', $status);
         }
 

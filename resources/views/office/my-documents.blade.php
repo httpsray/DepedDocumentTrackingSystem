@@ -89,6 +89,44 @@
         .t-office{font-size:12px;color:var(--text-muted);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .t-type{font-size:12px;color:var(--text-muted)}
         .cell-ellipsis{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .my-docs-panel .table-head{padding:14px 20px;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap}
+        .my-docs-panel .table-head-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+        .my-docs-panel table{width:100%;table-layout:fixed}
+        .my-docs-panel .table-scroll{overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable}
+        .my-docs-panel th{padding:10px 10px;background:#fff}
+        .my-docs-panel td{padding:10px 10px;border-bottom:1px solid #f1f5f9}
+        .my-docs-panel tr:last-child td{border-bottom:none}
+        .my-docs-panel .col-ref{width:16%}
+        .my-docs-panel .col-track{width:18%}
+        .my-docs-panel .col-subject{width:24%}
+        .my-docs-panel .col-office{width:18%}
+        .my-docs-panel .col-date{width:12%}
+        .my-docs-panel .col-status{width:12%}
+        .my-docs-panel .col-action{width:44px}
+        .my-docs-panel .t-ref,.my-docs-panel .t-track{font-family:monospace;font-size:12px;font-weight:600;white-space:nowrap}
+        .my-docs-panel .t-ref{color:var(--primary)}
+        .my-docs-panel .t-track{color:var(--text-dark)}
+        .my-docs-panel .t-subject-main{display:block;font-size:13px;font-weight:600;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .my-docs-panel .t-subject-sub{display:block;margin-top:4px;font-size:11px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .my-docs-panel .t-office .cell-ellipsis{max-width:100%}
+        .my-docs-panel .t-status{white-space:nowrap;min-width:0}
+        .my-docs-panel .pill{padding:3px 9px;border-radius:20px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+        .my-docs-panel .mob-cards{display:none;padding:12px}
+        .my-docs-panel .mob-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.04);cursor:pointer;transition:border-color .15s,box-shadow .15s}
+        .my-docs-panel .mob-card + .mob-card{margin-top:10px}
+        .my-docs-panel .mob-card:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(0,86,179,.08)}
+        .my-docs-panel .mob-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+        .my-docs-panel .mob-card-ids{min-width:0}
+        .my-docs-panel .mob-card-ref{font-size:11.5px;font-weight:700;color:var(--primary);font-family:monospace;line-height:1.25}
+        .my-docs-panel .mob-card-track{font-size:10px;color:var(--text-muted);font-family:monospace;margin-top:2px;line-height:1.25}
+        .my-docs-panel .mob-card-arrow{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;color:#94a3b8;font-size:11px;flex-shrink:0;background:#f8fafc}
+        .my-docs-panel .mob-card-subject{font-size:13.5px;font-weight:600;color:var(--text-dark);margin-bottom:8px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .my-docs-panel .mob-card-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+        .my-docs-panel .mob-card-date{font-size:10.5px;color:var(--text-muted);display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+        .my-docs-panel .mob-card-row{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--text-muted)}
+        .my-docs-panel .mob-card-row i{font-size:11px;opacity:.75;flex-shrink:0}
+        .my-docs-panel .mob-card:hover .mob-card-arrow{background:var(--primary);color:#fff}
+        .my-docs-panel .mob-card.hidden-row{display:none}
 
         /* ─── Pills ─── */
         .pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap}
@@ -224,10 +262,8 @@
             .search-card{flex-direction:column;align-items:stretch}
             .status-select{min-width:unset}
             .table-card.list-table-card.has-list{max-height:min(68vh,560px)}
-            th:nth-child(3),td:nth-child(3),
-            th:nth-child(5),td:nth-child(5),
-            th:nth-child(6),td:nth-child(6){display:none}
-            .t-subject{max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+            .my-docs-panel .table-scroll{display:none}
+            .my-docs-panel .mob-cards{display:block;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:10px}
         }
     </style>
     <script src="/js/spa.js" defer></script>
@@ -318,7 +354,7 @@
         </div>
         <select class="status-select" id="statusFilter" onchange="filterDocs(true)">
             <option value="">All Statuses</option>
-            @foreach(\App\Models\Document::STATUSES as $key => $label)
+            @foreach(\App\Models\Document::FILTER_STATUSES as $key => $label)
                 <option value="{{ $key }}" {{ $status === $key ? 'selected' : '' }}>{{ $label }}</option>
             @endforeach
         </select>
@@ -326,11 +362,11 @@
     </div>
 
     <!-- Documents Table -->
-    <div class="table-card list-table-card{{ $documents->count() ? ' has-list' : '' }}">
+    <div class="table-card list-table-card my-docs-panel{{ $documents->count() ? ' has-list' : '' }}">
         <div class="table-head">
-            <div style="display:flex;align-items:center;gap:8px">
+            <div class="table-head-left">
                 <span class="table-title">Results</span>
-                <span class="table-doc-count" id="totalCount">({{ \App\Support\UiNumber::compact($documents->total()) }})</span>
+                <span class="table-doc-count" id="totalCount">{{ \App\Support\UiNumber::compact($documents->total()) }} total</span>
             </div>
         </div>
 
@@ -343,43 +379,57 @@
         @else
             <div class="table-scroll">
             <table id="docsTable">
+                <colgroup>
+                    <col class="col-ref">
+                    <col class="col-track">
+                    <col class="col-subject">
+                    <col class="col-office">
+                    <col class="col-date">
+                    <col class="col-status">
+                    <col class="col-action">
+                </colgroup>
                 <thead>
                     <tr>
-                        <th>Reference / Tracking</th>
+                        <th>Reference #</th>
+                        <th>Tracking #</th>
                         <th>Subject</th>
-                        <th>Type</th>
-                        <th>Status</th>
                         <th>Current Office</th>
-                        <th>Date Submitted</th>
+                        <th>Submitted</th>
+                        <th>Status</th>
                         <th class="td-action"></th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($documents as $doc)
+                    @php
+                        $docRef = $doc->reference_number ?: $doc->tracking_number;
+                        $docTracking = $doc->tracking_number ?: $doc->reference_number;
+                        $docOffice = $doc->status === 'submitted'
+                            ? 'Awaiting acceptance by ' . ($doc->submittedToOffice->name ?? 'Records Section')
+                            : ($doc->currentOffice->name ?? $doc->submittedToOffice->name ?? 'No office assigned');
+                    @endphp
                     <tr class="doc-row"
-                        data-search="{{ strtolower(($doc->reference_number ?: $doc->tracking_number) . ' ' . $doc->tracking_number . ' ' . $doc->subject . ' ' . $doc->type) }}"
+                        data-search="{{ strtolower($docRef . ' ' . $docTracking . ' ' . $doc->subject . ' ' . $doc->type) }}"
                         data-status="{{ $doc->status }}"
-                        data-ref="{{ $doc->reference_number ?: $doc->tracking_number }}"
-                        data-tracking="{{ $doc->tracking_number ?: $doc->reference_number }}">
-                        <td>
-                            <span class="t-num">{{ $doc->reference_number ?: $doc->tracking_number }}</span>
-                            @if($doc->reference_number && $doc->tracking_number && $doc->reference_number !== $doc->tracking_number)
-                                <div class="t-num-sub">{{ $doc->tracking_number }}</div>
-                            @endif
+                        data-ref="{{ $docRef }}"
+                        data-tracking="{{ $docTracking }}">
+                        <td class="t-ref">
+                            <div class="cell-ellipsis" title="{{ $docRef }}">{{ $docRef }}</div>
                         </td>
-                        <td class="t-subject" title="{{ $doc->subject }}">{{ $doc->subject }}</td>
-                        <td class="t-type"><div class="cell-ellipsis" style="max-width:160px" title="{{ $doc->type }}">{{ $doc->type }}</div></td>
-                        <td>
-                            <span class="pill pill-{{ $doc->status }}">{{ $doc->statusLabel() }}</span>
+                        <td class="t-track">
+                            <div class="cell-ellipsis" title="{{ $docTracking }}">{{ $docTracking }}</div>
+                        </td>
+                        <td class="t-subject">
+                            <span class="t-subject-main" title="{{ $doc->subject }}">{{ $doc->subject }}</span>
+                            <span class="t-subject-sub" title="{{ $doc->type }}">{{ $doc->type }}</span>
                         </td>
                         <td class="t-office">
-                            @if($doc->status === 'submitted')
-                                <div class="cell-ellipsis" title="{{ 'Awaiting acceptance by ' . ($doc->submittedToOffice->name ?? 'Records Section') }}">{{ 'Awaiting acceptance by ' . ($doc->submittedToOffice->name ?? 'Records Section') }}</div>
-                            @else
-                                <div class="cell-ellipsis" title="{{ $doc->currentOffice->name ?? $doc->submittedToOffice->name ?? 'No office assigned' }}">{{ $doc->currentOffice->name ?? $doc->submittedToOffice->name ?? 'No office assigned' }}</div>
-                            @endif
+                            <div class="cell-ellipsis" title="{{ $docOffice }}">{{ $docOffice }}</div>
                         </td>
                         <td class="t-date">{{ $doc->created_at->format('M d, Y') }}</td>
+                        <td class="t-status">
+                            <span class="pill pill-{{ $doc->status }}">{{ $doc->statusLabel() }}</span>
+                        </td>
                         <td class="td-action"><span class="row-arrow"><i class="fas fa-chevron-right"></i></span></td>
                     </tr>
                     @empty
@@ -398,6 +448,56 @@
                     </tr>
                 </tbody>
             </table>
+            </div>
+            <div class="mob-cards">
+                @forelse($documents as $doc)
+                    @php
+                        $docRef = $doc->reference_number ?: $doc->tracking_number;
+                        $docTracking = $doc->tracking_number ?: $doc->reference_number;
+                        $docOffice = $doc->status === 'submitted'
+                            ? 'Awaiting acceptance by ' . ($doc->submittedToOffice->name ?? 'Records Section')
+                            : ($doc->currentOffice->name ?? $doc->submittedToOffice->name ?? 'No office assigned');
+                    @endphp
+                    <div
+                        class="mob-card"
+                        data-search="{{ strtolower($docRef . ' ' . $docTracking . ' ' . $doc->subject . ' ' . $doc->type) }}"
+                        data-status="{{ $doc->status }}"
+                        data-ref="{{ $docRef }}"
+                        data-tracking="{{ $docTracking }}"
+                    >
+                        <div class="mob-card-top">
+                            <div class="mob-card-ids">
+                                <div class="mob-card-ref">{{ $docRef }}</div>
+                                <div class="mob-card-track">Tracking: {{ $docTracking }}</div>
+                            </div>
+                            <span class="mob-card-arrow"><i class="fas fa-chevron-right"></i></span>
+                        </div>
+                        <div class="mob-card-subject">{{ $doc->subject }}</div>
+                        <div class="mob-card-meta">
+                            <span class="pill pill-{{ $doc->status }}">{{ $doc->statusLabel() }}</span>
+                            <span class="mob-card-date"><i class="fas fa-calendar"></i>{{ $doc->created_at->format('M d, Y') }}</span>
+                        </div>
+                        <div class="mob-card-row">
+                            <i class="fas fa-building"></i>
+                            <span class="cell-ellipsis" title="{{ $docOffice }}">{{ $docOffice }}</span>
+                        </div>
+                        <div class="mob-card-row">
+                            <i class="fas fa-tag"></i>
+                            <span class="cell-ellipsis" title="{{ $doc->type }}">{{ $doc->type }}</span>
+                        </div>
+                    </div>
+                @empty
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <h3>No Results Found</h3>
+                        <p>Try adjusting your search or filter.</p>
+                    </div>
+                @endforelse
+                <div class="empty-state" id="noResultMobile" style="display:none">
+                    <i class="fas fa-search"></i>
+                    <h3>No Results Found</h3>
+                    <p>No documents match your search.</p>
+                </div>
             </div>
 
             @if($documents->hasPages())
@@ -512,7 +612,8 @@ var _searchTimer = null;
 function filterDocs(immediate) {
     var q      = document.getElementById('searchInput').value.toLowerCase().trim();
     var status = document.getElementById('statusFilter').value;
-    var rows   = document.querySelectorAll('#docsTable tbody tr:not(#noResultRow)');
+    var rows   = document.querySelectorAll('#docsTable tbody tr.doc-row');
+    var cards  = document.querySelectorAll('.my-docs-panel .mob-card[data-ref]');
     var shown  = 0;
 
     rows.forEach(function(row) {
@@ -523,8 +624,17 @@ function filterDocs(immediate) {
         if (visible) shown++;
     });
 
+    cards.forEach(function(card) {
+        var matchSearch = !q || (card.dataset.search && card.dataset.search.includes(q));
+        var matchStatus = !status || card.dataset.status === status;
+        var visible = matchSearch && matchStatus;
+        card.classList.toggle('hidden-row', !visible);
+    });
+
     var noResult = document.getElementById('noResultRow');
     if (noResult) noResult.style.display = (shown === 0 && rows.length > 0) ? 'table-row' : 'none';
+    var noResultMobile = document.getElementById('noResultMobile');
+    if (noResultMobile) noResultMobile.style.display = (shown === 0 && cards.length > 0) ? 'block' : 'none';
 
     var countEl = document.getElementById('resultCount');
     if (countEl) {
@@ -586,24 +696,26 @@ window.closeSidebar = function() {
 };
 
 function bindDocRows() {
-    var rows = document.querySelectorAll('#docsTable tbody tr.doc-row');
-    rows.forEach(function(row) {
-        row.setAttribute('tabindex', '0');
-        row.setAttribute('role', 'button');
-        row.setAttribute('aria-label', 'View routing details');
+    var items = document.querySelectorAll('#docsTable tbody tr.doc-row, .my-docs-panel .mob-card[data-ref]');
+    items.forEach(function(item) {
+        if (item.dataset.bound === '1') return;
+        item.dataset.bound = '1';
+        item.setAttribute('tabindex', '0');
+        item.setAttribute('role', 'button');
+        item.setAttribute('aria-label', 'View document details');
 
-        row.addEventListener('click', function(e) {
+        item.addEventListener('click', function(e) {
             if (e.target.closest('a,button,input,select,textarea,label')) return;
-            var ref = row.getAttribute('data-ref') || '';
-            var tracking = row.getAttribute('data-tracking') || ref;
+            var ref = item.getAttribute('data-ref') || '';
+            var tracking = item.getAttribute('data-tracking') || ref;
             openDocDetail(ref, tracking);
         });
 
-        row.addEventListener('keydown', function(e) {
+        item.addEventListener('keydown', function(e) {
             if (e.key !== 'Enter' && e.key !== ' ') return;
             e.preventDefault();
-            var ref = row.getAttribute('data-ref') || '';
-            var tracking = row.getAttribute('data-tracking') || ref;
+            var ref = item.getAttribute('data-ref') || '';
+            var tracking = item.getAttribute('data-tracking') || ref;
             openDocDetail(ref, tracking);
         });
     });

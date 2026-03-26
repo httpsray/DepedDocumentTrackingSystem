@@ -337,25 +337,22 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        // Clear authentication
         Auth::logout();
-        
-        // Invalidate session completely
+
+        // Invalidate the session and rotate the CSRF token.
+        // `invalidate()` already flushes the session payload, so we avoid
+        // doing extra cleanup work that slows down logout on the client.
         $request->session()->invalidate();
-        $request->session()->flush();
         $request->session()->regenerateToken();
-        
-        // Clear all cookies
-        foreach ($request->cookies->all() as $name => $value) {
-            cookie()->queue(cookie()->forget($name));
-        }
+
+        cookie()->queue(cookie()->forget(config('session.cookie')));
+        cookie()->queue(cookie()->forget('XSRF-TOKEN'));
 
         return response()->json(['success' => true, 'redirect' => '/login'])
             ->withHeaders([
                 'Cache-Control' => 'no-cache, no-store, must-revalidate, max-age=0',
                 'Pragma' => 'no-cache',
                 'Expires' => 'Sat, 01 Jan 2000 00:00:00 GMT',
-                'Clear-Site-Data' => '"cache", "cookies", "storage"'
             ]);
     }
 

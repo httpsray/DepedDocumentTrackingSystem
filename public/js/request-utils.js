@@ -1488,6 +1488,22 @@
 
     // Global logout reliability
     var _logoutInFlight = false;
+    var LOGOUT_REDIRECT_DELAY_MS = 120;
+
+    function broadcastLogoutEvent() {
+        try {
+            localStorage.setItem('logout-event', String(Date.now()));
+        } catch (e) {}
+    }
+
+    function clearLogoutState() {
+        try { sessionStorage.removeItem('logout-event'); } catch (e) {}
+        broadcastLogoutEvent();
+    }
+
+    function navigateToLogin() {
+        window.location.replace('/login');
+    }
 
     function performReliableLogout(event) {
         if (event) {
@@ -1500,22 +1516,39 @@
 
         var csrfMeta = document.querySelector('meta[name="csrf-token"]');
         var csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+        var redirected = false;
 
-        fetch('/api/logout', {
+        clearLogoutState();
+
+        var logoutRequest = fetch('/api/logout', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': csrfToken
             },
-            credentials: 'same-origin'
-        }).finally(function () {
-            window.location.replace('/login');
+            credentials: 'same-origin',
+            keepalive: true
+        }).catch(function () {
+            // Best effort only. We'll still redirect to the login page.
+        });
+
+        setTimeout(function () {
+            if (redirected) return;
+            redirected = true;
+            navigateToLogin();
+        }, LOGOUT_REDIRECT_DELAY_MS);
+
+        logoutRequest.finally(function () {
+            if (redirected) return;
+            redirected = true;
+            navigateToLogin();
         });
 
         return false;
     }
 
+    window.performLogout = performReliableLogout;
     window.logout = performReliableLogout;
 
     document.addEventListener('click', function (event) {

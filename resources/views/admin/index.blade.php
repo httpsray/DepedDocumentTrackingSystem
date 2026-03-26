@@ -389,12 +389,12 @@
             color: #fff;
         }
 
-        .recent-panel .col-track { width: 18%; }
-        .recent-panel .col-ref { width: 16%; }
+        .recent-panel .col-track { width: 17%; }
+        .recent-panel .col-ref { width: 15%; }
         .recent-panel .col-subject { width: 24%; }
-        .recent-panel .col-submitted { width: 23%; }
-        .recent-panel .col-status { width: 13%; }
-        .recent-panel .col-action { width: 6%; }
+        .recent-panel .col-submitted { width: 24%; }
+        .recent-panel .col-status { width: 12%; }
+        .recent-panel .col-action { width: 44px; }
 
         .recent-panel .t-track,
         .recent-panel .t-ref {
@@ -928,8 +928,8 @@
                     </colgroup>
                     <thead>
                         <tr>
-                            <th>Tracking #</th>
                             <th>Reference #</th>
+                            <th>Tracking #</th>
                             <th>Subject</th>
                             <th>Submitted</th>
                             <th>Status</th>
@@ -939,8 +939,8 @@
                     <tbody>
                         @foreach($recentDocs as $doc)
                         <tr class="doc-row" style="cursor:pointer;" onclick='openDocDetail(@json($doc->tracking_number))'>
-                            <td class="t-track"><div class="cell-ellipsis" title="{{ $doc->tracking_number }}">{{ $doc->tracking_number }}</div></td>
-                            <td class="t-ref"><div class="cell-ellipsis" title="{{ $doc->reference_number ?: 'N/A' }}">{{ $doc->reference_number ?: 'N/A' }}</div></td>
+                            <td class="t-track"><div class="cell-ellipsis" title="{{ $doc->reference_number ?: 'N/A' }}">{{ $doc->reference_number ?: 'N/A' }}</div></td>
+                            <td class="t-ref"><div class="cell-ellipsis" title="{{ $doc->tracking_number ?: ($doc->reference_number ?: 'N/A') }}">{{ $doc->tracking_number ?: ($doc->reference_number ?: 'N/A') }}</div></td>
                             <td class="t-subject"><div class="cell-ellipsis" style="font-weight:600" title="{{ $doc->subject }}">{{ $doc->subject }}</div></td>
                             <td class="t-user">
                                 <div class="cell-ellipsis submission-person" style="max-width:170px" title="{{ $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest') }}">{{ $doc->user ? $doc->user->name : ($doc->sender_name ?? 'Guest') }}</div>
@@ -973,8 +973,8 @@
                     <div class="mob-card" onclick='openDocDetail(@json($doc->tracking_number))'>
                         <div class="mob-card-top">
                             <div>
-                                <div class="mob-card-ref">{{ $doc->tracking_number }}</div>
-                                <div class="mob-card-track">Ref: {{ $doc->reference_number ?: 'N/A' }}</div>
+                                <div class="mob-card-ref">{{ $doc->reference_number ?: 'N/A' }}</div>
+                                <div class="mob-card-track">Tracking: {{ $doc->tracking_number ?: ($doc->reference_number ?: 'N/A') }}</div>
                             </div>
                             <span class="mob-card-arrow"><i class="fas fa-chevron-right"></i></span>
                         </div>
@@ -1377,7 +1377,7 @@
             if(scanBtn) scanBtn.disabled = true;
 
             try{
-                var res = await fetch('/api/office/documents/receive-by-reference', {
+                var res = await fetch(@json($user->isSuperAdmin() ? '/api/ict/receive-by-reference' : '/api/office/documents/receive-by-reference'), {
                     method: 'POST',
                     headers:{'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
                     body: JSON.stringify({

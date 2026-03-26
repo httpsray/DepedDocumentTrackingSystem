@@ -852,7 +852,7 @@
             <input type="text" name="search" class="filter-input" placeholder="Search tracking/reference no., subject, or sender..." value="{{ $filters['search'] }}" data-clearable data-no-capitalize>
             <select name="status" class="filter-select">
                 <option value="">All Status</option>
-                @foreach(\App\Models\Document::STATUSES as $key => $label)
+                @foreach(\App\Models\Document::FILTER_STATUSES as $key => $label)
                     <option value="{{ $key }}" {{ $filters['status'] === $key ? 'selected' : '' }}>{{ $label }}</option>
                 @endforeach
             </select>

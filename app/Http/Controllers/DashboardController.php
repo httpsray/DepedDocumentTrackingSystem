@@ -25,7 +25,7 @@ class DashboardController extends Controller
 
         // SuperAdmin: show admin dashboard with extra link to records view
         if ($user->isSuperAdmin()) {
-            $recentDocs = Document::with('user', 'currentOffice')->latest()->take(5)->get();
+            $recentDocs = Document::with('user', 'currentOffice')->latest()->take(10)->get();
 
             $data = [
                 'user' => $user,
@@ -74,7 +74,7 @@ class DashboardController extends Controller
         }
 
         if ($user->isAdmin()) {
-            $recentDocs = Document::with('user', 'currentOffice')->latest()->take(5)->get();
+            $recentDocs = Document::with('user', 'currentOffice')->latest()->take(10)->get();
 
             return $this->adminDashboardResponse([
                 'user' => $user,
@@ -133,7 +133,7 @@ class DashboardController extends Controller
         }
 
         $status = trim((string) $request->get('status', ''));
-        if ($status !== '' && array_key_exists($status, Document::STATUSES)) {
+        if ($status !== '' && array_key_exists($status, Document::FILTER_STATUSES)) {
             $query->where('status', $status);
         }
 

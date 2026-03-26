@@ -509,7 +509,7 @@ class RepresentativeController extends Controller
             ];
             if (isset($statusGroups[$status])) {
                 $query->whereIn('status', $statusGroups[$status]);
-            } elseif (array_key_exists($status, Document::STATUSES)) {
+            } elseif (array_key_exists($status, Document::FILTER_STATUSES)) {
                 $query->where('status', $status);
             }
         }

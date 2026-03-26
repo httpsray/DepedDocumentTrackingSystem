@@ -13,47 +13,54 @@
         return;
     }
 
-    // Enhanced logout function with complete cleanup
+    var _logoutInFlight = false;
+    var LOGOUT_REDIRECT_DELAY_MS = 120;
+
+    function broadcastLogoutEvent() {
+        try {
+            localStorage.setItem('logout-event', String(Date.now()));
+        } catch (e) {}
+    }
+
+    function navigateToLogin() {
+        window.location.replace('/login');
+    }
+
+    // Fast logout path used on guarded pages.
     window.performLogout = function(event) {
         if (event) event.preventDefault();
+        if (_logoutInFlight) return false;
+        _logoutInFlight = true;
 
         var csrfToken = csrf.content;
+        var redirected = false;
 
-        // Clear all browser storage
-        try {
-            sessionStorage.clear();
-            localStorage.clear();
-        } catch (e) {
-            console.warn('Could not clear storage:', e);
-        }
+        try { sessionStorage.removeItem('logout-event'); } catch (e) {}
+        broadcastLogoutEvent();
 
-        // Clear service worker caches
-        if ('caches' in window) {
-            caches.keys().then(function(names) {
-                for (var i = 0; i < names.length; i++) {
-                    caches.delete(names[i]);
-                }
-            }).catch(function(e) {
-                console.warn('Could not clear caches:', e);
-            });
-        }
-
-        // Send logout request
-        fetch('/api/logout', {
+        var logoutRequest = fetch('/api/logout', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': csrfToken,
                 'Accept': 'application/json'
             },
-            credentials: 'same-origin'
-        }).then(function() {
-            // Force navigation (not just redirect)
-            window.location.replace('/login');
-        }).catch(function(error) {
-            // Even if logout fails, redirect to login
-            console.warn('Logout request failed:', error);
-            window.location.replace('/login');
+            credentials: 'same-origin',
+            keepalive: true
+        }).catch(function() {
+            // Best effort only. We'll still redirect immediately.
+        });
+
+        setTimeout(function() {
+            if (redirected) return;
+            redirected = true;
+            navigateToLogin();
+        }, LOGOUT_REDIRECT_DELAY_MS);
+
+        logoutRequest.finally(function() {
+            if (redirected) return;
+            redirected = true;
+            navigateToLogin();
         });
 
         return false;

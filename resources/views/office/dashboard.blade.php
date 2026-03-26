@@ -126,6 +126,29 @@
         .row-arrow{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;color:#94a3b8;transition:all .15s}
         tr.doc-row:hover .row-arrow{background:var(--primary);color:#fff}
         .cell-ellipsis{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .queue-panel .table-head{padding:14px 20px;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap}
+        .queue-panel .table-head-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+        .queue-panel table{width:100%;table-layout:fixed}
+        .queue-panel .table-card-scroll{overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable}
+        .queue-panel th{padding:10px 10px;background:#fff}
+        .queue-panel td{padding:10px 10px;border-bottom:1px solid #f1f5f9}
+        .queue-panel tr:last-child td{border-bottom:none}
+        .queue-panel .col-ref{width:15%}
+        .queue-panel .col-track{width:18%}
+        .queue-panel .col-subject{width:23%}
+        .queue-panel .col-submitted{width:20%}
+        .queue-panel .col-status{width:12%}
+        .queue-panel .col-cta{width:92px}
+        .queue-panel .col-action{width:44px}
+        .queue-panel .t-ref,.queue-panel .t-track{font-family:monospace;font-size:12px;font-weight:600;white-space:nowrap}
+        .queue-panel .t-ref{color:var(--primary)}
+        .queue-panel .t-track{color:var(--text-dark)}
+        .queue-panel .t-status{white-space:nowrap;min-width:0}
+        .queue-panel .submission-person{font-size:12px;color:var(--text-dark);font-weight:500}
+        .queue-panel .submission-date{display:inline-flex;align-items:center;gap:5px;margin-top:4px;font-size:11px;color:#94a3b8;white-space:nowrap}
+        .queue-panel .submission-date i{font-size:10px}
+        .queue-panel .td-cta{white-space:nowrap}
+        .queue-panel .td-cta .btn-accept{width:100%;justify-content:center;padding:8px 10px;border-radius:8px}
         .mob-cards{display:none;padding:12px}
         .mob-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.04);cursor:pointer;transition:border-color .15s,box-shadow .15s}
         .mob-card + .mob-card{margin-top:10px}
@@ -411,11 +434,12 @@
     </div>
 
     <!-- Documents table -->
-    <div class="table-card dashboard-table-card{{ $documents->isNotEmpty() ? ' has-list' : '' }}">
+    <div class="table-card dashboard-table-card queue-panel{{ $documents->isNotEmpty() ? ' has-list' : '' }}">
         <div class="table-head">
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <div class="table-head-left">
                 <span class="table-title">Document Queue</span>
-                <span class="table-doc-count" id="docUpdateFlash"></span>
+                <span class="table-doc-count">{{ \App\Support\UiNumber::compact($documents->count()) }} showing</span>
+                <span class="doc-update-flash" id="docUpdateFlash">List updated</span>
             </div>
             <div class="filters">
                 <div class="search-wrap">
@@ -426,7 +450,6 @@
                     <option value="">All Statuses</option>
                     <option value="submitted">Submitted</option>
                     <option value="in_review">Processing</option>
-                    <option value="on_hold">On Hold</option>
                     <option value="for_pickup">For Pickup</option>
                 </select>
             </div>
@@ -441,29 +464,39 @@
         @else
             <div class="table-scroll table-card-scroll">
             <table id="docsTable">
+                <colgroup>
+                    <col class="col-ref">
+                    <col class="col-track">
+                    <col class="col-subject">
+                    <col class="col-submitted">
+                    <col class="col-status">
+                    <col class="col-cta">
+                    <col class="col-action">
+                </colgroup>
                 <thead>
                     <tr>
-                        <th>Tracking #</th>
                         <th>Reference #</th>
+                        <th>Tracking #</th>
                         <th>Subject</th>
-                        <th>Type</th>
-                        <th>Sender</th>
+                        <th>Submitted</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th>Action</th>
                         <th class="td-action"></th>
                     </tr>
                 </thead>
                 <tbody>
                 @foreach($documents as $doc)
                     <tr class="doc-row" onclick='openDocDetail(@json($doc->tracking_number))' data-status="{{ $doc->status }}" data-search="{{ strtolower($doc->tracking_number . ' ' . ($doc->reference_number ?? '') . ' ' . $doc->subject . ' ' . $doc->type . ' ' . $doc->sender_name) }}">
-                        <td style="font-family:monospace;font-size:12px;font-weight:600;color:var(--primary);white-space:nowrap">{{ $doc->tracking_number }}</td>
-                        <td style="font-family:monospace;font-size:12px;font-weight:600;white-space:nowrap">{{ $doc->reference_number ?: 'N/A' }}</td>
-                        <td style="max-width:200px">
+                        <td class="t-ref"><div class="cell-ellipsis" title="{{ $doc->reference_number ?: 'N/A' }}">{{ $doc->reference_number ?: 'N/A' }}</div></td>
+                        <td class="t-track"><div class="cell-ellipsis" title="{{ $doc->tracking_number ?: ($doc->reference_number ?: 'N/A') }}">{{ $doc->tracking_number ?: ($doc->reference_number ?: 'N/A') }}</div></td>
+                        <td class="t-subject" style="max-width:200px">
                             <div class="cell-ellipsis" style="font-weight:600" title="{{ $doc->subject }}">{{ $doc->subject }}</div>
                         </td>
-                        <td style="font-size:12px;white-space:nowrap"><div class="cell-ellipsis" style="max-width:150px" title="{{ $doc->type }}">{{ $doc->type }}</div></td>
-                        <td style="font-size:12px"><div class="cell-ellipsis" style="max-width:160px" title="{{ $doc->sender_name }}">{{ $doc->sender_name }}</div></td>
-                        <td>
+                        <td class="t-submitted">
+                            <div class="cell-ellipsis submission-person" title="{{ $doc->sender_name }}">{{ $doc->sender_name }}</div>
+                            <div class="submission-date"><i class="fas fa-calendar-alt"></i>{{ $doc->created_at->format('M d, Y') }}</div>
+                        </td>
+                        <td class="t-status">
                             <span style="display:inline-flex;align-items:center;gap:5px">
                                 <span class="badge badge-{{ $doc->status }}">{{ $doc->statusLabel() }}</span>
                                 @if($doc->status === 'for_pickup')
@@ -471,14 +504,12 @@
                                 @endif
                             </span>
                         </td>
-                        <td>
-                            <div style="display:flex;gap:6px;align-items:center">
-                                @if($doc->status === 'submitted')
-                                    <button class="btn-accept" onclick="event.stopPropagation(); quickAccept({{ $doc->id }}, this)">
-                                        <i class="fas fa-check"></i> Accept
-                                    </button>
-                                @endif
-                            </div>
+                        <td class="td-cta">
+                            @if($doc->status === 'submitted')
+                                <button class="btn-accept" onclick="event.stopPropagation(); quickAccept({{ $doc->id }}, this)">
+                                    <i class="fas fa-check"></i> Accept
+                                </button>
+                            @endif
                         </td>
                         <td class="td-action"><span class="row-arrow"><i class="fas fa-chevron-right"></i></span></td>
                     </tr>
@@ -496,8 +527,8 @@
                     >
                         <div class="mob-card-top">
                             <div class="mob-card-ids">
-                                <div class="mob-card-ref">{{ $doc->tracking_number }}</div>
-                                <div class="mob-card-track">Ref: {{ $doc->reference_number ?: 'N/A' }}</div>
+                                <div class="mob-card-ref">{{ $doc->reference_number ?: 'N/A' }}</div>
+                                <div class="mob-card-track">Tracking: {{ $doc->tracking_number ?: ($doc->reference_number ?: 'N/A') }}</div>
                             </div>
                             <span class="mob-card-arrow"><i class="fas fa-chevron-right"></i></span>
                         </div>
@@ -511,15 +542,9 @@
                             </span>
                             <span class="mob-card-date"><i class="fas fa-calendar"></i>{{ $doc->created_at->format('M d, Y') }}</span>
                         </div>
-                        <div class="mob-card-grid">
-                            <div class="mob-card-item">
-                                <span class="mob-card-k">Type</span>
-                                <span class="mob-card-v" title="{{ $doc->type }}">{{ $doc->type }}</span>
-                            </div>
-                            <div class="mob-card-item">
-                                <span class="mob-card-k">Sender</span>
-                                <span class="mob-card-v" title="{{ $doc->sender_name }}">{{ $doc->sender_name }}</span>
-                            </div>
+                        <div class="mob-card-row">
+                            <i class="fas fa-user"></i>
+                            <span class="cell-ellipsis" title="{{ $doc->sender_name }}">{{ $doc->sender_name }}</span>
                         </div>
                         @if($doc->status === 'submitted')
                         <div class="mob-card-actions">
@@ -721,6 +746,10 @@ async function receiveByReference(){
 
     return submitReceiveLookup(ref, 'Receiving document...');
 }
+
+window.clearRefBoxes = clearRefBoxes;
+window.submitReceiveLookup = submitReceiveLookup;
+window.receiveByReference = receiveByReference;
 
 var _pendingAcceptId = null, _pendingAcceptBtn = null;
 function quickAccept(docId, btn){
@@ -1019,6 +1048,10 @@ document.addEventListener('keydown', function(e){
     <script src="/js/jsqr.js"></script>
     <script>
     (function(){
+        if (window.__docTraxOfficeScanner && typeof window.__docTraxOfficeScanner.cleanup === 'function') {
+            try { window.__docTraxOfficeScanner.cleanup(); } catch (e) {}
+        }
+
         var html5QrCode = null;
         var scannerRunning = false;
         var activeStream = null;
@@ -1029,6 +1062,7 @@ document.addEventListener('keydown', function(e){
         var scanBuffer = '';
         var scanTimer = null;
         var SCAN_IDLE_MS = 80;
+        var scannerDestroyed = false;
 
         function scannerOverlay(){
             return document.getElementById('scannerOverlay');
@@ -1124,19 +1158,22 @@ document.addEventListener('keydown', function(e){
 
             window.closeScanner();
             fillRefBoxes(lookup);
-            submitReceiveLookup(lookup, 'QR detected. Receiving document...');
+            window.submitReceiveLookup(lookup, 'QR detected. Receiving document...');
         }
 
         window.openScanner = function() {
             var overlay = scannerOverlay();
             if (!overlay) return;
+            scannerDestroyed = false;
             overlay.classList.add('show');
             document.body.style.overflow = 'hidden';
+            scanCooldown = false;
             scanBuffer = '';
             if (scanTimer) {
                 clearTimeout(scanTimer);
                 scanTimer = null;
             }
+            stopCamera();
             startCamera();
         };
 
@@ -1378,7 +1415,7 @@ document.addEventListener('keydown', function(e){
             clearReader();
         }
 
-        document.addEventListener('keydown', function(e) {
+        function handleScannerKeydown(e) {
             if (e.key === 'Escape' && isScannerOpen()) {
                 e.preventDefault();
                 window.closeScanner();
@@ -1410,7 +1447,33 @@ document.addEventListener('keydown', function(e){
                     scanTimer = null;
                 }, SCAN_IDLE_MS);
             }
-        });
+        }
+
+        function destroyScanner() {
+            if (scannerDestroyed) return;
+            scannerDestroyed = true;
+            scanCooldown = false;
+            scanBuffer = '';
+            if (scanTimer) {
+                clearTimeout(scanTimer);
+                scanTimer = null;
+            }
+            stopCamera();
+            var overlay = scannerOverlay();
+            if (overlay) overlay.classList.remove('show');
+            if (document.body) document.body.style.overflow = '';
+            document.removeEventListener('keydown', handleScannerKeydown);
+            window.removeEventListener('spa:before-swap', destroyScanner);
+            window.removeEventListener('pagehide', destroyScanner);
+            if (window.__docTraxOfficeScanner && window.__docTraxOfficeScanner.cleanup === destroyScanner) {
+                window.__docTraxOfficeScanner = null;
+            }
+        }
+
+        window.__docTraxOfficeScanner = { cleanup: destroyScanner };
+        window.addEventListener('spa:before-swap', destroyScanner);
+        window.addEventListener('pagehide', destroyScanner);
+        document.addEventListener('keydown', handleScannerKeydown);
     })();
     </script>
 

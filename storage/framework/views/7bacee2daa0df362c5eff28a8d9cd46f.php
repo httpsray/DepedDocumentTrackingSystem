@@ -137,7 +137,41 @@
         const passwordInput = document.getElementById('password');
         const passwordGroup = document.getElementById('passwordGroup');
         const submitBtn = document.getElementById('submitBtn');
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        function getCsrfToken() {
+            const tokenNode = document.querySelector('meta[name="csrf-token"]');
+            return tokenNode ? tokenNode.getAttribute('content') : '';
+        }
+
+        function redirectToFreshLogin() {
+            const url = new URL('/login', window.location.origin);
+            url.searchParams.set('session', 'expired');
+            if (nextPath) {
+                url.searchParams.set('next', nextPath);
+            }
+            window.location.replace(url.toString());
+        }
+
+        async function parseAuthResponse(response) {
+            if (response.status === 401 || response.status === 419) {
+                redirectToFreshLogin();
+                throw new Error('SESSION_EXPIRED');
+            }
+
+            const contentType = response.headers.get('content-type') || '';
+
+            if (contentType.includes('application/json')) {
+                return response.json();
+            }
+
+            const text = await response.text();
+
+            try {
+                return JSON.parse(text);
+            } catch (error) {
+                throw new Error('INVALID_RESPONSE');
+            }
+        }
 
         function getSafeNextPath() {
             const next = new URLSearchParams(window.location.search).get('next');
@@ -202,10 +236,15 @@
                 try {
                     const response = await fetch('/api/check-email', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': getCsrfToken()
+                        },
+                        credentials: 'same-origin',
                         body: JSON.stringify({ email: emailVal })
                     });
-                    const data = await response.json();
+                    const data = await parseAuthResponse(response);
 
                     if (data.exists) {
                         if (data.pending) {
@@ -239,6 +278,9 @@
                         window.location.href = '/register?email=' + encodeURIComponent(emailVal);
                     }
                 } catch (error) {
+                    if (error && error.message === 'SESSION_EXPIRED') {
+                        return;
+                    }
                     console.error('Check email error:', error);
                     showError('email', 'Server error. Please try again.');
                     submitBtn.innerText = 'Proceed';
@@ -257,13 +299,18 @@
                 try {
                     const response = await fetch('/api/login', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': getCsrfToken()
+                        },
+                        credentials: 'same-origin',
                         body: JSON.stringify({
                             email: confirmedEmail,
                             password: passwordInput.value
                         })
                     });
-                    const data = await response.json();
+                    const data = await parseAuthResponse(response);
 
                     if (data.success) {
                         window.location.href = nextPath || '/dashboard';
@@ -297,6 +344,9 @@
                         submitBtn.disabled = false;
                     }
                 } catch (error) {
+                    if (error && error.message === 'SESSION_EXPIRED') {
+                        return;
+                    }
                     console.error('Login error:', error);
                     showError('password', 'System error occurred. Please try again.');
                     submitBtn.innerText = 'Login';
@@ -324,6 +374,21 @@
             document.getElementById(field).style.borderColor = '#e2e8f0';
         }
 
+        const sessionState = new URLSearchParams(window.location.search).get('session');
+        if (sessionState === 'expired') {
+            showError('email', 'Your session expired. Please sign in again.');
+
+            const params = new URLSearchParams(window.location.search);
+            params.delete('session');
+            const cleanUrl = window.location.pathname
+                + (params.toString() ? '?' + params.toString() : '')
+                + window.location.hash;
+
+            if (window.history && typeof window.history.replaceState === 'function') {
+                window.history.replaceState({}, '', cleanUrl);
+            }
+        }
+
         // Expose togglePassword globally for onclick handler
         window.togglePassword = togglePassword;
     })();
@@ -339,4 +404,4 @@
 </body>
 </html>
 
-<?php /**PATH C:\Users\iamra\Desktop\DepedDocumentTrackingSystem\resources\views/auth/login.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\Users\iamra\Desktop\DepedDocumentTrackingSystem\resources\views\auth\login.blade.php ENDPATH**/ ?>

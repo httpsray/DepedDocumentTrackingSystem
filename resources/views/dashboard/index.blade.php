@@ -269,6 +269,235 @@
             justify-content: center;
         }
 
+        .recent-docs-panel .panel-head {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .recent-docs-panel .panel-head-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .table-doc-count {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .recent-docs-panel .dtable {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .recent-docs-panel .panel-scroll-body {
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-gutter: stable;
+        }
+
+        .recent-docs-panel .dtable th {
+            text-align: left;
+            padding: 10px 10px;
+            font-size: 10.5px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .recent-docs-panel .dtable td {
+            padding: 10px 10px;
+            font-size: 13px;
+            color: var(--text-dark);
+            border-top: none;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .recent-docs-panel .dtable tbody tr {
+            cursor: pointer;
+        }
+
+        .recent-docs-panel .dtable tbody tr:hover td {
+            background: #f8faff;
+        }
+
+        .recent-docs-panel .dtable tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .recent-docs-panel .dtable th,
+        .recent-docs-panel .dtable td {
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .recent-docs-panel .pill {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 9.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            white-space: nowrap;
+        }
+
+        .recent-docs-panel .td-action {
+            width: 40px;
+            text-align: center;
+        }
+
+        .recent-docs-panel .dtable th.td-action,
+        .recent-docs-panel .dtable td.td-action {
+            padding-left: 2px;
+            padding-right: 8px;
+        }
+
+        .recent-docs-panel .row-arrow {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            color: #94a3b8;
+            transition: all .15s;
+            flex-shrink: 0;
+        }
+
+        .recent-docs-panel .dtable tbody tr:hover .row-arrow,
+        .recent-docs-panel .mob-card:hover .mob-card-arrow {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .recent-docs-panel .col-ref { width: 24%; }
+        .recent-docs-panel .col-subject { width: 36%; }
+        .recent-docs-panel .col-status { width: 18%; }
+        .recent-docs-panel .col-date { width: 16%; }
+        .recent-docs-panel .col-action { width: 44px; }
+
+        .recent-docs-panel .t-ref {
+            font-family: monospace;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+
+        .recent-docs-panel .t-subject .cell-ellipsis {
+            max-width: 100%;
+        }
+
+        .recent-docs-panel .t-status {
+            white-space: nowrap;
+            min-width: 0;
+        }
+
+        .recent-docs-panel .t-date {
+            font-size: 11px;
+            color: #94a3b8;
+            white-space: nowrap;
+        }
+
+        .recent-docs-panel .mob-cards {
+            display: none;
+        }
+
+        .recent-docs-panel .mob-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: box-shadow .15s, border-color .15s;
+        }
+
+        .recent-docs-panel .mob-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0,86,179,.08);
+        }
+
+        .recent-docs-panel .mob-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+            gap: 10px;
+        }
+
+        .recent-docs-panel .mob-card-ref {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary);
+            font-family: monospace;
+        }
+
+        .recent-docs-panel .mob-card-arrow {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            color: #94a3b8;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .recent-docs-panel .mob-card-subject {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .recent-docs-panel .mob-card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            font-size: 12px;
+            color: var(--text-muted);
+            align-items: center;
+        }
+
+        .recent-docs-panel .mob-card-date {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .recent-docs-panel .mob-card-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .recent-docs-panel .mob-card-row i {
+            font-size: 11px;
+            opacity: .75;
+            flex-shrink: 0;
+        }
+
         .panel-head {
             display: flex;
             justify-content: space-between;
@@ -468,6 +697,17 @@
             .panel-actions .actions-list { overflow: visible; }
         }
 
+        @media (max-width: 900px) {
+            .recent-docs-panel .dtable-wrap { display: none; }
+            .recent-docs-panel .mob-cards {
+                display: block;
+                padding: 10px 12px;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
         @media (max-width: 400px) {
             .greeting-section h1 { font-size: 18px; }
         }
@@ -518,6 +758,8 @@
         $navRepName    = $user->name;
         $navDisplayName = $isRep ? $navOfficeName : explode(' ', $user->name)[0];
         $navDisplayRole = $isRep ? ($user->office_id ? 'Office' : 'Representative') : ucfirst($user->role ?? 'User');
+        $dashboardWelcomeName = $navRepName ?: $navDisplayName;
+        $dashboardContextLabel = $navOfficeName ?: ($isRep ? 'Representative Dashboard' : 'Personal Dashboard');
         $pickupCount = $stats['for_pickup'] ?? 0;
     @endphp
 
@@ -569,8 +811,8 @@
         <!-- Top Bar -->
         <div class="top-bar anim">
             <div class="greeting-section">
-                <h1>{{ $navDisplayName }}</h1>
-                <p>Welcome back &mdash; here's your document overview.</p>
+                <h1>Welcome back, {{ $dashboardWelcomeName }}!</h1>
+                <p>{{ $dashboardContextLabel }} &mdash; here's your document overview.</p>
             </div>
 
             <div class="live-clock">
@@ -636,29 +878,44 @@
         <div class="grid">
 
             <!-- Recent Documents -->
-            <div class="panel panel-fixed anim">
+            <div class="panel panel-fixed recent-docs-panel anim" id="recentDocumentsPanel">
                 <div class="panel-head">
-                    <div class="panel-title">Recent Documents</div>
+                    <div class="panel-head-left">
+                        <div class="panel-title">Recent Documents</div>
+                        <span class="table-doc-count">{{ \App\Support\UiNumber::compact($recentDocs->count()) }} showing</span>
+                    </div>
                     <a href="/my-documents" class="panel-link">View all <i class="fas fa-arrow-right" style="font-size:11px"></i></a>
                 </div>
 
                 @if($recentDocs->count() > 0)
                 <div class="dtable-wrap panel-scroll-body">
                 <table class="dtable">
+                    <colgroup>
+                        <col class="col-ref">
+                        <col class="col-subject">
+                        <col class="col-status">
+                        <col class="col-date">
+                        <col class="col-action">
+                    </colgroup>
                     <thead>
                         <tr>
-                            <th>Tracking No.</th>
+                            <th>Reference #</th>
                             <th>Subject</th>
                             <th>Status</th>
                             <th>Date</th>
+                            <th class="td-action"></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($recentDocs as $doc)
-                        <tr>
-                            <td><span class="t-num">{{ $doc->reference_number }}</span></td>
-                            <td style="max-width:200px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ $doc->subject }}">{{ $doc->subject }}</div></td>
-                            <td>
+                        @php
+                            $recentLookup = $doc->reference_number ?: ($doc->tracking_number ?: '');
+                            $recentDocUrl = '/my-documents?search=' . urlencode($recentLookup);
+                        @endphp
+                        <tr onclick='window.location.href=@json($recentDocUrl)'>
+                            <td class="t-ref"><div class="cell-ellipsis" title="{{ $recentLookup }}">{{ $recentLookup }}</div></td>
+                            <td class="t-subject"><div class="cell-ellipsis" style="font-weight:600" title="{{ $doc->subject }}">{{ $doc->subject }}</div></td>
+                            <td class="t-status">
                                 @php
                                     $sc = match($doc->status) {
                                         'submitted', 'received' => 'pending',
@@ -675,10 +932,42 @@
                                 </span>
                             </td>
                             <td class="t-date">{{ $doc->created_at->format('M d, Y') }}</td>
+                            <td class="td-action"><span class="row-arrow" aria-hidden="true"><i class="fas fa-chevron-right"></i></span></td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
+                </div>
+                <div class="mob-cards">
+                    @foreach($recentDocs as $doc)
+                    @php
+                        $recentLookup = $doc->reference_number ?: ($doc->tracking_number ?: '');
+                        $recentDocUrl = '/my-documents?search=' . urlencode($recentLookup);
+                    @endphp
+                    <div class="mob-card" onclick='window.location.href=@json($recentDocUrl)'>
+                        <div class="mob-card-top">
+                            <div class="mob-card-ref">{{ $recentLookup }}</div>
+                            <span class="mob-card-arrow"><i class="fas fa-chevron-right"></i></span>
+                        </div>
+                        <div class="mob-card-subject">{{ $doc->subject }}</div>
+                        <div class="mob-card-meta">
+                            @php
+                                $sc = match($doc->status) {
+                                    'submitted', 'received' => 'pending',
+                                    'in_review', 'on_hold' => 'processing',
+                                    'completed', 'for_pickup' => 'completed',
+                                    default => 'other',
+                                };
+                            @endphp
+                            <span class="pill {{ $sc }}">{{ $doc->statusLabel() }}</span>
+                            <span class="mob-card-date"><i class="fas fa-calendar"></i>{{ $doc->created_at->format('M d, Y') }}</span>
+                        </div>
+                        <div class="mob-card-row">
+                            <i class="fas fa-building"></i>
+                            <span class="cell-ellipsis" title="{{ $doc->currentOffice?->name ?? 'Awaiting routing' }}">{{ $doc->currentOffice?->name ?? 'Awaiting routing' }}</span>
+                        </div>
+                    </div>
+                    @endforeach
                 </div>
                 @else
                 <div class="empty-state">
@@ -689,7 +978,7 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="panel panel-actions anim">
+            <div class="panel panel-actions anim" id="quickActionsPanel">
                 <div class="panel-head">
                     <div class="panel-title">Quick Actions</div>
                 </div>
@@ -760,6 +1049,24 @@
 
     <script>
     (function() {
+        function syncRecentPanelHeight() {
+            var recentPanel = document.getElementById('recentDocumentsPanel');
+            var quickActionsPanel = document.getElementById('quickActionsPanel');
+            if (!recentPanel) return;
+
+            recentPanel.style.height = '';
+            recentPanel.style.minHeight = '';
+
+            if (!quickActionsPanel || window.innerWidth <= 1024) {
+                return;
+            }
+
+            var quickActionsHeight = quickActionsPanel.offsetHeight;
+            if (quickActionsHeight > 0) {
+                recentPanel.style.height = quickActionsHeight + 'px';
+            }
+        }
+
         // ─── Clock ───
         function tick() {
             var n = new Date();
@@ -831,6 +1138,24 @@
         }
         if (window.smartInterval) { window.smartInterval(refreshStats, 30000); }
         else { setInterval(refreshStats, 30000); }
+
+        syncRecentPanelHeight();
+        window.addEventListener('resize', syncRecentPanelHeight);
+        window.addEventListener('load', syncRecentPanelHeight);
+
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(syncRecentPanelHeight).catch(function() {});
+        }
+
+        if (window.ResizeObserver) {
+            var quickActionsPanel = document.getElementById('quickActionsPanel');
+            if (quickActionsPanel) {
+                var recentPanelObserver = new ResizeObserver(function() {
+                    syncRecentPanelHeight();
+                });
+                recentPanelObserver.observe(quickActionsPanel);
+            }
+        }
 
         // ─── Pickup confirmation ───
         var _pickupRef = null;

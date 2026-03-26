@@ -328,4 +328,4 @@
     </script>
 </body>
 </html>
-<?php /**PATH C:\Users\iamra\Desktop\DepedDocumentTrackingSystem\resources\views/auth/forgot-password.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\Users\iamra\Desktop\DepedDocumentTrackingSystem\resources\views\auth\forgot-password.blade.php ENDPATH**/ ?>

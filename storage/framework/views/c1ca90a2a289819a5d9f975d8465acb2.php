@@ -70,4 +70,4 @@
     </table>
 </body>
 </html>
-<?php /**PATH C:\Users\iamra\Desktop\DepedDocumentTrackingSystem\resources\views/emails/password-reset.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\Users\iamra\Desktop\DepedDocumentTrackingSystem\resources\views\emails\password-reset.blade.php ENDPATH**/ ?>

@@ -212,13 +212,15 @@ class DocumentController extends Controller
         $request->validate([
             'tracking_number' => 'nullable|string',
             'reference_number' => 'nullable|string',
+            'ref' => 'nullable|string',
         ]);
 
-        $lookupInput = strtoupper(trim(strip_tags((string)($request->tracking_number ?: $request->reference_number))));
+        $lookupInput = strtoupper(trim(strip_tags((string)($request->tracking_number ?: $request->reference_number ?: $request->ref))));
 
         if ($lookupInput === '') {
             return response()->json([
                 'success' => false,
+                'found' => false,
                 'message' => 'Tracking number is required.',
             ], 422);
         }
@@ -238,6 +240,7 @@ class DocumentController extends Controller
         if (!$document) {
             return response()->json([
                 'success' => false,
+                'found' => false,
                 'message' => 'Tracking number not found. Please check and try again.',
             ], 404);
         }
@@ -357,6 +360,8 @@ class DocumentController extends Controller
                 $remarks = 'Document submitted. Awaiting acceptance by ' . $displayToOffice . '.';
             }
 
+            $remarks = $this->normalizeTrackingRemarks($log, $remarks, $displayToOffice);
+
             return [
                 'id' => $log->id,
                 'action' => $log->action,
@@ -414,11 +419,15 @@ class DocumentController extends Controller
 
         return response()->json([
             'success' => true,
+            'found' => true,
+            'logs' => $logs,
             'document' => [
+                'id' => $document->id,
                 'reference_number' => $document->reference_number ?: $document->tracking_number,
                 'tracking_number' => $document->tracking_number,
                 'subject' => $document->subject,
                 'type' => $document->type,
+                'description' => $document->description,
                 'status' => $document->status,
                 'status_label' => $document->statusLabel(),
                 'status_color' => $document->statusColor(),
@@ -431,6 +440,37 @@ class DocumentController extends Controller
                 'routing_logs' => $logs,
             ],
         ]);
+    }
+
+    private function normalizeTrackingRemarks(RoutingLog $log, ?string $remarks, ?string $displayToOffice): ?string
+    {
+        $remarks = $remarks !== null ? trim($remarks) : null;
+
+        if (strtolower((string) $log->action) !== 'processing') {
+            return $remarks;
+        }
+
+        $legacyIctRemarks = [
+            'document accepted by ict unit (super admin).',
+            'document is now being processed by ict unit (super admin).',
+        ];
+
+        if ($remarks !== null && !in_array(strtolower($remarks), $legacyIctRemarks, true) && $remarks !== '') {
+            return $remarks;
+        }
+
+        $fromOfficeName = $log->fromOffice?->name;
+        $toOfficeName = $displayToOffice ?: $log->toOffice?->name;
+
+        if ($fromOfficeName && $toOfficeName && strcasecmp($fromOfficeName, $toOfficeName) !== 0) {
+            return "Document handed off from {$fromOfficeName} to {$toOfficeName}.";
+        }
+
+        if ($toOfficeName) {
+            return "Document is now being processed at {$toOfficeName}.";
+        }
+
+        return 'Document is now being processed.';
     }
 
     /**
@@ -457,7 +497,8 @@ class DocumentController extends Controller
             'imageBase64'  => false,
         ]);
 
-        $receiveUrl = url('/receive/' . $document->tracking_number);
+        $receiveLookup = $document->reference_number ?: $document->tracking_number;
+        $receiveUrl = url('/receive/' . $receiveLookup);
         $svg = (new QRCode($options))->render($receiveUrl);
 
         return response($svg, 200, [
