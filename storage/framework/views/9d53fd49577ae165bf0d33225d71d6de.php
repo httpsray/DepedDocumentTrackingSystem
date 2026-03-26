@@ -1010,7 +1010,7 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
                 <button class="scanner-close" onclick="closeScanner()">&#10005;</button>
             </div>
             <div class="scanner-body">
-                <div class="scanner-hint">Point your camera at the document's QR code to auto-fill the tracking number.</div>
+                <div class="scanner-hint">Point your camera at the document's QR code to review it before receiving.</div>
                 <div id="qr-reader"></div>
                 <p class="camera-status" id="cameraStatus">Initializing camera...</p>
             </div>
@@ -1124,8 +1124,7 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
             if (!lookup || lookup.length < 8) return;
 
             window.closeScanner();
-            fillRefBoxes(lookup);
-            window.submitReceiveLookup(lookup, 'QR detected. Receiving document...');
+            window.location.assign('/receive/' + encodeURIComponent(lookup));
         }
 
         window.openScanner = function() {
