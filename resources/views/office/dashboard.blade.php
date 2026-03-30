@@ -173,6 +173,8 @@
         .empty-state i{font-size:40px;color:#cbd5e1;margin-bottom:12px;display:block}
         .empty-state h3{font-size:15px;font-weight:600;color:#94a3b8;margin-bottom:6px}
         .empty-state p{font-size:12px}
+        #noResultRow{display:none}
+        #noResultRow td{text-align:center;padding:40px;color:var(--text-muted);font-size:13px}
         /* Tracking Drawer (aligned with My Documents) */
         .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:400;opacity:0;pointer-events:none;transition:opacity .25s}
         .drawer-overlay.open{opacity:1;pointer-events:all}
@@ -203,7 +205,7 @@
         .tl-dot.c-warn{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
         .tl-dot.c-danger{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
         .tl-dot.c-latest{background:#f59e0b;box-shadow:0 0 0 2px #f59e0b}
-        .tl-action{font-size:12px;font-weight:500;color:#64748b}
+        .tl-action{font-size:12px;font-weight:700;color:#1b263b}
         .tl-meta{font-size:12px;color:#64748b;margin:2px 0}
         .tl-remarks{font-size:12px;color:#64748b;background:#f8fafc;border-left:3px solid var(--border);padding:5px 9px;border-radius:4px;margin-top:5px}
         .tl-office-hdr{display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--text-dark);text-transform:none;letter-spacing:0;margin:18px 0 8px -7px;padding-left:7px;padding-bottom:6px;position:relative}
@@ -212,15 +214,16 @@
         .drawer-loader{display:flex;align-items:center;justify-content:center;padding:48px;flex-direction:column;gap:12px;color:var(--text-muted);font-size:13px}
         .spin{width:22px;height:22px;border:3px solid #e2e8f0;border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite}
         /* ─── Mobile sidebar ─── */
-        .mob-topbar{display:flex;position:sticky;top:0;z-index:100;background:#0056b3;padding:12px 16px;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+        .mob-topbar{display:flex;position:sticky;top:0;z-index:100;background:#0056b3;padding:14px 18px;align-items:center;justify-content:space-between;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
         .mob-hamburger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;z-index:1001;user-select:none;padding:4px}
         .mob-hamburger span{height:2px;width:24px;background:#fff;border-radius:2px;transition:all .4s ease}
         .mob-hamburger.toggle span:nth-child(1){transform:rotate(-45deg) translate(-4px,5px)}
         .mob-hamburger.toggle span:nth-child(2){opacity:0}
         .mob-hamburger.toggle span:nth-child(3){transform:rotate(45deg) translate(-4px,-5px)}
-        .mob-brand{flex:1;display:flex;flex-direction:column;color:#fff}
-        .mob-brand .brand-subtitle{font-size:clamp(9px,2vw,11px);opacity:.85;text-transform:uppercase;letter-spacing:1px}
-        .mob-brand h1{font-size:clamp(13px,3.5vw,18px);font-weight:700;margin:0;line-height:1.2}
+        .mob-brand{flex:1;display:flex;flex-direction:column;color:#fff;gap:4px}
+        .mob-brand .brand-subtitle{font-size:clamp(10px,2.4vw,11px);font-weight:500;opacity:.88;text-transform:uppercase;letter-spacing:2.4px;line-height:1.1}
+        .mob-brand h1{font-size:clamp(18px,4.8vw,22px);font-weight:700;margin:0;line-height:1.08}
+        .mob-brand .brand-caption{font-size:clamp(11px,2.9vw,13px);font-weight:300;opacity:.9;line-height:1.18}
         .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:199}
         .mob-overlay.open{display:block}
 
@@ -327,7 +330,8 @@
     <button class="mob-hamburger" id="mobHamBtn" type="button" onclick="toggleSidebar()" aria-label="Menu"><span></span><span></span><span></span></button>
     <div class="mob-brand">
         <span class="brand-subtitle">Department of Education</span>
-        <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
+        <h1>CSJDM DOCTRAX</h1>
+        <span class="brand-caption">Document Tracking System &mdash; DOCTRAX</span>
     </div>
 </div>
 <div class="mob-overlay" id="mobOverlay" onclick="closeSidebar()"></div>
@@ -486,7 +490,10 @@
                 </thead>
                 <tbody>
                 @foreach($documents as $doc)
-                    <tr class="doc-row" onclick='openDocDetail(@json($doc->tracking_number))' data-status="{{ $doc->status }}" data-search="{{ strtolower($doc->tracking_number . ' ' . ($doc->reference_number ?? '') . ' ' . $doc->subject . ' ' . $doc->type . ' ' . $doc->sender_name) }}">
+                    @php
+                        $docLookup = $doc->tracking_number ?: $doc->reference_number;
+                    @endphp
+                    <tr class="doc-row" onclick='openDocDetail(@json($docLookup))' data-status="{{ $doc->status }}" data-search="{{ strtolower(($docLookup ?: '') . ' ' . ($doc->reference_number ?? '') . ' ' . $doc->subject . ' ' . $doc->type . ' ' . $doc->sender_name) }}">
                         <td class="t-ref"><div class="cell-ellipsis" title="{{ $doc->reference_number ?: 'N/A' }}">{{ $doc->reference_number ?: 'N/A' }}</div></td>
                         <td class="t-track"><div class="cell-ellipsis" title="{{ $doc->tracking_number ?: ($doc->reference_number ?: 'N/A') }}">{{ $doc->tracking_number ?: ($doc->reference_number ?: 'N/A') }}</div></td>
                         <td class="t-subject" style="max-width:200px">
@@ -514,16 +521,22 @@
                         <td class="td-action"><span class="row-arrow"><i class="fas fa-chevron-right"></i></span></td>
                     </tr>
                 @endforeach
+                <tr id="noResultRow">
+                    <td colspan="7"><i class="fas fa-search" style="margin-right:6px;opacity:.4"></i>No documents match your search or status filter.</td>
+                </tr>
                 </tbody>
             </table>
             </div>
             <div class="mob-cards">
                 @foreach($documents as $doc)
+                    @php
+                        $docLookup = $doc->tracking_number ?: $doc->reference_number;
+                    @endphp
                     <div
                         class="mob-card"
-                        onclick='openDocDetail(@json($doc->tracking_number))'
+                        onclick='openDocDetail(@json($docLookup))'
                         data-status="{{ $doc->status }}"
-                        data-search="{{ strtolower($doc->tracking_number . ' ' . ($doc->reference_number ?? '') . ' ' . $doc->subject . ' ' . $doc->type . ' ' . $doc->sender_name) }}"
+                        data-search="{{ strtolower(($docLookup ?: '') . ' ' . ($doc->reference_number ?? '') . ' ' . $doc->subject . ' ' . $doc->type . ' ' . $doc->sender_name) }}"
                     >
                         <div class="mob-card-top">
                             <div class="mob-card-ids">
@@ -555,6 +568,11 @@
                         @endif
                     </div>
                 @endforeach
+                <div class="empty-state" id="noResultMobile" style="display:none">
+                    <i class="fas fa-search"></i>
+                    <h3>No Results Found</h3>
+                    <p>No documents match your search or status filter.</p>
+                </div>
             </div>
         @endif
     </div>
@@ -610,12 +628,31 @@ var docsData = JSON.parse(document.getElementById('docsData').textContent || '{}
 function filterTable(){
     var q      = document.getElementById('searchInput').value.toLowerCase().trim();
     var status = document.getElementById('statusFilter').value;
-    document.querySelectorAll('#docsTable tbody tr, .mob-cards .mob-card').forEach(function(item){
+    var rows = document.querySelectorAll('#docsTable tbody tr.doc-row');
+    var cards = document.querySelectorAll('.mob-cards .mob-card');
+    var shown = 0;
+
+    rows.forEach(function(item){
+        var search = (item.dataset.search || '').toLowerCase();
+        var matchSearch = !q || search.includes(q);
+        var matchStatus = !status || item.dataset.status === status;
+        var visible = matchSearch && matchStatus;
+        item.style.display = visible ? '' : 'none';
+        if (visible) shown++;
+    });
+
+    cards.forEach(function(item){
         var search = (item.dataset.search || '').toLowerCase();
         var matchSearch = !q || search.includes(q);
         var matchStatus = !status || item.dataset.status === status;
         item.style.display = (matchSearch && matchStatus) ? '' : 'none';
     });
+
+    var noResult = document.getElementById('noResultRow');
+    if (noResult) noResult.style.display = (shown === 0 && rows.length > 0) ? 'table-row' : 'none';
+
+    var noResultMobile = document.getElementById('noResultMobile');
+    if (noResultMobile) noResultMobile.style.display = (shown === 0 && cards.length > 0) ? 'block' : 'none';
 }
 
 function showReceiveMsg(message, kind){

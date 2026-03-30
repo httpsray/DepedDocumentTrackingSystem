@@ -62,15 +62,16 @@
         .btn-logout:hover{background:rgba(220,38,38,.75)}
 
         /* ─── Mobile top bar ─── */
-        .mob-topbar{display:flex;position:sticky;top:0;z-index:100;background:#0056b3;padding:12px 16px;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+        .mob-topbar{display:flex;position:sticky;top:0;z-index:100;background:#0056b3;padding:14px 18px;align-items:center;justify-content:space-between;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
         .mob-hamburger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;z-index:1001;user-select:none;padding:4px}
         .mob-hamburger span{height:2px;width:24px;background:#fff;border-radius:2px;transition:all .4s ease}
         .mob-hamburger.toggle span:nth-child(1){transform:rotate(-45deg) translate(-4px,5px)}
         .mob-hamburger.toggle span:nth-child(2){opacity:0}
         .mob-hamburger.toggle span:nth-child(3){transform:rotate(45deg) translate(-4px,-5px)}
-        .mob-brand{flex:1;display:flex;flex-direction:column;color:#fff}
-        .mob-brand .brand-subtitle{font-size:clamp(9px,2vw,11px);opacity:.85;text-transform:uppercase;letter-spacing:1px}
-        .mob-brand h1{font-size:clamp(13px,3.5vw,18px);font-weight:700;margin:0;line-height:1.2}
+        .mob-brand{flex:1;display:flex;flex-direction:column;color:#fff;gap:4px}
+        .mob-brand .brand-subtitle{font-size:clamp(10px,2.4vw,11px);font-weight:500;opacity:.88;text-transform:uppercase;letter-spacing:2.4px;line-height:1.1}
+        .mob-brand h1{font-size:clamp(18px,4.8vw,22px);font-weight:700;margin:0;line-height:1.08}
+        .mob-brand .brand-caption{font-size:clamp(11px,2.9vw,13px);font-weight:300;opacity:.9;line-height:1.18}
         .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:199}
         .mob-overlay.open{display:block}
 
@@ -259,6 +260,12 @@
             flex: none;
             min-height: auto;
             overflow: visible;
+        }
+
+        .panel-fixed .empty-state,
+        .panel-fixed .mob-cards {
+            flex: 1;
+            min-height: 0;
         }
 
         .panel-fixed .empty-state {
@@ -745,6 +752,52 @@
         .modal-actions .modal-confirm{background:#ea580c;color:#fff;border-color:#ea580c}
         .modal-actions .modal-confirm:hover{background:#c2410c}
         .modal-actions .modal-confirm:disabled{opacity:.6;cursor:not-allowed}
+
+        /* ─── Recent document drawer ─── */
+        .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:400;opacity:0;pointer-events:none;transition:opacity .25s}
+        .drawer-overlay.open{opacity:1;pointer-events:all}
+        .drawer{position:fixed;top:0;right:0;height:100vh;width:460px;max-width:100vw;background:#fff;z-index:401;box-shadow:-4px 0 24px rgba(0,0,0,.12);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+        .drawer.open{transform:translateX(0)}
+        .drawer-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
+        .drawer-head-info{flex:1;min-width:0}
+        .drawer-head h3{font-size:16px;font-weight:700;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+        .drawer-ref{font-size:13px;color:var(--text-muted);font-family:monospace;letter-spacing:.4px;margin-bottom:2px}
+        .drawer-track{font-size:11px;color:var(--text-muted);font-family:monospace;letter-spacing:.4px;margin-bottom:4px}
+        .drawer-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#f8fafc;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px;flex-shrink:0;transition:all .15s}
+        .drawer-close:hover{background:#fee2e2;color:#dc2626;border-color:#fca5a5}
+        .drawer-body{flex:1;overflow-y:auto}
+        .drawer-tl-head{padding:14px 20px 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);display:flex;align-items:center;gap:6px}
+        .drawer-timeline{padding:10px 20px 24px}
+        .tl{position:relative}
+        .tl::before{content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:var(--border);z-index:-1}
+        .tl-item{position:relative;margin-bottom:20px;padding-left:24px}
+        .tl-item:last-child{margin-bottom:0}
+        .tl-dot{width:16px;height:16px;border-radius:50%;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+        .tl-dot.c-active{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
+        .tl-dot.c-done{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
+        .tl-dot.c-warn{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
+        .tl-dot.c-danger{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
+        .tl-dot.c-latest{background:#f59e0b;box-shadow:0 0 0 2px #f59e0b}
+        .tl-action{font-size:12px;font-weight:700;color:#1b263b}
+        .tl-meta{font-size:12px;color:#64748b;margin:2px 0}
+        .tl-remarks{font-size:12px;color:#64748b;background:#f8fafc;border-left:3px solid var(--border);padding:5px 9px;border-radius:4px;margin-top:5px}
+        .tl-office-hdr{display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--text-dark);text-transform:none;letter-spacing:0;margin:18px 0 8px -7px;padding-left:7px;padding-bottom:6px;position:relative}
+        .tl-office-hdr::after{content:'';position:absolute;left:21px;right:0;bottom:0;height:1.5px;background:var(--border)}
+        .tl-office-hdr:first-child{margin-top:0}
+        .tl-item.voided{opacity:.45}
+        .tl-item.voided .tl-action,.tl-item.voided .tl-meta,.tl-item.voided .tl-remarks{text-decoration:line-through;color:#94a3b8}
+        .tl-dot.c-voided{background:#cbd5e1;box-shadow:0 0 0 2px #cbd5e1}
+        .tl-void-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.6px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-decoration:none !important}
+        .drawer-loader{display:flex;align-items:center;justify-content:center;padding:48px;flex-direction:column;gap:12px;color:var(--text-muted);font-size:13px}
+        .drawer-action-bar{padding:16px 20px;border-top:2px solid #fed7aa;background:#fff7ed;flex-shrink:0}
+        .pickup-notice{font-size:12.5px;color:#9a3412;margin-bottom:12px;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+        .pickup-notice i{margin-top:2px;flex-shrink:0}
+        .btn-confirm-pickup{width:100%;padding:11px 16px;background:#ea580c;color:#fff;border:none;border-radius:9px;font-family:Poppins,sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s}
+        .btn-confirm-pickup:hover{background:#c2410c}
+        .btn-confirm-pickup:disabled{opacity:.6;cursor:not-allowed}
+        @media (max-width: 768px) {
+            .drawer{width:100%;max-width:100%}
+        }
     </style>
     <script src="/js/spa.js" defer></script>
     <script src="/js/form-utils.js" defer></script>
@@ -768,7 +821,8 @@
     <button class="mob-hamburger" id="mobHamBtn" type="button" onclick="toggleSidebar()" aria-label="Menu"><span></span><span></span><span></span></button>
     <div class="mob-brand">
         <span class="brand-subtitle">Department of Education</span>
-        <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
+        <h1>CSJDM DOCTRAX</h1>
+        <span class="brand-caption">Document Tracking System &mdash; DOCTRAX</span>
     </div>
 </div>
 <div class="mob-overlay" id="mobOverlay" onclick="closeSidebar()"></div>
@@ -910,10 +964,10 @@
                         @foreach($recentDocs as $doc)
                         @php
                             $recentLookup = $doc->reference_number ?: ($doc->tracking_number ?: '');
-                            $recentDocUrl = '/my-documents?search=' . urlencode($recentLookup);
+                            $recentTracking = $doc->tracking_number ?: ($doc->reference_number ?: '');
                         @endphp
-                        <tr onclick='window.location.href=@json($recentDocUrl)'>
-                            <td class="t-ref"><div class="cell-ellipsis" title="{{ $recentLookup }}">{{ $recentLookup }}</div></td>
+                        <tr onclick='openRecentDocDetail(@json($recentLookup), @json($recentTracking))'>
+                            <td class="t-ref"><div class="cell-ellipsis" title="{{ $recentLookup }}">{{ $recentLookup ?: 'N/A' }}</div></td>
                             <td class="t-subject"><div class="cell-ellipsis" style="font-weight:600" title="{{ $doc->subject }}">{{ $doc->subject }}</div></td>
                             <td class="t-status">
                                 @php
@@ -942,11 +996,11 @@
                     @foreach($recentDocs as $doc)
                     @php
                         $recentLookup = $doc->reference_number ?: ($doc->tracking_number ?: '');
-                        $recentDocUrl = '/my-documents?search=' . urlencode($recentLookup);
+                        $recentTracking = $doc->tracking_number ?: ($doc->reference_number ?: '');
                     @endphp
-                    <div class="mob-card" onclick='window.location.href=@json($recentDocUrl)'>
+                    <div class="mob-card" onclick='openRecentDocDetail(@json($recentLookup), @json($recentTracking))'>
                         <div class="mob-card-top">
-                            <div class="mob-card-ref">{{ $recentLookup }}</div>
+                            <div class="mob-card-ref">{{ $recentLookup ?: 'N/A' }}</div>
                             <span class="mob-card-arrow"><i class="fas fa-chevron-right"></i></span>
                         </div>
                         <div class="mob-card-subject">{{ $doc->subject }}</div>
@@ -983,6 +1037,14 @@
                     <div class="panel-title">Quick Actions</div>
                 </div>
                 <div class="actions-list">
+                    <a href="/" class="act">
+                        <div class="act-icon" style="background:rgba(0,86,179,0.1);color:var(--primary);"><i class="fas fa-home"></i></div>
+                        <div class="act-body">
+                            <div class="act-title">Home</div>
+                            <div class="act-desc">Go to the main landing page</div>
+                        </div>
+                        <i class="fas fa-chevron-right act-arrow"></i>
+                    </a>
                     <a href="/submit" class="act">
                         <div class="act-icon" style="background:rgba(0,86,179,0.1);color:var(--primary);"><i class="fas fa-plus"></i></div>
                         <div class="act-body">
@@ -1033,6 +1095,60 @@
 
 </div><!-- /.main -->
 
+    @php
+        $recentDocDrawerData = [];
+        foreach ($recentDocs as $doc) {
+            $fallback = [
+                'reference_number' => $doc->reference_number ?: $doc->tracking_number,
+                'tracking_number' => $doc->tracking_number ?: $doc->reference_number,
+                'subject' => $doc->subject,
+                'status' => $doc->status,
+                'status_label' => $doc->statusLabel(),
+                'sender_name' => $doc->sender_name ?? ($user->name ?? 'Guest'),
+                'type' => $doc->type ?? 'General',
+                'submitted_to_office' => optional($doc->currentOffice)->name,
+                'current_office' => optional($doc->currentOffice)->name ?? 'Awaiting routing',
+                'current_handler' => 'Unassigned',
+                'date' => optional($doc->created_at)->format('M d, Y h:i A'),
+            ];
+            $primaryKey = $doc->tracking_number ?: $doc->reference_number;
+            if ($primaryKey) {
+                $recentDocDrawerData[$primaryKey] = $fallback;
+            }
+            if ($doc->reference_number && $doc->reference_number !== $doc->tracking_number) {
+                $recentDocDrawerData[$doc->reference_number] = $fallback;
+            }
+        }
+    @endphp
+    <script type="application/json" id="recentDocsData">@json($recentDocDrawerData)</script>
+
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+    <div class="drawer" id="docDrawer">
+        <div class="drawer-head">
+            <div class="drawer-head-info">
+                <h3 id="drTitle">—</h3>
+                <div class="drawer-ref" id="drRef">—</div>
+                <div class="drawer-track" id="drTrack"></div>
+            </div>
+            <button class="drawer-close" type="button" onclick="closeDrawer()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="drawer-body" id="drawerBody">
+            <div class="drawer-loader">
+                <span class="loading-dots"><span></span></span>
+                Loading details...
+            </div>
+        </div>
+        <div class="drawer-action-bar" id="drawerActionBar" style="display:none">
+            <div class="pickup-notice">
+                <i class="fas fa-box-open"></i>
+                <span>Your document is ready for pickup. Please confirm once you have physically received it.</span>
+            </div>
+            <button class="btn-confirm-pickup" id="drawerPickupBtn" type="button" onclick="openDrawerPickupConfirm()">
+                <i class="fas fa-check-circle"></i> Confirm I Received This Document
+            </button>
+        </div>
+    </div>
+
     {{-- ─── Pickup Confirm Modal ─── --}}
     <div class="modal-backdrop" id="pickupModal">
         <div class="modal-box">
@@ -1049,6 +1165,179 @@
 
     <script>
     (function() {
+        var recentDocsData = JSON.parse(document.getElementById('recentDocsData').textContent || '{}');
+        var _currentDrawerRef = null;
+
+        function escapeHtml(value) {
+            return String(value === null || value === undefined ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function closeDrawer() {
+            document.getElementById('drawerOverlay').classList.remove('open');
+            document.getElementById('docDrawer').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        window.closeDrawer = closeDrawer;
+
+        function dotClass(status) {
+            if (status === 'cancelled' || status === 'returned') return 'c-danger';
+            if (status === 'completed') return 'c-done';
+            if (status === 'forwarded') return 'c-warn';
+            return 'c-active';
+        }
+
+        function buildFallbackDocument(fallback, ref, tracking) {
+            return {
+                subject: fallback.subject || '-',
+                reference_number: fallback.reference_number || ref || tracking || '-',
+                tracking_number: fallback.tracking_number || tracking || ref || '-',
+                status: fallback.status || 'unknown',
+                status_label: fallback.status_label || 'Unknown',
+                sender_name: fallback.sender_name || '-',
+                type: fallback.type || '-',
+                submitted_to_office: fallback.submitted_to_office || fallback.current_office || '-',
+                current_office: fallback.current_office || fallback.submitted_to_office || '-',
+                current_handler: fallback.current_handler || 'Unassigned',
+                date: fallback.date || '-',
+                routing_logs: []
+            };
+        }
+
+        function renderDrawer(doc) {
+            _currentDrawerRef = doc.reference_number || doc.tracking_number || null;
+            var refNo = doc.reference_number || doc.tracking_number || '-';
+            var trackingNo = doc.tracking_number || '';
+
+            document.getElementById('drTitle').textContent = doc.subject || '-';
+            document.getElementById('drRef').textContent = refNo;
+            document.getElementById('drTrack').textContent = (trackingNo && trackingNo !== refNo) ? ('Tracking: ' + trackingNo) : '';
+
+            var actionBar = document.getElementById('drawerActionBar');
+            var pickupBtn = document.getElementById('drawerPickupBtn');
+            if (doc.status === 'for_pickup' && _currentDrawerRef) {
+                actionBar.style.display = '';
+                pickupBtn.disabled = false;
+            } else {
+                actionBar.style.display = 'none';
+            }
+
+            var logs = Array.isArray(doc.routing_logs) ? doc.routing_logs : [];
+            var tlHtml = '';
+
+            if (!logs.length) {
+                tlHtml = '<div style="color:var(--text-muted);font-size:13px;padding:4px 0">No routing history yet.</div>';
+            } else {
+                var voidedIds = new Set();
+                var revertStatuses = ['in_review', 'on_hold'];
+                var logsChron = logs.slice().sort(function(a, b) {
+                    return new Date(a.created_at) - new Date(b.created_at);
+                });
+
+                for (var vi = 0; vi < logsChron.length; vi++) {
+                    if (logsChron[vi].status_after === 'for_pickup') {
+                        for (var vj = vi + 1; vj < logsChron.length; vj++) {
+                            if (revertStatuses.indexOf(logsChron[vj].status_after) !== -1) {
+                                voidedIds.add(logsChron[vi].id);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                var prevGroupKey = null;
+                Array.from(logs).reverse().forEach(function(log, idx) {
+                    var isLatest = idx === 0;
+                    var isVoided = voidedIds.has(log.id);
+                    var dc = isVoided ? 'c-voided' : (isLatest ? 'c-latest' : dotClass(log.status_after));
+                    var dotIcon = isVoided ? 'fa-ban' : (isLatest ? 'fa-arrow-up' : 'fa-check');
+                    var groupKey = (log.action === 'submitted') ? '__pending__' :
+                        (log.action === 'forwarded' ? (log.from_office || 'Unknown') : (log.to_office || log.from_office || 'Unknown'));
+                    var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Acceptance' : groupKey;
+
+                    if (groupKey !== prevGroupKey) {
+                        prevGroupKey = groupKey;
+                        tlHtml += '<div class="tl-office-hdr"><div class="tl-dot ' + dc + '" style="margin-right:5px"><i class="fas ' + dotIcon + '" style="font-size:5px"></i></div><span>' + escapeHtml(groupLabel) + '</span></div>';
+                    }
+
+                    var voidBadge = isVoided ? ' <span class="tl-void-badge">VOIDED</span>' : '';
+                    var performerHtml = log.performed_by
+                        ? '<div class="tl-action">' + escapeHtml(log.performed_by) + voidBadge + '</div>'
+                        : (isVoided ? '<div class="tl-action">' + voidBadge + '</div>' : '');
+
+                    tlHtml += '<div class="tl-item' + (isVoided ? ' voided' : '') + '">' +
+                        performerHtml +
+                        '<div class="tl-meta"><i class="fas fa-clock" style="margin-right:3px;font-size:10px"></i>' + escapeHtml(log.timestamp || '-') + '</div>' +
+                        '<div class="tl-meta"><i class="fas fa-tasks" style="margin-right:3px;font-size:10px"></i>' + escapeHtml(log.action_label || 'Status Updated') + '</div>' +
+                        (log.remarks ? '<div class="tl-remarks">' + escapeHtml(log.remarks) + '</div>' : '') +
+                        '</div>';
+                });
+            }
+
+            document.getElementById('drawerBody').innerHTML =
+                '<div class="drawer-tl-head"><i class="fas fa-history"></i> Routing History</div>' +
+                '<div class="drawer-timeline"><div class="tl">' + tlHtml + '</div></div>';
+        }
+
+        window.openRecentDocDetail = function(ref, tracking) {
+            ref = (ref || '').toString().trim();
+            tracking = (tracking || ref).toString().trim();
+
+            document.getElementById('drTitle').textContent = '—';
+            document.getElementById('drRef').textContent = ref || tracking || '-';
+            document.getElementById('drTrack').textContent = '';
+            document.getElementById('drawerActionBar').style.display = 'none';
+            document.getElementById('drawerBody').innerHTML =
+                '<div class="drawer-loader"><span class="loading-dots"><span></span></span>Loading details...</div>';
+            document.getElementById('drawerOverlay').classList.add('open');
+            document.getElementById('docDrawer').classList.add('open');
+            document.body.style.overflow = 'hidden';
+
+            var fallback = recentDocsData[tracking] || recentDocsData[ref];
+            window.docTraxFetchJson('/api/track-document', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), 'Accept': 'application/json' },
+                timeoutMs: 15000,
+                body: JSON.stringify({
+                    reference_number: ref,
+                    tracking_number: tracking || ref
+                })
+            })
+            .then(function(data) {
+                if (data.success && data.document) {
+                    renderDrawer(data.document);
+                    return;
+                }
+                if (fallback) {
+                    renderDrawer(buildFallbackDocument(fallback, ref, tracking));
+                    return;
+                }
+                document.getElementById('drawerBody').innerHTML =
+                    '<div class="drawer-loader"><i class="fas fa-file-circle-question" style="font-size:32px;color:#cbd5e1;margin-bottom:8px"></i>Document not found.</div>';
+            })
+            .catch(function(error) {
+                if (fallback) {
+                    renderDrawer(buildFallbackDocument(fallback, ref, tracking));
+                    window.showNetworkNotice('Showing basic document details from the recent documents list while the live request is unavailable.', {
+                        type: 'warning',
+                        duration: 5000
+                    });
+                    return;
+                }
+                document.getElementById('drawerBody').innerHTML =
+                    '<div class="drawer-loader">' + escapeHtml(window.describeRequestError(error, 'Could not load document details. Please try again.')) + '</div>';
+            });
+        };
+
+        window.openDrawerPickupConfirm = function() {
+            if (!_currentDrawerRef) return;
+            openPickupConfirm(_currentDrawerRef, document.getElementById('drawerPickupBtn'));
+        };
+
         function syncRecentPanelHeight() {
             var recentPanel = document.getElementById('recentDocumentsPanel');
             var quickActionsPanel = document.getElementById('quickActionsPanel');
@@ -1198,7 +1487,12 @@
                 if (_pickupTriggerBtn) _pickupTriggerBtn.disabled = false;
             });
         };
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePickupModal(); });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeDrawer();
+                closePickupModal();
+            }
+        });
     })();
     </script>
 </body>

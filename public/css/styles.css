@@ -39,12 +39,13 @@ body {
     width: 100%;
     background: var(--primary-color);
     background: var(--primary-gradient);
-    padding: 15px 5%;
+    padding: 14px clamp(18px, 2vw, 28px);
     box-shadow: var(--shadow-md);
     color: var(--white);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 14px;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -53,26 +54,40 @@ body {
 .nav-content {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
 }
 
 .brand-text {
     display: flex;
     flex-direction: column;
+    gap: 4px;
+    min-width: 0;
 }
 
 .brand-subtitle {
-    font-size: 12px;
+    font-size: clamp(10px, 1vw, 11px);
+    font-weight: 500;
     opacity: 0.9;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 2.4px;
+    line-height: 1.1;
 }
 
 .navbar h1 {
-    font-size: 20px;
+    font-size: clamp(18px, 2.2vw, 22px);
     font-weight: 700;
     margin: 0;
-    line-height: 1.2;
+    line-height: 1.08;
+}
+
+.brand-caption {
+    font-size: clamp(11px, 1.2vw, 13px);
+    font-weight: 300;
+    opacity: 0.92;
+    line-height: 1.18;
+    white-space: normal;
 }
 
 /* ─── Nav links (desktop: inline row, mobile: hamburger dropdown) ─── */
@@ -80,13 +95,14 @@ body {
     display: flex;
     align-items: center;
     gap: 4px;
+    flex-shrink: 0;
 }
 .nav-link {
     color: rgba(255,255,255,.85);
     text-decoration: none;
     font-size: 13px;
     font-weight: 500;
-    padding: 7px 14px;
+    padding: 8px 13px;
     border-radius: 8px;
     transition: background .2s, color .2s;
     display: flex;
@@ -266,17 +282,24 @@ body {
 /* Responsive */
 @media (max-width: 768px) {
     .navbar {
-        padding: 12px 4%;
+        padding: 14px 4%;
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 10px;
     }
 
     .navbar h1 {
-        font-size: clamp(13px, 3.5vw, 15px);
+        font-size: clamp(18px, 4.8vw, 22px);
+        line-height: 1.08;
     }
 
     .brand-subtitle {
-        font-size: clamp(9px, 2vw, 10px);
+        font-size: clamp(10px, 2.4vw, 11px);
+        letter-spacing: 2.4px;
+    }
+
+    .brand-caption {
+        font-size: clamp(11px, 2.9vw, 13px);
+        line-height: 1.18;
     }
 
     /* Hamburger visible on mobile — placed on the left */

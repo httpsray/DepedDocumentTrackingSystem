@@ -109,7 +109,7 @@ class DashboardController extends Controller
                 'completed'  => $myDocs->whereIn('status', ['completed', 'returned'])->count(),
                 'for_pickup' => $myDocs->where('status', 'for_pickup')->count(),
             ],
-            'recentDocs'  => $myDocs->take(5),
+            'recentDocs'  => $myDocs->take(10),
             'pickupDocs'  => $myDocs->where('status', 'for_pickup')->values(),
         ]);
     }

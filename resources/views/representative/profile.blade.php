@@ -100,15 +100,16 @@
         .toast.error{border-left:3px solid #dc2626}
 
         /* ─── Mobile ─── */
-        .mob-topbar{display:flex;position:sticky;top:0;z-index:100;background:#0056b3;padding:12px 16px;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+        .mob-topbar{display:flex;position:sticky;top:0;z-index:100;background:#0056b3;padding:14px 18px;align-items:center;justify-content:space-between;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
         .mob-hamburger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;z-index:1001;user-select:none;padding:4px}
         .mob-hamburger span{height:2px;width:24px;background:#fff;border-radius:2px;transition:all .4s ease}
         .mob-hamburger.toggle span:nth-child(1){transform:rotate(-45deg) translate(-4px,5px)}
         .mob-hamburger.toggle span:nth-child(2){opacity:0}
         .mob-hamburger.toggle span:nth-child(3){transform:rotate(45deg) translate(-4px,-5px)}
-        .mob-brand{flex:1;display:flex;flex-direction:column;color:#fff}
-        .mob-brand .brand-subtitle{font-size:clamp(9px,2vw,11px);opacity:.85;text-transform:uppercase;letter-spacing:1px}
-        .mob-brand h1{font-size:clamp(13px,3.5vw,18px);font-weight:700;margin:0;line-height:1.2}
+        .mob-brand{flex:1;display:flex;flex-direction:column;color:#fff;gap:4px}
+        .mob-brand .brand-subtitle{font-size:clamp(10px,2.4vw,11px);font-weight:500;opacity:.88;text-transform:uppercase;letter-spacing:2.4px;line-height:1.1}
+        .mob-brand h1{font-size:clamp(18px,4.8vw,22px);font-weight:700;margin:0;line-height:1.08}
+        .mob-brand .brand-caption{font-size:clamp(11px,2.9vw,13px);font-weight:300;opacity:.9;line-height:1.18}
         .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:199}
         .mob-overlay.open{display:block}
 
@@ -154,7 +155,8 @@
     <button class="mob-hamburger" id="mobHamBtn" type="button" onclick="toggleSidebar()" aria-label="Menu"><span></span><span></span><span></span></button>
     <div class="mob-brand">
         <span class="brand-subtitle">Department of Education</span>
-        <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
+        <h1>CSJDM DOCTRAX</h1>
+        <span class="brand-caption">Document Tracking System &mdash; DOCTRAX</span>
     </div>
 </div>
 <div class="mob-overlay" id="mobOverlay" onclick="closeSidebar()"></div>

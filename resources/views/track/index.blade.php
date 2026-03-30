@@ -15,12 +15,13 @@
         *{margin:0;padding:0;box-sizing:border-box}
         html{overflow-y:scroll}
         body{background:var(--bg);font-family:Poppins,sans-serif;min-height:100vh;display:flex;flex-direction:column}
-        .navbar{background:linear-gradient(135deg,#0056b3,#004494);padding:14px 5%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.12);position:sticky;top:0;z-index:100;flex-shrink:0}
-        .brand-text{display:flex;flex-direction:column}
-        .brand-subtitle{font-size:clamp(8px,2vw,10px);color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:1.5px}
-        .navbar h1{font-size:clamp(12px,3.2vw,17px);font-weight:700;color:#fff}
-        .nav-links{display:flex;align-items:center;gap:4px}
-        .nav-link{color:rgba(255,255,255,.85);text-decoration:none;font-size:13px;font-weight:500;padding:7px 14px;border-radius:8px;transition:background .2s,color .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+        .navbar{background:linear-gradient(135deg,#0056b3,#004494);padding:14px clamp(18px,2vw,28px);display:flex;justify-content:space-between;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.12);position:sticky;top:0;z-index:100;flex-shrink:0}
+        .brand-text{display:flex;flex-direction:column;gap:4px;min-width:0}
+        .brand-subtitle{font-size:clamp(10px,1vw,11px);font-weight:500;color:rgba(255,255,255,.9);text-transform:uppercase;letter-spacing:2.4px;line-height:1.1}
+        .navbar h1{font-size:clamp(18px,2.2vw,22px);font-weight:700;color:#fff;margin:0;line-height:1.08}
+        .brand-caption{font-size:clamp(11px,1.2vw,13px);font-weight:300;color:rgba(255,255,255,.92);line-height:1.18;white-space:normal}
+        .nav-links{display:flex;align-items:center;gap:4px;flex-shrink:0}
+        .nav-link{color:rgba(255,255,255,.85);text-decoration:none;font-size:13px;font-weight:500;padding:8px 13px;border-radius:8px;transition:background .2s,color .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
         .nav-link:hover{background:rgba(255,255,255,.15);color:#fff}
         .nav-link.active{background:rgba(255,255,255,.18);color:#fff}
         .nav-hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;color:#fff;font-size:20px;z-index:101;align-items:center;justify-content:center;transition:transform .2s}
@@ -75,7 +76,7 @@
         .tl-dot.warn{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
         .tl-dot.danger{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
         .tl-dot.latest{background:#f59e0b;box-shadow:0 0 0 2px #f59e0b}
-        .tl-action{font-size:12px;font-weight:500;color:#64748b}
+        .tl-action{font-size:12px;font-weight:700;color:#1b263b}
         .tl-meta{font-size:12px;color:#64748b;margin:2px 0}
         .tl-remarks{font-size:12px;color:#64748b;background:#f8fafc;border-left:3px solid var(--border);padding:5px 9px;border-radius:4px;margin-top:5px}
         .tl-office-hdr{display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--text-dark);text-transform:none;letter-spacing:0;margin:18px 0 8px -7px;padding-left:7px;padding-bottom:6px;position:relative}
@@ -88,11 +89,12 @@
         @keyframes spin{to{transform:rotate(360deg)}}
         .spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
         @media(max-width:640px){
-            .navbar{padding:12px 4%;position:relative;flex-wrap:wrap}
+            .navbar{padding:14px 4%;position:relative;flex-wrap:wrap}
             .nav-hamburger{display:flex;order:-1}
             .brand-text{flex:1;min-width:0}
-            .navbar h1{font-size:13px;line-height:1.3}
-            .brand-subtitle{font-size:8px}
+            .navbar h1{font-size:clamp(18px,4.8vw,22px);line-height:1.08}
+            .brand-subtitle{font-size:clamp(10px,2.4vw,11px);letter-spacing:2.4px}
+            .brand-caption{font-size:clamp(11px,2.9vw,13px);line-height:1.18}
             .nav-links{display:none;position:absolute;top:100%;right:0;left:0;background:linear-gradient(135deg,#004494,#003378);flex-direction:column;padding:6px 0;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:100}
             .nav-links.open{display:flex}
             .nav-link{width:100%;padding:13px 20px;border-radius:0;font-size:13px;border-bottom:1px solid rgba(255,255,255,.08)}
@@ -155,7 +157,8 @@
 <nav class="navbar">
     <div class="brand-text">
         <span class="brand-subtitle">Department of Education</span>
-        <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
+        <h1>CSJDM DOCTRAX</h1>
+        <span class="brand-caption">Document Tracking System &mdash; DOCTRAX</span>
     </div>
     <button class="nav-hamburger" id="navHamburger" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')" aria-label="Menu">
         <i class="fas fa-bars"></i>

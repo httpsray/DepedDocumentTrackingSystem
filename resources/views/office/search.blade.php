@@ -133,9 +133,10 @@
         .mob-hamburger.toggle span:nth-child(2){opacity:0}
         .mob-hamburger.toggle span:nth-child(3){transform:rotate(45deg) translate(-4px,-5px)}
 
-        .mob-brand { flex: 1; display: flex; flex-direction: column; color: #fff; }
-        .mob-brand .brand-subtitle { font-size: clamp(9px,2vw,11px); opacity: .85; text-transform: uppercase; letter-spacing: 1px; }
-        .mob-brand h1 { font-size: clamp(13px,3.5vw,18px); font-weight: 700; margin: 0; line-height: 1.2; }
+        .mob-brand{flex:1;display:flex;flex-direction:column;color:#fff;gap:4px}
+        .mob-brand .brand-subtitle{font-size:clamp(10px,2.4vw,11px);font-weight:500;opacity:.88;text-transform:uppercase;letter-spacing:2.4px;line-height:1.1}
+        .mob-brand h1{font-size:clamp(18px,4.8vw,22px);font-weight:700;margin:0;line-height:1.08}
+        .mob-brand .brand-caption{font-size:clamp(11px,2.9vw,13px);font-weight:300;opacity:.9;line-height:1.18}
 
         .mob-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 199; }
         .mob-overlay.open { display: block; }
@@ -373,7 +374,7 @@
         .tl-dot.c-warn { background: #22c55e; box-shadow: 0 0 0 2px #22c55e; }
         .tl-dot.c-danger { background: #22c55e; box-shadow: 0 0 0 2px #22c55e; }
         .tl-dot.c-latest { background: #f59e0b; box-shadow: 0 0 0 2px #f59e0b; }
-        .tl-action { font-size: 12px; font-weight: 500; color: #64748b; }
+        .tl-action { font-size: 12px; font-weight: 700; color: #1b263b; }
         .tl-meta { font-size: 12px; color: #64748b; margin: 2px 0; }
         .tl-remarks { font-size: 12px; color: #64748b; background: #f8fafc; border-left: 3px solid var(--border); padding: 5px 9px; border-radius: 4px; margin-top: 5px; }
         .tl-office-hdr{display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--text-dark);text-transform:none;letter-spacing:0;margin:18px 0 8px -7px;padding-left:7px;padding-bottom:6px;position:relative}
@@ -603,7 +604,8 @@
     <button class="mob-hamburger" id="mobHamBtn" type="button" onclick="toggleSidebar()" aria-label="Menu"><span></span><span></span><span></span></button>
     <div class="mob-brand">
         <span class="brand-subtitle">Department of Education</span>
-        <h1>Document Tracking System &mdash; <strong>DOCTRAX</strong></h1>
+        <h1>CSJDM DOCTRAX</h1>
+        <span class="brand-caption">Document Tracking System &mdash; DOCTRAX</span>
     </div>
 </div>
 <div class="mob-overlay" id="mobOverlay" onclick="closeSidebar()"></div>
@@ -1294,6 +1296,11 @@ function closeUserActivity() {
     currentUaUid = null;
 }
 
+function openActivityDocDetail(ref, tracking) {
+    closeUserActivity();
+    openDocDetail(ref, tracking || ref);
+}
+
 function renderUserActivity(data) {
     var u = data.user, stats = data.stats, docs = data.documents;
 
@@ -1324,7 +1331,9 @@ function renderUserActivity(data) {
             + '<th style="text-align:left;padding:9px 14px;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);background:#f8fafc;white-space:nowrap">Last Action</th>'
             + '</tr></thead><tbody>';
         docs.forEach(function(doc) {
-            bodyHtml += '<tr style="border-bottom:1px solid #f1f5f9;cursor:pointer" onclick="window.location.href=\'/office/documents/' + doc.id + '?from=reports\'" title="Open document">'
+            var refValue = JSON.stringify(doc.reference || '');
+            var trackingValue = JSON.stringify(doc.tracking || doc.reference || '');
+            bodyHtml += '<tr style="border-bottom:1px solid #f1f5f9;cursor:pointer" onclick="openActivityDocDetail(' + refValue + ',' + trackingValue + ')" title="Open document drawer">'
                 + '<td style="padding:9px 14px;font-size:12px;font-family:Poppins,sans-serif;font-weight:600;color:var(--primary)">' + escapeHtml(doc.reference) + '</td>'
                 + '<td style="padding:9px 14px;font-size:12px;color:var(--text-dark);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + escapeHtml(doc.subject) + '">' + escapeHtml(doc.subject) + '</td>'
                 + '<td style="padding:9px 14px"><span class="badge badge-' + escapeHtml(doc.status) + '">' + escapeHtml(doc.status_label) + '</span></td>'
