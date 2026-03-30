@@ -16,7 +16,7 @@
     <script src="/js/form-utils.js" defer></script>
     <script src="/js/request-utils.js" defer></script>
 </head>
-<body>
+<body class="home-page">
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-content">

@@ -55,7 +55,7 @@
     <script src="/js/form-utils.js" defer></script>
     <script src="/js/request-utils.js" defer></script>
 </head>
-<body>
+<body class="home-page">
 
     <!-- Mobile top bar (hamburger on LEFT) -->
     <div class="mob-topbar">

@@ -161,6 +161,17 @@ body {
     margin-bottom: 0;
 }
 
+@media (min-width: 769px) {
+    .home-page .main-content {
+        max-width: 660px;
+    }
+
+    .home-page .greeting-logo {
+        width: min(100%, 600px);
+        max-height: 200px;
+    }
+}
+
 .greeting h2 {
     font-size: clamp(18px, 4vw, 28px);
     font-weight: 600;
