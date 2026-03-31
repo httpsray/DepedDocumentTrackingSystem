@@ -14,7 +14,7 @@
                     <tr>
                         <td style="background: linear-gradient(135deg, #0056b3 0%, #004494 100%); padding: 28px 36px; text-align: center;">
                             <h1 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 700; letter-spacing: 0.5px;">Document Tracking System &mdash; DOCTRAX</h1>
-                            <p style="margin: 4px 0 0; color: rgba(255,255,255,0.8); font-size: 12px;">Department of Education &bull; CSJDM Division Office</p>
+                            <p style="margin: 4px 0 0; color: rgba(255,255,255,0.8); font-size: 12px;">Department of Education &bull; City of San Jose del Monte</p>
                         </td>
                     </tr>
 
@@ -59,7 +59,7 @@
                     <tr>
                         <td style="background: #f8fafc; padding: 20px 36px; text-align: center; border-top: 1px solid #e2e8f0;">
                             <p style="margin: 0; color: #94a3b8; font-size: 11px;">
-                                &copy; {{ date('Y') }} CSJDM Division Office &mdash; Document Tracking System
+                                &copy; {{ date('Y') }} City of San Jose del Monte &mdash; Document Tracking System
                             </p>
                         </td>
                     </tr>
