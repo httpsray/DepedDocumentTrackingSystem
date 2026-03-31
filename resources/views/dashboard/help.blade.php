@@ -292,13 +292,10 @@
         $isRep = ($user->account_type ?? '') === 'representative';
         $isOfficeUser = $isRep && $user->office_id && !$isAdminUser;
 
-        $navOfficeName = '';
-        $navRepName = '';
-        if ($isRep && str_contains($user->name, ' - ')) {
-            [$navOfficeName, $navRepName] = explode(' - ', $user->name, 2);
-        }
+        $navOfficeName = $isRep ? $user->representativeOfficeName() : '';
+        $navRepName = $isRep ? $user->representativeDisplayName() : '';
 
-        $displayFirst = explode(' ', trim($user->name ?? 'User'))[0] ?? 'User';
+        $displayFirst = explode(' ', trim(($navRepName ?: $user->name) ?? 'User'))[0] ?? 'User';
         $officeLabel = $navOfficeName ?: ($user->office?->name ?? 'Office');
         $officePerson = $navRepName ?: $displayFirst;
         $navDisplayRole = $isAdminUser ? ($isSuperAdminUser ? 'Super Admin' : 'Admin') : ucfirst($user->role ?? 'User');
@@ -323,7 +320,7 @@
     <button class="mob-hamburger" id="mobHamBtn" type="button" onclick="toggleSidebar()" aria-label="Menu"><span></span><span></span><span></span></button>
     <div class="mob-brand">
         <span class="brand-subtitle">Department of Education</span>
-        <h1>CSJDM DOCTRAX</h1>
+        <h1>CITY OF SAN JOSE DEL MONTE</h1>
         <span class="brand-caption">Document Tracking System &mdash; DOCTRAX</span>
     </div>
 </div>

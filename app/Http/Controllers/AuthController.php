@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -30,22 +31,53 @@ class AuthController extends Controller
             'email' => strtolower(trim((string) $request->input('email'))),
         ]);
 
+        $accountType = $request->input('account_type') ?? 'individual';
+        $name = trim((string) $request->input('name'));
+        $representativeOfficeName = null;
+
+        if ($accountType === 'representative') {
+            $representativeOfficeName = trim((string) $request->input('office_name'));
+
+            if ($representativeOfficeName !== '') {
+                $prefix = $representativeOfficeName . ' - ';
+
+                if (str_starts_with($name, $prefix)) {
+                    $name = trim(substr($name, strlen($prefix)));
+                } elseif (str_contains($name, ' - ')) {
+                    [, $name] = explode(' - ', $name, 2);
+                    $name = trim($name);
+                }
+            }
+        }
+
+        $request->merge([
+            'name' => $name,
+        ]);
+
         $request->validate([
             'name'  => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'mobile' => 'nullable|string|max:20',
             'account_type' => 'nullable|string|in:individual,representative',
+            'office_name' => [
+                Rule::requiredIf($accountType === 'representative'),
+                'nullable',
+                'string',
+                'max:255',
+                Rule::in(config('representative_offices', [])),
+            ],
         ]);
 
         try {
             // Create the user in a transaction — email is sent outside so a
             // mail failure never prevents account creation.
-            $user = DB::transaction(function () use ($request) {
+            $user = DB::transaction(function () use ($request, $representativeOfficeName) {
                 $user = new User([
                     'name'         => $request->name,
                     'email'        => $request->email,
                     'mobile'       => $request->mobile,
                     'account_type' => $request->account_type ?? 'individual',
+                    'representative_office_name' => $representativeOfficeName,
                     'password'     => Hash::make(Str::random(64)), // placeholder — never usable
                 ]);
                 $user->status = 'pending';

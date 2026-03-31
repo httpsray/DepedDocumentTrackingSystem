@@ -22,7 +22,7 @@
         <div class="nav-content">
             <div class="brand-text">
                 <span class="brand-subtitle">Department of Education</span>
-                <h1>CSJDM DOCTRAX</h1>
+                <h1>CITY OF SAN JOSE DEL MONTE</h1>
                 <span class="brand-caption">Document Tracking System &mdash; DOCTRAX</span>
             </div>
         </div>

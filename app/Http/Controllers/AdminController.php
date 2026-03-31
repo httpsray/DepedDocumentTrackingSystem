@@ -136,13 +136,14 @@ class AdminController extends Controller
     {
         $this->authorize();
 
-        $query = User::where('role', 'user');
+        $query = User::with('office')->where('role', 'user');
 
         // Search filter
         if ($search = $request->get('search')) {
             $escaped = str_replace(['%', '_'], ['\\%', '\\_'], $search);
             $query->where(function ($q) use ($escaped) {
                 $q->where('name', 'like', "%{$escaped}%")
+                  ->orWhere('representative_office_name', 'like', "%{$escaped}%")
                   ->orWhere('email', 'like', "%{$escaped}%")
                   ->orWhere('mobile', 'like', "%{$escaped}%");
             });
@@ -213,10 +214,34 @@ class AdminController extends Controller
             }
         }
 
-        if ($request->has('name'))      $target->name      = $request->name;
+        if ($request->has('name')) {
+            $newName = trim((string) $request->name);
+
+            if ($target->account_type === 'representative' && !$target->office_id) {
+                $newOfficeName = trim((string) $request->input('representative_office_name', ''));
+
+                if ($newOfficeName === '' && str_contains($newName, ' - ')) {
+                    [$newOfficeName, $newName] = explode(' - ', $newName, 2);
+                    $newOfficeName = trim($newOfficeName);
+                    $newName = trim($newName);
+                }
+
+                if ($newOfficeName !== '') {
+                    $target->representative_office_name = $newOfficeName;
+                }
+            }
+
+            $target->name = $newName;
+        }
         if ($request->has('email'))     $target->email     = $request->email;
         if ($request->has('mobile'))    $target->mobile    = $request->mobile ?: null;
-        if ($request->has('office_id')) $target->office_id = $request->office_id ?: null;
+        if ($request->has('office_id')) {
+            $target->office_id = $request->office_id ?: null;
+
+            if ($target->office_id) {
+                $target->representative_office_name = null;
+            }
+        }
 
         if (!$target->isDirty()) {
             return response()->json([

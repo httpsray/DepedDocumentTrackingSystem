@@ -20,6 +20,7 @@ class User extends Authenticatable
         'password',
         'account_type',
         'office_id',
+        'representative_office_name',
     ];
 
     /**
@@ -135,6 +136,57 @@ class User extends Authenticatable
     public function office()
     {
         return $this->belongsTo(Office::class);
+    }
+
+    /**
+     * Displayable office or school label for representative accounts.
+     */
+    public function representativeOfficeName(): ?string
+    {
+        if (!$this->isRepresentative()) {
+            return null;
+        }
+
+        if ($this->office?->name) {
+            return $this->office->name;
+        }
+
+        $officeName = trim((string) ($this->representative_office_name ?? ''));
+        if ($officeName !== '') {
+            return $officeName;
+        }
+
+        if (!$this->office_id && str_contains($this->name, ' - ')) {
+            [$officeName] = explode(' - ', $this->name, 2);
+            return trim($officeName);
+        }
+
+        return null;
+    }
+
+    /**
+     * Displayable staff/contact name for representative accounts.
+     */
+    public function representativeDisplayName(): string
+    {
+        $displayName = trim((string) $this->name);
+
+        if (!$this->isRepresentative()) {
+            return $displayName;
+        }
+
+        $officeName = $this->representativeOfficeName();
+        $prefix = $officeName ? ($officeName . ' - ') : null;
+
+        if ($prefix && str_starts_with($displayName, $prefix)) {
+            return trim(substr($displayName, strlen($prefix)));
+        }
+
+        if (!$this->office_id && str_contains($displayName, ' - ')) {
+            [, $displayName] = explode(' - ', $displayName, 2);
+        }
+
+        return trim($displayName);
     }
 
     /**

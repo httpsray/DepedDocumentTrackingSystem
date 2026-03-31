@@ -120,7 +120,7 @@
         <div class="nav-content">
             <div class="brand-text">
                 <span class="brand-subtitle">Department of Education</span>
-                <h1>CSJDM DOCTRAX</h1>
+                <h1>CITY OF SAN JOSE DEL MONTE</h1>
                 <span class="brand-caption">Document Tracking System &mdash; DOCTRAX</span>
             </div>
         </div>
@@ -190,7 +190,12 @@
                     <div id="representativeFields" class="full-width" style="display: none;">
                         <div class="form-group full-width">
                             <label class="form-label">Office / School Name</label>
-                            <input type="text" class="form-control" id="officeName" autocomplete="one-time-code" readonly onfocus="this.removeAttribute('readonly');">
+                            <select class="form-control" id="officeName">
+                                <option value="">Select Office / School Name</option>
+                                @foreach (config('representative_offices', []) as $officeOption)
+                                    <option value="{{ $officeOption }}">{{ $officeOption }}</option>
+                                @endforeach
+                            </select>
                             <div class="error-alert" id="officeNameError"><i class="fas fa-exclamation-circle"></i><span>Required</span></div>
                         </div>
                         <div class="form-group">
@@ -363,7 +368,7 @@
         // Restrict Input Fields
         document.addEventListener('DOMContentLoaded', () => {
              // Name Fields: Letters, spaces, dots, and hyphens only
-             ['firstName', 'middleName', 'lastName', 'repFirstName', 'repMiddleName', 'repLastName', 'officeName'].forEach(id => {
+             ['firstName', 'middleName', 'lastName', 'repFirstName', 'repMiddleName', 'repLastName'].forEach(id => {
                  const el = document.getElementById(id);
                  if(el) {
                     el.addEventListener('input', function(e) {
@@ -560,6 +565,10 @@
                 mobile: document.getElementById('mobile').value,
                 account_type: type,
             };
+
+            if (type === 'representative') {
+                formData.office_name = document.getElementById('officeName').value.trim();
+            }
             
             try {
                 const response = await fetch('/api/register', {
@@ -617,6 +626,9 @@
                     if (errors.email) {
                         showError('regEmail', errors.email[0]);
                     }
+                    if (errors.office_name) {
+                        showError('officeName', errors.office_name[0]);
+                    }
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                 } else {
@@ -649,6 +661,11 @@
                 document.getElementById('middleName').style.opacity = '1';
                 document.getElementById('repMiddleName').disabled = false;
                 document.getElementById('repMiddleName').style.opacity = '1';
+                const officeName = document.getElementById('officeName');
+                if (officeName) {
+                    officeName.value = '';
+                    officeName.classList.remove('error');
+                }
                 setAccountType('individual');
                 const btn = document.querySelector('button[onclick="validateAndOpenModal()"]');
                 if (btn) { btn.innerHTML = 'Create Account'; btn.disabled = false; }

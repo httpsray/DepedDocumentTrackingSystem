@@ -315,7 +315,7 @@
     <button class="mob-hamburger" id="mobHamBtn" type="button" onclick="toggleSidebar()" aria-label="Menu"><span></span><span></span><span></span></button>
     <div class="mob-brand">
         <span class="brand-subtitle">Department of Education</span>
-        <h1>CSJDM DOCTRAX</h1>
+        <h1>CITY OF SAN JOSE DEL MONTE</h1>
         <span class="brand-caption">Document Tracking System &mdash; DOCTRAX</span>
     </div>
 </div>

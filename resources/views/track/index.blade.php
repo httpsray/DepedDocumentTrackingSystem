@@ -157,7 +157,7 @@
 <nav class="navbar">
     <div class="brand-text">
         <span class="brand-subtitle">Department of Education</span>
-        <h1>CSJDM DOCTRAX</h1>
+        <h1>CITY OF SAN JOSE DEL MONTE</h1>
         <span class="brand-caption">Document Tracking System &mdash; DOCTRAX</span>
     </div>
     <button class="nav-hamburger" id="navHamburger" onclick="document.getElementById('navLinks').classList.toggle('open');this.classList.toggle('open')" aria-label="Menu">

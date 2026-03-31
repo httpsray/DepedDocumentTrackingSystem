@@ -604,7 +604,7 @@
     <button class="mob-hamburger" id="mobHamBtn" type="button" onclick="toggleSidebar()" aria-label="Menu"><span></span><span></span><span></span></button>
     <div class="mob-brand">
         <span class="brand-subtitle">Department of Education</span>
-        <h1>CSJDM DOCTRAX</h1>
+        <h1>CITY OF SAN JOSE DEL MONTE</h1>
         <span class="brand-caption">Document Tracking System &mdash; DOCTRAX</span>
     </div>
 </div>
@@ -709,15 +709,8 @@
                     @foreach($users as $u)
                     @php
                         $isRep = $u->account_type === 'representative';
-                        if ($isRep && str_contains($u->name, ' - ')) {
-                            [$officeName, $repName] = explode(' - ', $u->name, 2);
-                        } elseif ($isRep) {
-                            $officeName = $u->office->name ?? 'No office assigned';
-                            $repName = $u->name;
-                        } else {
-                            $officeName = $u->name;
-                            $repName = '';
-                        }
+                        $officeName = $isRep ? ($u->representativeOfficeName() ?? 'No office assigned') : $u->name;
+                        $repName = $isRep ? $u->representativeDisplayName() : '';
                     @endphp
                     <tr id="user-row-{{ $u->id }}">
                         <td>
@@ -773,15 +766,8 @@
                 @foreach($users as $u)
                 @php
                     $isRep = $u->account_type === 'representative';
-                    if ($isRep && str_contains($u->name, ' - ')) {
-                        [$officeName, $repName] = explode(' - ', $u->name, 2);
-                    } elseif ($isRep) {
-                        $officeName = $u->office->name ?? 'No office assigned';
-                        $repName = $u->name;
-                    } else {
-                        $officeName = $u->name;
-                        $repName = '';
-                    }
+                    $officeName = $isRep ? ($u->representativeOfficeName() ?? 'No office assigned') : $u->name;
+                    $repName = $isRep ? $u->representativeDisplayName() : '';
                 @endphp
                 <div class="mob-card" id="mob-user-row-{{ $u->id }}">
                     <div class="mob-card-head">
