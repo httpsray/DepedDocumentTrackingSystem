@@ -366,16 +366,16 @@
 
 @php
     $isRep = ($user->account_type ?? '') === 'representative';
-    $navOfficeName = $isRep ? ($user->office?->name ?? 'Office') : '';
-    $navRepName = $user->name;
-    $repParts  = explode(' ', trim($user->name));
+    $navOfficeName = $isRep ? ($user->representativeOfficeName() ?? 'Office') : '';
+    $navRepName = $isRep ? $user->representativeDisplayName() : $user->name;
+    $repParts  = explode(' ', trim($navRepName));
     $repFirst  = count($repParts) ? array_shift($repParts) : '';
     $repLast   = count($repParts) ? array_pop($repParts)   : '';
     $repMiddle = implode(' ', $repParts);
     $hasMiddle = $repMiddle !== '';
-    $navDisplayName = $isRep ? $navOfficeName : $user->name;
+    $navDisplayName = $isRep ? $navOfficeName : $navRepName;
     $navDisplayRole = $isRep ? 'Office' : ucfirst($user->role ?? 'User');
-    $initials = collect(explode(' ', trim($user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
+    $initials = collect(explode(' ', trim($navRepName ?: $user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
 @endphp
 
 <!-- Mobile top bar -->

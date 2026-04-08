@@ -553,7 +553,7 @@ class RepresentativeController extends Controller
         $documents = (clone $query)
             ->orderByDesc($dateField)
             ->orderByDesc('id')
-            ->paginate(20)
+            ->paginate(20, ['*'], 'documents_page')
             ->withQueryString();
 
         $reportStats = [
@@ -629,7 +629,7 @@ class RepresentativeController extends Controller
         $users = $usersQuery
             ->orderByDesc('handling_count')
             ->orderByDesc('actions_count')
-            ->paginate(24)->withQueryString();
+            ->paginate(24, ['*'], 'users_page')->withQueryString();
 
         return view('office.search', compact(
             'user',

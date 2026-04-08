@@ -155,7 +155,7 @@
         .dashboard-table-card.has-list .table-card-scroll{display:block;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
         .dashboard-table-card.has-list .table-card-scroll thead th{position:sticky;top:0;z-index:2}
         .dashboard-table-card.has-list .pagination-bar{flex-shrink:0}
-        .table-head{padding:16px 20px 14px;border-bottom:1px solid var(--border)}
+        .table-head{padding:16px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
         .table-head-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
         .table-title{font-size:14px;font-weight:700;color:var(--text-dark)}
         .table-count{font-size:12px;color:var(--text-muted)}
@@ -201,10 +201,12 @@
         tr.doc-row{cursor:pointer}
         .cell-ellipsis{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .table-doc-count{font-size:11px;color:#94a3b8;font-weight:500}
-        .queue-panel .table-head{padding:14px 20px;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap}
-        .queue-panel .table-head-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-        .queue-panel .filters{display:flex;gap:8px;align-items:center;flex-wrap:nowrap}
+        .queue-panel .table-head{padding:14px 20px}
+        .queue-panel .table-head-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:0 0 auto}
+        .queue-panel .filters{display:flex;flex-direction:row;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap;flex:1 1 520px;min-width:0}
         .queue-panel .filter-row{display:contents}
+        .queue-panel .search-wrap{flex:1 1 340px;max-width:460px}
+        .queue-panel .filters select{flex:0 0 180px;min-width:180px}
         .queue-panel .btn-clear{display:none}
         .queue-panel table{width:100%;table-layout:fixed}
         .queue-panel .table-card-scroll{overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable}
@@ -278,6 +280,7 @@
         .tl-office-hdr{display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--text-dark);text-transform:none;letter-spacing:0;margin:18px 0 8px -7px;padding-left:7px;padding-bottom:6px;position:relative}
         .tl-office-hdr::after{content:'';position:absolute;left:21px;right:0;bottom:0;height:1.5px;background:var(--border)}
         .tl-office-hdr:first-child{margin-top:0}
+        .tl-dur{font-size:10px;font-weight:600;color:#6366f1;background:#eef2ff;border:1px solid #c7d2fe;border-radius:20px;padding:1px 8px;text-transform:none;letter-spacing:0;white-space:nowrap;flex-shrink:0;margin-left:auto}
         .drawer-loader{display:flex;align-items:center;justify-content:center;padding:48px;flex-direction:column;gap:12px;color:var(--text-muted);font-size:13px}
         .d-section{margin-bottom:18px}
         .d-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#94a3b8;margin-bottom:8px;display:flex;align-items:center;gap:6px}
@@ -343,6 +346,10 @@
             .dashboard-table-card.has-list{max-height:min(68vh,560px)}
             .table-head{flex-direction:column;align-items:stretch;gap:10px;padding:14px 16px}
             .filters{gap:6px}
+            .queue-panel .filters{flex-direction:column;align-items:stretch;justify-content:stretch;flex-basis:auto}
+            .queue-panel .filter-row{display:flex;gap:6px;align-items:stretch}
+            .queue-panel .search-wrap{flex:1 1 100%;max-width:none}
+            .queue-panel .filters select{flex:1 1 auto;min-width:0}
             .filters input{font-size:11px;padding:6px 8px 6px 26px}
             .filters input::placeholder{font-size:10px}
             .filters select{font-size:11px;padding:6px 22px 6px 8px;min-width:100px}
@@ -596,27 +603,10 @@
                 <p>No documents match your filter.</p>
             </div>
         </div>
-
-        @if($documents->hasPages())
-        <div class="pagination-bar">
-            <span>Showing {{ $documents->firstItem() }}–{{ $documents->lastItem() }} of {{ $documents->total() }}</span>
-            <div class="pagination-links">
-                @if($documents->onFirstPage())
-                    <span class="page-btn disabled"><i class="fas fa-chevron-left"></i></span>
-                @else
-                    <a href="{{ $documents->previousPageUrl() }}" class="page-btn"><i class="fas fa-chevron-left"></i></a>
-                @endif
-                @foreach($documents->getUrlRange(1, $documents->lastPage()) as $page => $url)
-                    <a href="{{ $url }}" class="page-btn {{ $page == $documents->currentPage() ? 'active' : '' }}">{{ $page }}</a>
-                @endforeach
-                @if($documents->hasMorePages())
-                    <a href="{{ $documents->nextPageUrl() }}" class="page-btn"><i class="fas fa-chevron-right"></i></a>
-                @else
-                    <span class="page-btn disabled"><i class="fas fa-chevron-right"></i></span>
-                @endif
-            </div>
-        </div>
-        @endif
+        @include('partials.shared-pagination', [
+            'paginator' => $documents,
+            'itemLabel' => 'documents',
+        ])
 
         <div class="empty-state" id="noResults" style="display:none">
             <i class="fas fa-search"></i>
@@ -937,18 +927,32 @@ var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
         if (!logs.length) {
             tlHtml = '<div style="color:var(--text-muted);font-size:13px;padding:4px 0">No routing history yet.</div>';
         } else {
+            function _gk(log) {
+                return (log.action === 'submitted') ? '__pending__' :
+                       (log.action === 'forwarded' ? (log.from_office || 'Unknown') :
+                       (log.to_office || log.from_office || 'Unknown'));
+            }
+            var segDurations = [];
+            logs.forEach(function(log) {
+                if (log.office_duration_human != null) {
+                    segDurations.push({ key: _gk(log), dur: log.office_duration_human });
+                }
+            });
+            var segDurIdx = segDurations.length - 1;
             var prevGroupKey = null;
             logs.slice().reverse().forEach(function(log, idx) {
                 var isLatest = idx === 0;
                 var dc = isLatest ? 'c-latest' : dotClass(log.status_after);
                 var dotIcon = isLatest ? 'fa-arrow-up' : 'fa-check';
-                var groupKey = (log.action === 'submitted') ? '__pending__' :
-                               (log.action === 'forwarded' ? (log.from_office || 'Unknown') :
-                               (log.to_office || log.from_office || 'Unknown'));
-                var groupLabel = (groupKey === '__pending__') ? 'Submitted - Pending Acceptance' : groupKey;
+                var groupKey = _gk(log);
+                var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Physical Submission' : groupKey;
                 if (groupKey !== prevGroupKey) {
                     prevGroupKey = groupKey;
-                    tlHtml += '<div class="tl-office-hdr"><div class="tl-dot ' + dc + '" style="margin-right:5px"><i class="fas ' + dotIcon + '" style="font-size:5px"></i></div><span>' + escapeHtml(groupLabel) + '</span></div>';
+                    var dur = null;
+                    if (segDurIdx >= 0 && segDurations[segDurIdx] && segDurations[segDurIdx].key === groupKey) {
+                        dur = segDurations[segDurIdx--].dur;
+                    }
+                    tlHtml += '<div class="tl-office-hdr"><div class="tl-dot ' + dc + '" style="margin-right:5px"><i class="fas ' + dotIcon + '" style="font-size:5px"></i></div><span>' + escapeHtml(groupLabel) + '</span>' + (dur ? '<span class="tl-dur"><i class="fas fa-hourglass-half" style="margin-right:4px;font-size:9px"></i>' + escapeHtml(dur) + '</span>' : '') + '</div>';
                 }
                 tlHtml += '<div class="tl-item">' +
                     (log.performed_by ? '<div class="tl-action">' + escapeHtml(log.performed_by) + '</div>' : '') +

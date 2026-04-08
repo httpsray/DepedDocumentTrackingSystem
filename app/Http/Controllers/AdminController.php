@@ -156,7 +156,7 @@ class AdminController extends Controller
             }
         }
 
-        $users = $query->withCount('documents')->latest()->paginate(15);
+        $users = $query->withCount('documents')->latest()->paginate(15)->withQueryString();
 
         $offices = Office::where('is_active', true)->orderBy('name')->get();
 
@@ -328,7 +328,7 @@ class AdminController extends Controller
             }
         }
 
-        $documents = $query->latest()->paginate(15);
+        $documents = $query->latest()->paginate(15)->withQueryString();
 
         $stats = [
             'total'     => Document::count(),
@@ -400,7 +400,8 @@ class AdminController extends Controller
             ->whereNotNull('office_id')
             ->with('office')
             ->latest()
-            ->get();
+            ->paginate(15)
+            ->withQueryString();
 
         $offices = Office::where('is_active', true)->orderBy('name')->get();
 

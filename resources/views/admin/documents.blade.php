@@ -940,29 +940,10 @@
                 </div>
                 @endforeach
             </div>
-
-            @if($documents->hasPages())
-            <div class="pagination-bar">
-                <span>Showing {{ $documents->firstItem() }}–{{ $documents->lastItem() }} of {{ $documents->total() }}</span>
-                <div class="pagination-links">
-                    @if($documents->onFirstPage())
-                        <span class="page-btn disabled"><i class="fas fa-chevron-left"></i></span>
-                    @else
-                        <a href="{{ $documents->previousPageUrl() }}" class="page-btn"><i class="fas fa-chevron-left"></i></a>
-                    @endif
-
-                    @foreach($documents->getUrlRange(1, $documents->lastPage()) as $page => $url)
-                        <a href="{{ $url }}" class="page-btn {{ $page == $documents->currentPage() ? 'active' : '' }}">{{ $page }}</a>
-                    @endforeach
-
-                    @if($documents->hasMorePages())
-                        <a href="{{ $documents->nextPageUrl() }}" class="page-btn"><i class="fas fa-chevron-right"></i></a>
-                    @else
-                        <span class="page-btn disabled"><i class="fas fa-chevron-right"></i></span>
-                    @endif
-                </div>
-            </div>
-            @endif
+            @include('partials.shared-pagination', [
+                'paginator' => $documents,
+                'itemLabel' => 'documents',
+            ])
 
             @else
             <div class="empty-state">
@@ -1090,7 +1071,7 @@
                     var dc = isLatest ? 'c-latest' : dotClass(log.status_after);
                     var dotIcon = isLatest ? 'fa-arrow-up' : 'fa-check';
                     var groupKey = _gk(log);
-                    var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Acceptance' : groupKey;
+                    var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Physical Submission' : groupKey;
                     if (groupKey !== prevGroupKey) {
                         prevGroupKey = groupKey;
                         var dur = null;
@@ -1109,7 +1090,7 @@
             }
 
             var currentOfficeText = (doc.status === 'submitted')
-                ? ('Awaiting acceptance by ' + (doc.submitted_to_office || doc.current_office || 'Records Section'))
+                ? ('Awaiting physical submission to ' + (doc.submitted_to_office || doc.current_office || 'Records Section'))
                 : (doc.current_office || doc.submitted_to_office || '-');
             var currentHandlerText = doc.current_handler || 'Unassigned';
 

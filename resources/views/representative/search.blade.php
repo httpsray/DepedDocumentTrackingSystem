@@ -1,10 +1,10 @@
 @php
     $user = auth()->user();
     $isRep = $user->account_type === 'representative';
-    $navOfficeName = $isRep ? ($user->office?->name ?? 'Representative') : null;
-    $navRepName = $user->name;
-    $navDisplayName = $navOfficeName ?? $user->name;
-    $initials = collect(explode(' ', trim($user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
+    $navOfficeName = $isRep ? ($user->representativeOfficeName() ?? 'Representative') : null;
+    $navRepName = $isRep ? $user->representativeDisplayName() : $user->name;
+    $navDisplayName = $navOfficeName ?? $navRepName;
+    $initials = collect(explode(' ', trim($navRepName ?: $user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -222,9 +222,10 @@
                 </tbody>
             </table>
             </div>
-            <div class="pager-wrap" style="padding:14px 22px;border-top:1px solid var(--border)">
-                {{ $documents->withQueryString()->links() }}
-            </div>
+            @include('partials.shared-pagination', [
+                'paginator' => $documents,
+                'itemLabel' => 'documents',
+            ])
         @endif
     </div>
 </div>

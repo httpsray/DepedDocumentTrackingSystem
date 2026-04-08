@@ -244,13 +244,19 @@
 </head>
 <body>
 @php
-    $initials = collect(explode(' ', trim($user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
-    $firstName = explode(' ', trim($user->name))[0];
     $isAdmin = $user->isAdmin();
     $isRep = $user->isRepresentative();
     $isOfficeRep = $isRep && !empty($user->office_id);
+    $isSelfRep = $isRep && !$isOfficeRep && !$isAdmin;
+    $repName = $isSelfRep ? $user->representativeDisplayName() : '';
+    $repOfficeName = $isSelfRep ? ($user->representativeOfficeName() ?? 'Representative') : '';
+    $sidebarNameSource = trim($repName ?: $user->name);
+    $initials = collect(explode(' ', $sidebarNameSource))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
+    $firstName = explode(' ', $sidebarNameSource)[0] ?? 'User';
     $backUrl = $isAdmin ? '/dashboard' : ($isOfficeRep ? '/office/dashboard' : '/dashboard');
     $roleBadge = $user->isSuperAdmin() ? 'Super Admin' : ($isAdmin ? 'Admin' : ($isRep ? 'Representative' : ucfirst($user->role ?? 'User')));
+    $sidebarMeta = $isSelfRep ? ($repName ?: 'Representative') : $roleBadge;
+    $sidebarName = $isSelfRep ? ($repOfficeName ?: 'Representative') : $firstName;
 @endphp
 
 <!-- Mobile top bar -->
@@ -285,8 +291,8 @@
         <div class="sb-user">
             <div class="sb-avatar">{{ $initials }}</div>
             <div class="sb-user-info">
-                <small>{{ $roleBadge }}</small>
-                <span>{{ $firstName }}</span>
+                <small>{{ $sidebarMeta }}</small>
+                <span>{{ $sidebarName }}</span>
             </div>
         </div>
         <button onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -368,7 +374,7 @@
                         </td>
                         <td class="t-office">
                             @if($doc->status === 'submitted')
-                                <div class="cell-ellipsis" title="{{ 'Awaiting acceptance by ' . ($doc->submittedToOffice->name ?? 'Records Section') }}">{{ 'Awaiting acceptance by ' . ($doc->submittedToOffice->name ?? 'Records Section') }}</div>
+                                <div class="cell-ellipsis" title="{{ 'Awaiting physical submission to ' . ($doc->submittedToOffice->name ?? 'Records Section') }}">{{ 'Awaiting physical submission to ' . ($doc->submittedToOffice->name ?? 'Records Section') }}</div>
                             @else
                                 <div class="cell-ellipsis" title="{{ $doc->currentOffice->name ?? $doc->submittedToOffice->name ?? 'No office assigned' }}">{{ $doc->currentOffice->name ?? $doc->submittedToOffice->name ?? 'No office assigned' }}</div>
                             @endif
@@ -393,27 +399,10 @@
                 </tbody>
             </table>
             </div>
-
-            @if($documents->hasPages())
-            <div class="pagination-bar">
-                <span>Showing {{ $documents->firstItem() }}–{{ $documents->lastItem() }} of {{ $documents->total() }}</span>
-                <div class="pagination-links">
-                    @if($documents->onFirstPage())
-                        <span class="page-btn disabled"><i class="fas fa-chevron-left"></i></span>
-                    @else
-                        <a href="{{ $documents->previousPageUrl() }}" class="page-btn"><i class="fas fa-chevron-left"></i></a>
-                    @endif
-                    @foreach($documents->getUrlRange(1, $documents->lastPage()) as $page => $url)
-                        <a href="{{ $url }}" class="page-btn {{ $page == $documents->currentPage() ? 'active' : '' }}">{{ $page }}</a>
-                    @endforeach
-                    @if($documents->hasMorePages())
-                        <a href="{{ $documents->nextPageUrl() }}" class="page-btn"><i class="fas fa-chevron-right"></i></a>
-                    @else
-                        <span class="page-btn disabled"><i class="fas fa-chevron-right"></i></span>
-                    @endif
-                </div>
-            </div>
-            @endif
+            @include('partials.shared-pagination', [
+                'paginator' => $documents,
+                'itemLabel' => 'documents',
+            ])
         @endif
     </div>
 
@@ -504,6 +493,9 @@
 
 <script>
 var _searchTimer = null;
+var _lastSearchSyncAt = 0;
+var SEARCH_URL_SYNC_DELAY = 700;
+var SEARCH_URL_MIN_INTERVAL = 1200;
 var docsData = JSON.parse(document.getElementById('docsData').textContent || '{}');
 
 function filterDocs(immediate) {
@@ -533,15 +525,7 @@ function filterDocs(immediate) {
         }
     }
 
-    // Navigate to server with filters — immediate for dropdown, debounced for typing
-    clearTimeout(_searchTimer);
-    if (immediate) {
-        syncFiltersToUrl(q, status);
-    } else {
-        _searchTimer = setTimeout(function() {
-            syncFiltersToUrl(q, status);
-        }, 600);
-    }
+    scheduleFilterSync(q, status, !!immediate);
 }
 
 function syncFiltersToUrl(q, status) {
@@ -555,6 +539,30 @@ function syncFiltersToUrl(q, status) {
     if (newUrl !== window.location.pathname + window.location.search) {
         window.location.href = newUrl;
     }
+}
+
+function scheduleFilterSync(q, status, immediate) {
+    clearTimeout(_searchTimer);
+
+    var runSync = function() {
+        var now = Date.now();
+        var remaining = SEARCH_URL_MIN_INTERVAL - (now - _lastSearchSyncAt);
+
+        if (remaining > 0) {
+            _searchTimer = setTimeout(runSync, remaining);
+            return;
+        }
+
+        _lastSearchSyncAt = Date.now();
+        syncFiltersToUrl(q, status);
+    };
+
+    if (immediate) {
+        runSync();
+        return;
+    }
+
+    _searchTimer = setTimeout(runSync, SEARCH_URL_SYNC_DELAY);
 }
 
 function logout() {
@@ -729,7 +737,7 @@ function renderDrawer(doc) {
             var groupKey = (log.action === 'submitted') ? '__pending__' :
                            (log.action === 'forwarded' ? (log.from_office || 'Unknown') :
                            (log.to_office || log.from_office || 'Unknown'));
-            var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Acceptance' : groupKey;
+            var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Physical Submission' : groupKey;
             if (groupKey !== prevGroupKey) {
                 prevGroupKey = groupKey;
                 tlHtml += '<div class="tl-office-hdr"><div class="tl-dot ' + dc + '" style="margin-right:5px"><i class="fas ' + dotIcon + '" style="font-size:5px"></i></div><span>' + escapeHtml(groupLabel) + '</span></div>';

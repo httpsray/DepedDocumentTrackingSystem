@@ -274,10 +274,10 @@
 <body>
 @php
     $isRep = $user->account_type === 'representative';
-    $navOfficeName = $isRep ? ($user->office?->name ?? 'Office') : null;
-    $navRepName = $user->name;
-    $navDisplayName = $navOfficeName ?? $user->name;
-    $initials = collect(explode(' ', trim($user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
+    $navOfficeName = $isRep ? ($user->representativeOfficeName() ?? 'Office') : null;
+    $navRepName = $isRep ? $user->representativeDisplayName() : $user->name;
+    $navDisplayName = $navOfficeName ?? $navRepName;
+    $initials = collect(explode(' ', trim($navRepName ?: $user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
 @endphp
 
 <!-- Mobile top bar -->
@@ -407,7 +407,7 @@
                         $docRef = $doc->reference_number ?: $doc->tracking_number;
                         $docTracking = $doc->tracking_number ?: $doc->reference_number;
                         $docOffice = $doc->status === 'submitted'
-                            ? 'Awaiting acceptance by ' . ($doc->submittedToOffice->name ?? 'Records Section')
+                            ? 'Awaiting physical submission to ' . ($doc->submittedToOffice->name ?? 'Records Section')
                             : ($doc->currentOffice->name ?? $doc->submittedToOffice->name ?? 'No office assigned');
                     @endphp
                     <tr class="doc-row"
@@ -457,7 +457,7 @@
                         $docRef = $doc->reference_number ?: $doc->tracking_number;
                         $docTracking = $doc->tracking_number ?: $doc->reference_number;
                         $docOffice = $doc->status === 'submitted'
-                            ? 'Awaiting acceptance by ' . ($doc->submittedToOffice->name ?? 'Records Section')
+                            ? 'Awaiting physical submission to ' . ($doc->submittedToOffice->name ?? 'Records Section')
                             : ($doc->currentOffice->name ?? $doc->submittedToOffice->name ?? 'No office assigned');
                     @endphp
                     <div
@@ -501,27 +501,10 @@
                     <p>No documents match your search.</p>
                 </div>
             </div>
-
-            @if($documents->hasPages())
-            <div class="pagination-bar">
-                <span>Showing {{ $documents->firstItem() }}–{{ $documents->lastItem() }} of {{ $documents->total() }}</span>
-                <div class="pagination-links">
-                    @if($documents->onFirstPage())
-                        <span class="page-btn disabled"><i class="fas fa-chevron-left"></i></span>
-                    @else
-                        <a href="{{ $documents->previousPageUrl() }}" class="page-btn"><i class="fas fa-chevron-left"></i></a>
-                    @endif
-                    @foreach($documents->getUrlRange(1, $documents->lastPage()) as $page => $url)
-                        <a href="{{ $url }}" class="page-btn {{ $page == $documents->currentPage() ? 'active' : '' }}">{{ $page }}</a>
-                    @endforeach
-                    @if($documents->hasMorePages())
-                        <a href="{{ $documents->nextPageUrl() }}" class="page-btn"><i class="fas fa-chevron-right"></i></a>
-                    @else
-                        <span class="page-btn disabled"><i class="fas fa-chevron-right"></i></span>
-                    @endif
-                </div>
-            </div>
-            @endif
+            @include('partials.shared-pagination', [
+                'paginator' => $documents,
+                'itemLabel' => 'documents',
+            ])
         @endif
     </div>
 
@@ -610,6 +593,9 @@
 
 <script>
 var _searchTimer = null;
+var _lastSearchSyncAt = 0;
+var SEARCH_URL_SYNC_DELAY = 700;
+var SEARCH_URL_MIN_INTERVAL = 1200;
 
 function filterDocs(immediate) {
     var q      = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -648,14 +634,7 @@ function filterDocs(immediate) {
         }
     }
 
-    clearTimeout(_searchTimer);
-    if (immediate) {
-        syncFiltersToUrl(q, status);
-    } else {
-        _searchTimer = setTimeout(function() {
-            syncFiltersToUrl(q, status);
-        }, 600);
-    }
+    scheduleFilterSync(q, status, !!immediate);
 }
 
 function syncFiltersToUrl(q, status) {
@@ -667,6 +646,30 @@ function syncFiltersToUrl(q, status) {
     if (newUrl !== window.location.pathname + window.location.search) {
         window.location.href = newUrl;
     }
+}
+
+function scheduleFilterSync(q, status, immediate) {
+    clearTimeout(_searchTimer);
+
+    var runSync = function() {
+        var now = Date.now();
+        var remaining = SEARCH_URL_MIN_INTERVAL - (now - _lastSearchSyncAt);
+
+        if (remaining > 0) {
+            _searchTimer = setTimeout(runSync, remaining);
+            return;
+        }
+
+        _lastSearchSyncAt = Date.now();
+        syncFiltersToUrl(q, status);
+    };
+
+    if (immediate) {
+        runSync();
+        return;
+    }
+
+    _searchTimer = setTimeout(runSync, SEARCH_URL_SYNC_DELAY);
 }
 
 function logout() {
@@ -836,7 +839,7 @@ function renderDrawer(doc) {
             var groupKey = (log.action === 'submitted') ? '__pending__' :
                            (log.action === 'forwarded' ? (log.from_office || 'Unknown') :
                            (log.to_office || log.from_office || 'Unknown'));
-            var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Acceptance' : groupKey;
+            var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Physical Submission' : groupKey;
             if (groupKey !== prevGroupKey) {
                 prevGroupKey = groupKey;
                 tlHtml += '<div class="tl-office-hdr"><div class="tl-dot ' + dc + '" style="margin-right:5px"><i class="fas ' + dotIcon + '" style="font-size:5px"></i></div><span>' + escapeHtml(groupLabel) + '</span></div>';

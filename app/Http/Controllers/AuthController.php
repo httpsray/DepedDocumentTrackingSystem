@@ -399,20 +399,37 @@ class AuthController extends Controller
 
     /**
      * Send a password-reset link to the given email.
-     * Always returns 200 to avoid email enumeration.
      */
     public function sendResetLink(Request $request)
     {
+        $request->merge([
+            'email' => strtolower(trim((string) $request->input('email'))),
+        ]);
+
         $request->validate(['email' => 'required|email|max:255']);
 
-        $user = User::where('email', strtolower(trim($request->email)))->first();
+        $user = User::where('email', $request->email)->first();
 
-        // Always respond generically — never confirm whether the email exists
-        if (!$user || !$user->isActive()) {
+        // Fail fast so the frontend can keep the user on the form when the
+        // email is unknown or the account is not active yet.
+        if (!$user) {
             return response()->json([
-                'success' => true,
-                'message' => 'If that email is registered and active, a reset link has been sent.',
-            ]);
+                'success' => false,
+                'message' => 'No account found for that email address.',
+                'errors' => [
+                    'email' => ['No account found for that email address.'],
+                ],
+            ], 422);
+        }
+
+        if (!$user->isActive()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only active accounts can request a password reset link.',
+                'errors' => [
+                    'email' => ['Only active accounts can request a password reset link.'],
+                ],
+            ], 422);
         }
 
         // Hash a new raw token and upsert into password_reset_tokens
@@ -433,7 +450,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'If that email is registered and active, a reset link has been sent.',
+            'message' => 'A reset link has been sent to your email address.',
         ]);
     }
 

@@ -20,7 +20,7 @@
                 if (!immediate) fn.apply(ctx, args);
             }, delay);
 
-            if (callNow) fn.apply(ctx, args);me
+            if (callNow) fn.apply(ctx, args);
         };
     };
 
@@ -1013,9 +1013,16 @@
     window.docTraxFetchJson = function (url, opts) {
         opts = opts || {};
 
-        return window.docTraxFetch(url, opts)
+        var fetcher = (typeof opts.cooldownMs === 'number' || typeof opts.rateLimitKey === 'string')
+            ? window.safeFetch
+            : window.docTraxFetch;
+
+        return fetcher(url, opts)
             .then(function (response) {
                 if (opts.rejectOnHttpError !== false && !response.ok) {
+                    if (response.status === 429) {
+                        throw createRequestError('rate_limit', 'Too many requests. Please wait a moment and try again.');
+                    }
                     throw createRequestError('server', 'The server returned an unexpected response. Please try again.');
                 }
 
@@ -1348,6 +1355,8 @@
 
     // Live SPA search/filter forms
     var LIVE_FORM_SELECTOR = 'form[data-live-search][method="GET"]';
+    var LIVE_FORM_DEFAULT_DEBOUNCE_MS = 700;
+    var LIVE_FORM_MIN_INTERVAL_MS = 1200;
 
     function buildLiveFormUrl(form) {
         var action = form.getAttribute('action') || location.pathname;
@@ -1396,22 +1405,65 @@
         return Promise.resolve(false);
     }
 
+    function queueLiveFormSubmit(form, isManual) {
+        if (!form) return Promise.resolve(false);
+
+        if (form._liveSearchCooldownTimer) {
+            clearTimeout(form._liveSearchCooldownTimer);
+            form._liveSearchCooldownTimer = null;
+        }
+
+        if (isManual) {
+            form._liveSearchLastSubmittedAt = Date.now();
+            return submitLiveForm(form);
+        }
+
+        var minInterval = parseInt(form.getAttribute('data-live-min-interval') || String(LIVE_FORM_MIN_INTERVAL_MS), 10);
+        if (isNaN(minInterval) || minInterval < 0) minInterval = LIVE_FORM_MIN_INTERVAL_MS;
+
+        var now = Date.now();
+        var elapsed = now - (form._liveSearchLastSubmittedAt || 0);
+
+        if (elapsed >= minInterval) {
+            form._liveSearchLastSubmittedAt = now;
+            return submitLiveForm(form);
+        }
+
+        form._liveSearchCooldownTimer = setTimeout(function () {
+            form._liveSearchLastSubmittedAt = Date.now();
+            submitLiveForm(form);
+        }, minInterval - elapsed);
+
+        return Promise.resolve(false);
+    }
+
     function bindLiveForm(form) {
         if (!form || form.dataset.liveSearchBound === '1') return;
 
         form.dataset.liveSearchBound = '1';
         form.dataset.liveSearchLastUrl = location.href.split('#')[0];
+        form._liveSearchLastSubmittedAt = 0;
 
-        var delay = parseInt(form.getAttribute('data-live-debounce') || '280', 10);
-        if (isNaN(delay) || delay < 0) delay = 280;
+        var delay = parseInt(form.getAttribute('data-live-debounce') || String(LIVE_FORM_DEFAULT_DEBOUNCE_MS), 10);
+        if (isNaN(delay) || delay < 0) delay = LIVE_FORM_DEFAULT_DEBOUNCE_MS;
 
-        var debouncedSubmit = window.debounce(function () {
-            submitLiveForm(form);
-        }, delay);
+        function scheduleDebouncedSubmit() {
+            if (form._liveSearchInputTimer) {
+                clearTimeout(form._liveSearchInputTimer);
+            }
+
+            form._liveSearchInputTimer = setTimeout(function () {
+                queueLiveFormSubmit(form, false);
+            }, delay);
+        }
 
         form.addEventListener('submit', function (event) {
             event.preventDefault();
-            submitLiveForm(form);
+            if (form._liveSearchInputTimer) {
+                clearTimeout(form._liveSearchInputTimer);
+                form._liveSearchInputTimer = null;
+            }
+            queueLiveFormSubmit(form, true);
         });
 
         form.querySelectorAll('input, textarea, select').forEach(function (field) {
@@ -1422,7 +1474,11 @@
 
             if (tag === 'SELECT' || type === 'date' || type === 'checkbox' || type === 'radio') {
                 field.addEventListener('change', function () {
-                    submitLiveForm(form);
+                    if (form._liveSearchInputTimer) {
+                        clearTimeout(form._liveSearchInputTimer);
+                        form._liveSearchInputTimer = null;
+                    }
+                    queueLiveFormSubmit(form, false);
                 });
                 return;
             }
@@ -1430,9 +1486,13 @@
             if (type === 'hidden') return;
 
             if (tag === 'TEXTAREA' || type === 'text' || type === 'search' || type === '') {
-                field.addEventListener('input', debouncedSubmit);
+                field.addEventListener('input', scheduleDebouncedSubmit);
                 field.addEventListener('change', function () {
-                    submitLiveForm(form);
+                    if (form._liveSearchInputTimer) {
+                        clearTimeout(form._liveSearchInputTimer);
+                        form._liveSearchInputTimer = null;
+                    }
+                    queueLiveFormSubmit(form, false);
                 });
             }
         });

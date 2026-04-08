@@ -97,10 +97,10 @@
 
 @php
     $isRep = ($user->account_type ?? '') === 'representative';
-    $navOfficeName = $isRep ? ($user->office?->name ?? 'Office') : '';
-    $navRepName = $user->name;
-    $navDisplayName = $isRep ? $navOfficeName : $user->name;
-    $initials = collect(explode(' ', trim($user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
+    $navOfficeName = $isRep ? ($user->representativeOfficeName() ?? 'Office') : '';
+    $navRepName = $isRep ? $user->representativeDisplayName() : $user->name;
+    $navDisplayName = $isRep ? $navOfficeName : $navRepName;
+    $initials = collect(explode(' ', trim($navRepName ?: $user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
 @endphp
 
 <div class="mob-topbar">

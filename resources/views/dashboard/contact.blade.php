@@ -96,9 +96,14 @@
 </head>
 <body>
 @php
-    $initials = collect(explode(' ', trim($user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
-    $firstName = explode(' ', trim($user->name))[0];
-    $roleBadge = ucfirst($user->role ?? 'User');
+    $isSelfRep = $user->isRepresentative() && !$user->office_id;
+    $repName = $isSelfRep ? $user->representativeDisplayName() : '';
+    $repOfficeName = $isSelfRep ? ($user->representativeOfficeName() ?? 'Representative') : '';
+    $sidebarNameSource = trim($repName ?: $user->name);
+    $initials = collect(explode(' ', $sidebarNameSource))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
+    $firstName = explode(' ', $sidebarNameSource)[0] ?? 'User';
+    $roleBadge = $isSelfRep ? ($repName ?: 'Representative') : ucfirst($user->role ?? 'User');
+    $sidebarName = $isSelfRep ? ($repOfficeName ?: 'Representative') : $firstName;
 @endphp
 
 <div class="mob-topbar">
@@ -132,7 +137,7 @@
             <div class="sb-avatar">{{ $initials }}</div>
             <div class="sb-user-info">
                 <small>{{ $roleBadge }}</small>
-                <span>{{ $firstName }}</span>
+                <span>{{ $sidebarName }}</span>
             </div>
         </div>
         <button onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>

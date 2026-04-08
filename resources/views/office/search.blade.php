@@ -1,10 +1,10 @@
 @php
     $user = auth()->user();
     $isRep = $user->account_type === 'representative';
-    $navOfficeName = $isRep ? ($user->office?->name ?? 'Office') : null;
-    $navRepName = $user->name;
-    $navDisplayName = $navOfficeName ?? $user->name;
-    $initials = collect(explode(' ', trim($user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
+    $navOfficeName = $isRep ? ($user->representativeOfficeName() ?? 'Office') : null;
+    $navRepName = $isRep ? $user->representativeDisplayName() : $user->name;
+    $navDisplayName = $navOfficeName ?? $navRepName;
+    $initials = collect(explode(' ', trim($navRepName ?: $user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -880,10 +880,10 @@
                     </div>
                 @endforeach
             </div>
-
-            <div class="pager">
-                {{ $documents->withQueryString()->links() }}
-            </div>
+            @include('partials.shared-pagination', [
+                'paginator' => $documents,
+                'itemLabel' => 'documents',
+            ])
         @endif
     </div>
 
@@ -952,10 +952,12 @@
         </div>
         @if($users->hasPages())
         <div class="table-card" style="margin-top:0">
-            <div class="pager">{{ $users->withQueryString()->links() }}</div>
+            @include('partials.shared-pagination', [
+                'paginator' => $users,
+                'itemLabel' => 'staff members',
+            ])
         </div>
         @endif
-    @endif
 </div>
 
 <div class="drawer-overlay" id="uaDrawerOverlay" onclick="closeUserActivity()"></div>
@@ -1526,7 +1528,7 @@ function renderDrawer(doc) {
             var groupKey = (log.action === 'submitted') ? '__pending__' :
                            (log.action === 'forwarded' ? (log.from_office || 'Unknown') :
                            (log.to_office || log.from_office || 'Unknown'));
-            var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Acceptance' : groupKey;
+            var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Physical Submission' : groupKey;
             if (groupKey !== prevGroupKey) {
                 prevGroupKey = groupKey;
                 tlHtml += '<div class="tl-office-hdr"><div class="tl-dot ' + dc + '" style="margin-right:5px"><i class="fas ' + dotIcon + '" style="font-size:5px"></i></div><span>' + escapeHtml(groupLabel) + '</span></div>';

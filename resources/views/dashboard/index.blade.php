@@ -301,6 +301,14 @@
             table-layout: fixed;
         }
 
+        .cell-ellipsis {
+            display: block;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         .recent-docs-panel .panel-scroll-body {
             overflow-y: auto;
             overflow-x: hidden;
@@ -398,10 +406,15 @@
             font-weight: 600;
             color: var(--primary);
             white-space: nowrap;
+            min-width: 0;
         }
 
         .recent-docs-panel .t-subject .cell-ellipsis {
             max-width: 100%;
+        }
+
+        .recent-docs-panel .t-subject {
+            min-width: 0;
         }
 
         .recent-docs-panel .t-status {
@@ -413,6 +426,7 @@
             font-size: 11px;
             color: #94a3b8;
             white-space: nowrap;
+            min-width: 0;
         }
 
         .recent-docs-panel .mob-cards {
@@ -807,12 +821,13 @@
 
     @php
         $isRep       = ($user->account_type ?? '') === 'representative';
-        $navOfficeName = $isRep ? ($user->office?->name ?? '') : '';
-        $navRepName    = $user->name;
-        $navDisplayName = $isRep ? $navOfficeName : explode(' ', $user->name)[0];
+        $navOfficeName = $isRep ? ($user->representativeOfficeName() ?? '') : '';
+        $navRepName    = $isRep ? $user->representativeDisplayName() : $user->name;
+        $navDisplayName = $isRep ? ($navOfficeName ?: 'Representative') : explode(' ', trim($user->name))[0];
         $navDisplayRole = $isRep ? ($user->office_id ? 'Office' : 'Representative') : ucfirst($user->role ?? 'User');
         $dashboardWelcomeName = $navRepName ?: $navDisplayName;
         $dashboardContextLabel = $navOfficeName ?: ($isRep ? 'Representative Dashboard' : 'Personal Dashboard');
+        $sidebarAvatarLabel = $isRep ? ($navRepName ?: $user->name) : $navDisplayName;
         $pickupCount = $stats['for_pickup'] ?? 0;
     @endphp
 
@@ -846,7 +861,7 @@
     </nav>
     <div class="sb-footer">
         <div class="sb-user">
-            <div class="sb-avatar">{{ strtoupper(substr($navDisplayName, 0, 1)) }}</div>
+            <div class="sb-avatar">{{ strtoupper(substr($sidebarAvatarLabel, 0, 1)) }}</div>
             <div class="sb-user-info">
                 <small>{{ ($isRep && $navRepName) ? $navRepName : $navDisplayRole }}</small>
                 <span>{{ $navDisplayName }}</span>
@@ -1211,11 +1226,9 @@
         function renderDrawer(doc) {
             _currentDrawerRef = doc.reference_number || doc.tracking_number || null;
             var refNo = doc.reference_number || doc.tracking_number || '-';
-            var trackingNo = doc.tracking_number || '';
-
             document.getElementById('drTitle').textContent = doc.subject || '-';
             document.getElementById('drRef').textContent = refNo;
-            document.getElementById('drTrack').textContent = (trackingNo && trackingNo !== refNo) ? ('Tracking: ' + trackingNo) : '';
+            document.getElementById('drTrack').textContent = '';
 
             var actionBar = document.getElementById('drawerActionBar');
             var pickupBtn = document.getElementById('drawerPickupBtn');
@@ -1257,7 +1270,7 @@
                     var dotIcon = isVoided ? 'fa-ban' : (isLatest ? 'fa-arrow-up' : 'fa-check');
                     var groupKey = (log.action === 'submitted') ? '__pending__' :
                         (log.action === 'forwarded' ? (log.from_office || 'Unknown') : (log.to_office || log.from_office || 'Unknown'));
-                    var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Acceptance' : groupKey;
+                    var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Physical Submission' : groupKey;
 
                     if (groupKey !== prevGroupKey) {
                         prevGroupKey = groupKey;

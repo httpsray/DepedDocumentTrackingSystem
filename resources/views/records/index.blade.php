@@ -102,11 +102,31 @@
         .empty-state i{font-size:40px;color:#cbd5e1;margin-bottom:12px;display:block}
         .empty-state h3{font-size:15px;font-weight:600;color:#94a3b8;margin-bottom:6px}
         .empty-state p{font-size:12px}
-        .pagination-wrap{padding:16px 22px;display:flex;justify-content:center;gap:4px}
-        .pagination-wrap a,.pagination-wrap span{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 10px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;border:1.5px solid var(--border);color:var(--text-dark);background:#fff;transition:all .15s}
-        .pagination-wrap a:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
-        .pagination-wrap span.current{background:var(--primary);color:#fff;border-color:var(--primary)}
-        .pagination-wrap span.dots{border:none;background:none;color:var(--text-muted)}
+        .pagination-wrap{padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:linear-gradient(180deg,#fff 0%,#f8fbff 100%)}
+        .pagination-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+        .pagination-pill{display:inline-flex;align-items:center;white-space:nowrap}
+        .pagination-pill-text{display:inline-flex;align-items:baseline;gap:5px;font-size:12px;line-height:1}
+        .pagination-pill-label{color:var(--text-muted);font-weight:600}
+        .pagination-pill-value{color:var(--text-dark);font-weight:700;letter-spacing:.01em}
+        .pagination-pill-sep{color:#94a3b8;font-weight:700}
+        .pagination-summary{font-size:12px;color:var(--text-muted);font-weight:500}
+        .pagination-summary strong{color:var(--text-dark)}
+        .pagination-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+        .pagination-links{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}
+        .page-link,.page-current,.page-disabled,.page-dots{display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:40px;padding:0 12px;border-radius:12px;font-size:12px;font-weight:700;text-decoration:none;transition:all .18s ease}
+        .page-link{border:1px solid #dbe5f0;color:#334155;background:#fff}
+        .page-link:hover{border-color:var(--primary-dark);background:var(--primary-dark);color:#fff}
+        .page-current{border:1px solid transparent;background:linear-gradient(135deg,#0f61c9 0%,#0056b3 100%);color:#fff}
+        .page-disabled{border:1px dashed #dbe3ee;background:#f8fafc;color:#cbd5e1;cursor:not-allowed}
+        .page-dots{min-width:auto;height:40px;padding:0 2px;border:none;background:none;color:#94a3b8}
+        .page-nav{gap:7px;padding:0 14px}
+        .page-nav i{font-size:10px}
+        .pagination-jump{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 10px;border:1px solid #dbe5f0;border-radius:12px;background:#fff}
+        .pagination-jump label{font-size:11px;font-weight:700;color:var(--text-muted);white-space:nowrap}
+        .pagination-jump input{width:58px;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:10px;background:#f8fafc;color:var(--text-dark);font-family:Poppins,sans-serif;font-size:12px;font-weight:600;text-align:center;outline:none}
+        .pagination-jump input:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(0,86,179,.08)}
+        .pagination-jump button{height:36px;padding:0 12px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-family:Poppins,sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s}
+        .pagination-jump button:hover{background:var(--primary-dark)}
         .records-table-card.has-list .table-card-scroll{display:block;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
         .records-table-card.has-list .table-card-scroll thead th{position:sticky;top:0;z-index:2}
         .records-table-card.has-list .pagination-wrap{flex-shrink:0;border-top:1px solid #f1f5f9}
@@ -166,6 +186,7 @@
         .tl-office-hdr{display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--text-dark);text-transform:none;letter-spacing:0;margin:18px 0 8px -7px;padding-left:7px;padding-bottom:6px;position:relative}
         .tl-office-hdr::after{content:'';position:absolute;left:21px;right:0;bottom:0;height:1.5px;background:var(--border)}
         .tl-office-hdr:first-child{margin-top:0}
+        .tl-dur{font-size:10px;font-weight:600;color:#6366f1;background:#eef2ff;border:1px solid #c7d2fe;border-radius:20px;padding:1px 8px;text-transform:none;letter-spacing:0;white-space:nowrap;flex-shrink:0;margin-left:auto}
         .drawer-loader{display:flex;align-items:center;justify-content:center;padding:48px;flex-direction:column;gap:12px;color:var(--text-muted);font-size:13px}
         .spin{width:22px;height:22px;border:3px solid #e2e8f0;border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite}
         @keyframes spin{to{transform:rotate(360deg)}}
@@ -216,9 +237,17 @@
             .drawer{width:100%;max-width:100%}
             .drawer-meta{grid-template-columns:1fr}
             .dm-item{border-right:none}
-            .pagination-wrap{flex-wrap:wrap;padding:12px 14px}
+            .pagination-wrap{flex-wrap:wrap;justify-content:center;padding:14px}
+            .pagination-meta{justify-content:center;text-align:center}
+            .pagination-actions{justify-content:center;width:100%}
+            .pagination-links{justify-content:center}
+            .pagination-jump{justify-content:center}
         }
         @media(max-width:420px){
+            .page-link,.page-current,.page-disabled{min-width:36px;height:36px;padding:0 10px;border-radius:10px}
+            .page-nav .nav-label{display:none}
+            .pagination-jump{width:100%}
+            .pagination-jump input{flex:1;max-width:72px}
             .records-table-card.has-list{max-height:min(64vh,520px)}
             .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
             .mob-card-grid{grid-template-columns:1fr}
@@ -505,30 +534,10 @@
                     </div>
                 @endforeach
             </div>
-
-            @if($documents->hasPages())
-            <div class="pagination-wrap">
-                @if($documents->onFirstPage())
-                    <span class="dots">&laquo;</span>
-                @else
-                    <a href="{{ $documents->previousPageUrl() }}">&laquo;</a>
-                @endif
-
-                @foreach($documents->getUrlRange(max(1, $documents->currentPage()-2), min($documents->lastPage(), $documents->currentPage()+2)) as $page => $url)
-                    @if($page == $documents->currentPage())
-                        <span class="current">{{ $page }}</span>
-                    @else
-                        <a href="{{ $url }}">{{ $page }}</a>
-                    @endif
-                @endforeach
-
-                @if($documents->hasMorePages())
-                    <a href="{{ $documents->nextPageUrl() }}">&raquo;</a>
-                @else
-                    <span class="dots">&raquo;</span>
-                @endif
-            </div>
-            @endif
+            @include('partials.shared-pagination', [
+                'paginator' => $documents,
+                'itemLabel' => 'documents',
+            ])
         @endif
     </div>
 </div>
@@ -671,18 +680,32 @@ function renderDrawer(doc){
     if (!logs.length) {
         tlHtml = '<div style="color:var(--text-muted);font-size:13px;padding:4px 0">No routing history yet.</div>';
     } else {
+        function _gk(log) {
+            return (log.action === 'submitted') ? '__pending__' :
+                   (log.action === 'forwarded' ? (log.from_office || 'Unknown') :
+                   (log.to_office || log.from_office || 'Unknown'));
+        }
+        var segDurations = [];
+        logs.forEach(function(log) {
+            if (log.office_duration_human != null) {
+                segDurations.push({ key: _gk(log), dur: log.office_duration_human });
+            }
+        });
+        var segDurIdx = segDurations.length - 1;
         logs.slice().reverse().forEach(function(log, idx) {
             var isLatest = idx === 0;
             var dc = isLatest ? 'c-latest' : dotClass(log.status_after);
             var dotIcon = isLatest ? 'fa-arrow-up' : 'fa-check';
             var fromTo = (log.from_office && log.to_office && log.from_office !== log.to_office) ? (log.from_office + ' -> ' + log.to_office) : '';
-            var groupKey = (log.action === 'submitted') ? '__pending__' :
-                           (log.action === 'forwarded' ? (log.from_office || 'Unknown') :
-                           (log.to_office || log.from_office || 'Unknown'));
-            var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Acceptance' : groupKey;
+            var groupKey = _gk(log);
+            var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Physical Submission' : groupKey;
             if (groupKey !== prevGroupKey) {
                 prevGroupKey = groupKey;
-                tlHtml += '<div class="tl-office-hdr"><div class="tl-dot ' + dc + '" style="margin-right:5px"><i class="fas ' + dotIcon + '" style="font-size:5px"></i></div><span>' + escapeHtml(groupLabel) + '</span></div>';
+                var dur = null;
+                if (segDurIdx >= 0 && segDurations[segDurIdx] && segDurations[segDurIdx].key === groupKey) {
+                    dur = segDurations[segDurIdx--].dur;
+                }
+                tlHtml += '<div class="tl-office-hdr"><div class="tl-dot ' + dc + '" style="margin-right:5px"><i class="fas ' + dotIcon + '" style="font-size:5px"></i></div><span>' + escapeHtml(groupLabel) + '</span>' + (dur ? '<span class="tl-dur"><i class="fas fa-hourglass-half" style="margin-right:4px;font-size:9px"></i>' + escapeHtml(dur) + '</span>' : '') + '</div>';
             }
             tlHtml += '<div class="tl-item">' +
                 (log.performed_by ? '<div class="tl-action">' + escapeHtml(log.performed_by) + '</div>' : '') +
@@ -694,7 +717,7 @@ function renderDrawer(doc){
     }
 
     var currentOfficeText = (doc.status === 'submitted')
-        ? ('Awaiting acceptance by ' + (doc.submitted_to_office || doc.current_office || 'Records Section'))
+        ? ('Awaiting physical submission to ' + (doc.submitted_to_office || doc.current_office || 'Records Section'))
         : (doc.status === 'archived' ? 'Unprocessed (Archived)' : (doc.current_office || doc.submitted_to_office || '-'));
 
     document.getElementById('drawerBody').innerHTML =

@@ -24,10 +24,10 @@ Route::get('/about-us', function () {
     if ($user && $user->isAdmin()) {
         return view('admin.about', compact('user'));
     }
-    if ($user && $user->isRepresentative() && $user->office_id) {
+    if ($user && $user->isOfficeAccount()) {
         return view('office.about', compact('user'));
     }
-    if ($user && $user->account_type !== 'representative') {
+    if ($user) {
         return view('dashboard.about', compact('user'));
     }
     return view('about');
@@ -38,10 +38,10 @@ Route::get('/contact-us', function () {
     if ($user && $user->isAdmin()) {
         return view('admin.contact', compact('user'));
     }
-    if ($user && $user->isRepresentative() && $user->office_id) {
+    if ($user && $user->isOfficeAccount()) {
         return view('office.contact', compact('user'));
     }
-    if ($user && $user->account_type !== 'representative') {
+    if ($user) {
         return view('dashboard.contact', compact('user'));
     }
     return view('contact');
@@ -56,8 +56,9 @@ Route::get('/track', function () {
         if ($user->isAdmin()) {
             return view('admin.track', compact('user', 'myDocs'));
         }
-        // Serve sidebar version for logged-in individual users
-        if ($user->account_type !== 'representative') {
+        // Serve sidebar version for logged-in public-facing accounts,
+        // including self-registered representatives without an office assignment.
+        if (!$user->isOfficeAccount()) {
             return view('dashboard.track', compact('user', 'myDocs'));
         }
     }
@@ -162,7 +163,7 @@ Route::post('/api/logout', [AuthController::class, 'logout'])
 // Authenticated routes
 Route::middleware(['auth', 'ensure-auth', 'no-cache'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/my-documents', [DashboardController::class, 'myDocuments'])->name('my.documents')->middleware('throttle:30,1');
+    Route::get('/my-documents', [DashboardController::class, 'myDocuments'])->name('my.documents')->middleware('throttle:60,1');
     Route::get('/api/my-stats', [DashboardController::class, 'userStatsJson'])->middleware('throttle:60,1');
     Route::get('/api/admin-stats', [DashboardController::class, 'adminStatsJson'])->middleware('throttle:60,1');
     Route::get('/api/office-stats', [RepresentativeController::class, 'officeStatsJson'])->middleware('throttle:60,1');
@@ -188,17 +189,17 @@ Route::middleware(['auth', 'ensure-auth', 'no-cache'])->group(function () {
     Route::post('/api/office/documents/receive-by-reference', [RepresentativeController::class, 'receiveByReference'])->middleware('throttle:20,1');
     Route::post('/api/office/documents/{id}/status', [RepresentativeController::class, 'updateStatus'])->middleware('throttle:20,1');
     Route::get('/office/search', [RepresentativeController::class, 'search'])
-        ->name('office.search')->middleware('throttle:30,1');
+        ->name('office.search')->middleware('throttle:60,1');
     Route::get('/api/office/user-activity/{id}', [RepresentativeController::class, 'userActivityJson'])->middleware('throttle:30,1');
     Route::get('/office/users/{id}/export', [RepresentativeController::class, 'userActivityExport'])->name('office.user.export');
 
     // ─── Admin-only routes ───────────────────────────────────────────────────
     Route::middleware(['admin'])->group(function () {
-        Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users')->middleware('throttle:30,1');
+        Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users')->middleware('throttle:60,1');
         Route::put('/api/admin/users/{id}', [AdminController::class, 'updateUser'])->middleware('throttle:20,1');
         Route::delete('/api/admin/users/{id}', [AdminController::class, 'deleteUser'])->middleware('throttle:10,1');
 
-        Route::get('/admin/documents', [AdminController::class, 'documents'])->name('admin.documents')->middleware('throttle:30,1');
+        Route::get('/admin/documents', [AdminController::class, 'documents'])->name('admin.documents')->middleware('throttle:60,1');
         Route::put('/api/admin/documents/{id}', [AdminController::class, 'updateDocument'])->middleware('throttle:20,1');
         Route::delete('/api/admin/documents/{id}', [AdminController::class, 'deleteDocument'])->middleware('throttle:10,1');
 
@@ -209,14 +210,14 @@ Route::middleware(['auth', 'ensure-auth', 'no-cache'])->group(function () {
         Route::put('/api/admin/offices/{id}/transfer', [AdminController::class, 'transferOfficeAccount'])->middleware('throttle:10,1');
 
         // ─── ICT Unit (SuperAdmin only) ───────────────────────────────────────────
-        Route::get('/ict/documents', [AdminController::class, 'ictDocuments'])->name('ict.documents')->middleware('throttle:30,1');
+        Route::get('/ict/documents', [AdminController::class, 'ictDocuments'])->name('ict.documents')->middleware('throttle:60,1');
         Route::post('/api/ict/receive-by-reference', [AdminController::class, 'ictReceiveByReference'])->middleware('throttle:20,1');
         Route::post('/api/ict/documents/{id}/accept', [AdminController::class, 'ictAccept'])->middleware('throttle:20,1');
         Route::get('/api/ict-stats', [AdminController::class, 'ictStatsJson'])->middleware('throttle:60,1');
     });
 
     // ─── Records Section & SuperAdmin routes ─────────────────────────────────
-    Route::get('/records/documents', [RecordsController::class, 'index'])->name('records.documents')->middleware('throttle:30,1');
+    Route::get('/records/documents', [RecordsController::class, 'index'])->name('records.documents')->middleware('throttle:60,1');
     Route::get('/records/documents/{id}', [RecordsController::class, 'show'])->name('records.document');
     Route::get('/api/records-stats', [RecordsController::class, 'statsJson'])->middleware('throttle:60,1');
 });

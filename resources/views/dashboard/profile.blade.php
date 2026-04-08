@@ -364,15 +364,23 @@
 <body>
 
 @php
-    $nameParts  = collect(explode(' ', trim($user->name)))->filter()->values();
+    $isRep = $user->isRepresentative() && !$user->office_id;
+    $profileNameValue = $isRep ? $user->representativeDisplayName() : trim($user->name);
+    $schoolName = $isRep ? ($user->representativeOfficeName() ?? '') : '';
+
+    $nameParts  = collect(explode(' ', trim($profileNameValue)))->filter()->values();
     $firstName  = $nameParts->first() ?? '';
     $lastName   = $nameParts->count() > 1 ? $nameParts->last() : '';
     $middleParts = $nameParts->count() > 2 ? $nameParts->slice(1, $nameParts->count() - 2)->values() : collect();
     $middleName = $middleParts->implode(' ');
     $hasMiddle  = $middleName !== '';
     $initials   = $nameParts->map(fn($w) => strtoupper(substr($w, 0, 1)))->take(2)->implode('');
-    $displayFirst = $nameParts->first() ?? $user->name;
-    $navRole    = ucfirst($user->role ?? 'User');
+    $displayFirst = $nameParts->first() ?? $profileNameValue;
+    $navSmallLabel = $isRep ? ($profileNameValue ?: 'Representative') : ucfirst($user->role ?? 'User');
+    $navLargeLabel = $isRep ? ($schoolName ?: 'Representative') : $displayFirst;
+    $profileBadge = $isRep ? 'Representative' : 'Individual';
+    $accountMetaLabel = $isRep ? 'School / Office' : 'Account Type';
+    $accountMetaValue = $isRep ? ($schoolName ?: 'No school assigned') : 'Individual';
 @endphp
 
 <!-- Mobile top bar -->
@@ -407,8 +415,8 @@
         <div class="sb-user">
             <div class="sb-avatar" id="navAvatar">{{ $initials }}</div>
             <div class="sb-user-info">
-                <small>{{ $navRole }}</small>
-                <span id="navName">{{ $displayFirst }}</span>
+                <small id="navMeta">{{ $navSmallLabel }}</small>
+                <span id="navName">{{ $navLargeLabel }}</span>
             </div>
         </div>
         <button onclick="logout()" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -434,15 +442,15 @@
         <div class="profile-header">
             <div class="profile-avatar" id="profileAvatar">{{ $initials }}</div>
             <div class="profile-meta">
-                <h2 id="profileName">{{ $user->name }}</h2>
+                <h2 id="profileName">{{ $profileNameValue }}</h2>
                 <p><!--email_off-->{{ $user->email }}<!--/email_off--></p>
-                <span class="role-badge">Individual</span>
+                <span class="role-badge" id="profileBadge">{{ $profileBadge }}</span>
             </div>
         </div>
         <div class="profile-info-grid">
             <div class="info-item">
                 <div class="info-label">Full Name</div>
-                <div class="info-value" id="infoName">{{ $user->name }}</div>
+                <div class="info-value" id="infoName">{{ $profileNameValue }}</div>
             </div>
             <div class="info-item">
                 <div class="info-label">Email Address</div>
@@ -457,8 +465,8 @@
                 <div class="info-value" style="color: {{ $user->status === 'active' ? '#16a34a' : '#9a3412' }};">{{ ucfirst($user->status) }}</div>
             </div>
             <div class="info-item">
-                <div class="info-label">Account Type</div>
-                <div class="info-value">Individual</div>
+                <div class="info-label" id="infoAccountMetaLabel">{{ $accountMetaLabel }}</div>
+                <div class="info-value" id="infoAccountMeta">{{ $accountMetaValue }}</div>
             </div>
             <div class="info-item">
                 <div class="info-label">Member Since</div>
@@ -619,6 +627,8 @@
 <script>
 (function() {
     var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    var isRep = @json($isRep);
+    var schoolName = @json($schoolName ?: 'Representative');
 
     // ─── Toast ───
     function showToast(msg, type) {
@@ -719,14 +729,19 @@
                 showToast(res.data.message, 'success');
                 var u = res.data.user;
                 document.getElementById('infoName').textContent    = u.name;
-                document.getElementById('profileName').textContent  = u.name;
+                document.getElementById('profileName').textContent = u.name;
                 document.getElementById('infoEmail').textContent   = u.email;
                 document.getElementById('infoMobile').textContent  = u.mobile || 'No number provided';
                 var parts = u.name.trim().split(/\s+/).filter(Boolean);
                 var newInitials = parts.map(function(w){ return w[0].toUpperCase(); }).slice(0,2).join('');
                 document.getElementById('profileAvatar').textContent = newInitials;
                 document.getElementById('navAvatar').textContent     = newInitials;
-                document.getElementById('navName').textContent       = parts[0] || u.name;
+                if (isRep) {
+                    document.getElementById('navMeta').textContent = u.name;
+                    document.getElementById('navName').textContent = schoolName;
+                } else {
+                    document.getElementById('navName').textContent = parts[0] || u.name;
+                }
             } else {
                 if (res.data.errors) showFieldErrors(res.data.errors);
                 showToast(res.data.message || 'Failed to update profile.', 'error');

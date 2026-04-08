@@ -826,29 +826,10 @@
                 </div>
                 @endforeach
             </div>
-
-            @if($users->hasPages())
-            <div class="pagination-bar">
-                <span>Showing {{ $users->firstItem() }}–{{ $users->lastItem() }} of {{ $users->total() }}</span>
-                <div class="pagination-links">
-                    @if($users->onFirstPage())
-                        <span class="page-btn disabled"><i class="fas fa-chevron-left"></i></span>
-                    @else
-                        <a href="{{ $users->previousPageUrl() }}" class="page-btn"><i class="fas fa-chevron-left"></i></a>
-                    @endif
-
-                    @foreach($users->getUrlRange(1, $users->lastPage()) as $page => $url)
-                        <a href="{{ $url }}" class="page-btn {{ $page == $users->currentPage() ? 'active' : '' }}">{{ $page }}</a>
-                    @endforeach
-
-                    @if($users->hasMorePages())
-                        <a href="{{ $users->nextPageUrl() }}" class="page-btn"><i class="fas fa-chevron-right"></i></a>
-                    @else
-                        <span class="page-btn disabled"><i class="fas fa-chevron-right"></i></span>
-                    @endif
-                </div>
-            </div>
-            @endif
+            @include('partials.shared-pagination', [
+                'paginator' => $users,
+                'itemLabel' => 'users',
+            ])
 
             @else
             <div class="empty-state">

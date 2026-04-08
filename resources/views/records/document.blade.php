@@ -63,6 +63,7 @@
         .tl-office-hdr{display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--text-dark);text-transform:none;letter-spacing:0;margin:18px 0 8px -7px;padding-left:7px;padding-bottom:6px;position:relative}
         .tl-office-hdr::after{content:'';position:absolute;left:21px;right:0;bottom:0;height:1.5px;background:var(--border)}
         .tl-office-hdr:first-child{margin-top:0}
+        .tl-dur{font-size:10px;font-weight:600;color:#6366f1;background:#eef2ff;border:1px solid #c7d2fe;border-radius:20px;padding:1px 8px;text-transform:none;letter-spacing:0;white-space:nowrap;flex-shrink:0;margin-left:auto}
         .archive-badge{display:inline-flex;align-items:center;gap:6px;background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:14px}
         .mob-topbar{display:flex;position:sticky;top:0;z-index:100;background:#0056b3;padding:14px 18px;align-items:center;justify-content:space-between;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
         .mob-hamburger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;z-index:1001;user-select:none;padding:4px}
@@ -210,15 +211,79 @@
                     <h2><i class="fas fa-history" style="color:var(--primary);margin-right:6px"></i> Routing History</h2>
                 </div>
                 <div class="card-body">
+                    @php
+                        $timelineLogs = $document->routingLogs
+                            ->sortBy(function ($log) {
+                                return sprintf('%s-%010d', $log->created_at?->format('YmdHis') ?? '00000000000000', (int) $log->id);
+                            })
+                            ->values();
+                        $segmentDurationsByStartLogId = [];
+                        $timelineNow = now();
+                        $formatDuration = function (int $seconds): string {
+                            if ($seconds < 60) return $seconds . 's';
+                            $days = intdiv($seconds, 86400);
+                            $seconds %= 86400;
+                            $hours = intdiv($seconds, 3600);
+                            $seconds %= 3600;
+                            $minutes = intdiv($seconds, 60);
+                            $parts = [];
+                            if ($days > 0) $parts[] = $days . 'd';
+                            if ($hours > 0) $parts[] = $hours . 'h';
+                            if ($minutes > 0) $parts[] = $minutes . 'm';
+                            return $parts ? implode(' ', array_slice($parts, 0, 3)) : ($seconds . 's');
+                        };
+
+                        $segments = [];
+                        $logCount = $timelineLogs->count();
+                        for ($i = 0; $i < $logCount; $i++) {
+                            $log = $timelineLogs->get($i);
+                            $isSubmissionPending = $log->action === 'submitted' && $log->status_after === 'submitted';
+                            $officeId = null;
+                            if (!$isSubmissionPending) {
+                                if ($log->action === 'forwarded' && $log->from_office_id) {
+                                    $officeId = $log->from_office_id;
+                                } else {
+                                    $officeId = $log->to_office_id ?: $log->from_office_id;
+                                }
+                            }
+                            if (!$officeId) {
+                                continue;
+                            }
+
+                            if (empty($segments) || $segments[array_key_last($segments)]['office_id'] !== $officeId) {
+                                $segments[] = [
+                                    'office_id' => $officeId,
+                                    'start_index' => $i,
+                                    'end_index' => $i,
+                                ];
+                            } else {
+                                $segments[array_key_last($segments)]['end_index'] = $i;
+                            }
+                        }
+
+                        $segmentCount = count($segments);
+                        for ($segIndex = 0; $segIndex < $segmentCount; $segIndex++) {
+                            $segment = $segments[$segIndex];
+                            $nextSegment = $segments[$segIndex + 1] ?? null;
+                            $startLog = $timelineLogs->get($segment['start_index']);
+                            $timeInAt = $startLog->created_at;
+                            $nextInAt = $nextSegment ? $timelineLogs->get($nextSegment['start_index'])->created_at : null;
+                            $officeDurationSeconds = $nextInAt !== null
+                                ? max(0, $timeInAt->diffInSeconds($nextInAt))
+                                : max(0, $timeInAt->diffInSeconds($timelineNow));
+
+                            $segmentDurationsByStartLogId[$startLog->id] = $formatDuration((int) $officeDurationSeconds);
+                        }
+                    @endphp
                     @if($document->routingLogs->isEmpty())
                         <p style="color:var(--text-muted);font-size:13px">No routing history yet.</p>
                     @else
                         @php
                             $tlGroups = [];
                             $tlPrevKey = null;
-                            foreach ($document->routingLogs->sortBy('created_at') as $tlLog) {
+                            foreach ($timelineLogs as $tlLog) {
                                 if ($tlLog->action === 'submitted') {
-                                    $tlKey = '__pending__'; $tlLabel = 'Submitted — Pending Acceptance';
+                                    $tlKey = '__pending__'; $tlLabel = 'Submitted — Pending Physical Submission';
                                 } elseif ($tlLog->action === 'forwarded') {
                                     $tlKey = 'from_' . ($tlLog->from_office_id ?? '0');
                                     $tlLabel = $tlLog->fromOffice?->name ?? 'Office';
@@ -238,9 +303,9 @@
                         <div class="timeline">
                             @foreach($tlGroups as $tlGroup)
                                 @php
-                                    $hdrLogs = array_values(array_reverse($tlGroup['logs']));
-                                    $hdrLog = $hdrLogs[0] ?? null;
+                                    $hdrLog = $tlGroup['logs'][0] ?? null;
                                     $hdrS = $hdrLog ? $hdrLog->status_after : 'active';
+                                    $hdrDuration = $hdrLog ? ($segmentDurationsByStartLogId[$hdrLog->id] ?? null) : null;
                                     $hdrDc = $tlFirst ? 'latest' : match(true){
                                         in_array($hdrS,['cancelled','returned','archived']) => 'danger',
                                         $hdrS === 'completed' => 'done',
@@ -248,7 +313,7 @@
                                     };
                                     $hdrIcon = $tlFirst ? 'fa-arrow-up' : 'fa-check';
                                 @endphp
-                                <div class="tl-office-hdr"><div class="tl-dot {{ $hdrDc }}" style="margin-right:5px"><i class="fas {{ $hdrIcon }}" style="font-size:5px"></i></div><span>{{ $tlGroup['label'] }}</span></div>
+                                <div class="tl-office-hdr"><div class="tl-dot {{ $hdrDc }}" style="margin-right:5px"><i class="fas {{ $hdrIcon }}" style="font-size:5px"></i></div><span>{{ $tlGroup['label'] }}</span>@if($hdrDuration)<span class="tl-dur"><i class="fas fa-hourglass-half" style="margin-right:4px;font-size:9px"></i>{{ $hdrDuration }}</span>@endif</div>
                                 @foreach(array_reverse($tlGroup['logs']) as $tlLog)
                                     @php
                                         $s = $tlLog->status_after;
@@ -265,7 +330,12 @@
                                         @endif
                                         <div class="tl-meta"><i class="fas fa-clock" style="margin-right:3px;font-size:10px"></i>{{ $tlLog->created_at->setTimezone('Asia/Manila')->format('M d, Y h:i A') }}</div>
                                         <div class="tl-meta"><i class="fas fa-tasks" style="margin-right:3px;font-size:10px"></i>{{ $tlLog->actionLabel() }}</div>
-                                        @if($tlLog->remarks)<div class="tl-remarks">{{ $tlLog->remarks }}</div>@endif
+                                        @php
+                                            $tlRemarks = $tlLog->action === 'submitted'
+                                                ? 'Document submitted online. Awaiting physical submission to Records Section.'
+                                                : $tlLog->remarks;
+                                        @endphp
+                                        @if($tlRemarks)<div class="tl-remarks">{{ $tlRemarks }}</div>@endif
                                     </div>
                                 @endforeach
                             @endforeach

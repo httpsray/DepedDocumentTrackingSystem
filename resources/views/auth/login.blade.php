@@ -154,7 +154,7 @@
         }
 
         async function parseAuthResponse(response) {
-            if (response.status === 401 || response.status === 419) {
+            if (response.status === 419) {
                 redirectToFreshLogin();
                 throw new Error('SESSION_EXPIRED');
             }

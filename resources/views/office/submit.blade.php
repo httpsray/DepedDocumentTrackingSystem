@@ -260,10 +260,10 @@
 @php
     $user = auth()->user();
     $isRep = $user && $user->account_type === 'representative';
-    $navOfficeName = $isRep ? ($user->office?->name ?? 'Office') : null;
-    $navRepName = $user->name;
-    $navDisplayName = $navOfficeName ?? ($user->name ?? 'User');
-    $initials = collect(explode(' ', trim($user->name ?? '')))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
+    $navOfficeName = $isRep ? ($user->representativeOfficeName() ?? 'Office') : null;
+    $navRepName = $isRep ? $user->representativeDisplayName() : $user->name;
+    $navDisplayName = $navOfficeName ?? ($navRepName ?? 'User');
+    $initials = collect(explode(' ', trim($navRepName ?? $user->name ?? '')))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
 @endphp
 
 <!-- Mobile top bar -->

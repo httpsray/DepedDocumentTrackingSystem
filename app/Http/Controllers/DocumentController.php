@@ -177,7 +177,7 @@ class DocumentController extends Controller
                 'to_office_id' => null,
                 'action' => 'submitted',
                 'status_after' => 'submitted',
-                'remarks' => 'Document submitted. Awaiting acceptance by Records Section.',
+                'remarks' => 'Document submitted online. Awaiting physical submission to Records Section.',
             ]);
 
             return response()->json([
@@ -357,7 +357,7 @@ class DocumentController extends Controller
             $remarks = $log->remarks;
             $displayToOffice = $isSubmissionPending ? ($log->toOffice?->name ?: $submittedOfficeName) : $log->toOffice?->name;
             if ($isSubmissionPending) {
-                $remarks = 'Document submitted. Awaiting acceptance by ' . $displayToOffice . '.';
+                $remarks = 'Document submitted online. Awaiting physical submission to ' . $displayToOffice . '.';
             }
 
             $remarks = $this->normalizeTrackingRemarks($log, $remarks, $displayToOffice);

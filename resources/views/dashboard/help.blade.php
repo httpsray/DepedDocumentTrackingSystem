@@ -291,17 +291,18 @@
         $isSuperAdminUser = $user->isSuperAdmin();
         $isRep = ($user->account_type ?? '') === 'representative';
         $isOfficeUser = $isRep && $user->office_id && !$isAdminUser;
+        $isSelfRepUser = $isRep && !$user->office_id && !$isAdminUser;
 
         $navOfficeName = $isRep ? $user->representativeOfficeName() : '';
         $navRepName = $isRep ? $user->representativeDisplayName() : '';
 
         $displayFirst = explode(' ', trim(($navRepName ?: $user->name) ?? 'User'))[0] ?? 'User';
-        $officeLabel = $navOfficeName ?: ($user->office?->name ?? 'Office');
+        $officeLabel = $navOfficeName ?: 'Office';
         $officePerson = $navRepName ?: $displayFirst;
         $navDisplayRole = $isAdminUser ? ($isSuperAdminUser ? 'Super Admin' : 'Admin') : ucfirst($user->role ?? 'User');
         $helpBackUrl = $isOfficeUser ? '/office/dashboard' : '/dashboard';
 
-        $sidebarNameSource = $isOfficeUser ? $officePerson : $displayFirst;
+        $sidebarNameSource = $isOfficeUser ? $officePerson : ($isSelfRepUser ? ($navRepName ?: $displayFirst) : $displayFirst);
         $sidebarInitials = '';
         foreach (preg_split('/\s+/', trim($sidebarNameSource)) as $part) {
             if ($part === '') {
@@ -389,6 +390,9 @@
                 @if($isOfficeUser)
                 <small>{{ $officeLabel }}</small>
                 <span>{{ $officePerson }}</span>
+                @elseif($isSelfRepUser)
+                <small>{{ $navRepName ?: 'Representative' }}</small>
+                <span>{{ $navOfficeName ?: 'Representative' }}</span>
                 @else
                 <small>{{ $navDisplayRole }}</small>
                 <span>{{ $displayFirst }}</span>

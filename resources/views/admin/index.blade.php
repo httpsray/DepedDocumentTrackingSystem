@@ -588,8 +588,8 @@
             align-items: flex-start;
             margin-bottom: 6px;
         }
-        .mob-card-ref { font-size: 12px; font-weight: 600; color: var(--primary); font-family: monospace; }
-        .mob-card-track { font-size: 10px; color: var(--text-muted); font-family: monospace; margin-top: 2px; }
+        .mob-card-ref { font-size: 11.5px; font-weight: 700; color: var(--primary); font-family: monospace; line-height: 1.25; }
+        .mob-card-track { font-size: 10px; color: var(--text-muted); font-family: monospace; margin-top: 2px; line-height: 1.25; }
         .mob-card-subject {
             font-size: 14px;
             font-weight: 600;
@@ -744,8 +744,8 @@
         .drawer-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
         .drawer-head-info{flex:1;min-width:0}
         .drawer-head h3{font-size:16px;font-weight:700;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
-        .drawer-ref{font-size:13px;color:var(--text-muted);font-family:Poppins,sans-serif;font-weight:600;letter-spacing:.2px;margin-bottom:2px}
-        .drawer-track{font-size:11px;color:var(--text-muted);font-family:Poppins,sans-serif;font-weight:500;letter-spacing:.2px;margin-bottom:4px}
+        .drawer-ref{font-size:13px;color:var(--text-muted);font-family:monospace;letter-spacing:.4px;margin-bottom:2px}
+        .drawer-track{font-size:11px;color:var(--text-muted);font-family:monospace;letter-spacing:.4px;margin-bottom:4px}
         .drawer-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#f8fafc;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px;flex-shrink:0;transition:all .15s}
         .drawer-close:hover{background:#fee2e2;color:#dc2626;border-color:#fca5a5}
         .drawer-body{flex:1;overflow-y:auto}
@@ -1528,7 +1528,7 @@
                     var dc = isLatest ? 'c-latest' : dotClass(log.status_after);
                     var dotIcon = isLatest ? 'fa-arrow-up' : 'fa-check';
                     var groupKey = _gk(log);
-                    var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Acceptance' : groupKey;
+                    var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Physical Submission' : groupKey;
                     if (groupKey !== prevGroupKey) {
                         prevGroupKey = groupKey;
                         var dur = null;
@@ -1546,7 +1546,7 @@
                 });
             }
             var currentOfficeText = (doc.status === 'submitted')
-                ? ('Awaiting acceptance by ' + (doc.submitted_to_office || doc.current_office || 'Records Section'))
+                ? ('Awaiting physical submission to ' + (doc.submitted_to_office || doc.current_office || 'Records Section'))
                 : (doc.current_office || doc.submitted_to_office || '-');
             var currentHandlerText = doc.current_handler || 'Unassigned';
             document.getElementById('drawerBody').innerHTML =

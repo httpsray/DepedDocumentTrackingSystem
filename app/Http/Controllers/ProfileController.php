@@ -27,12 +27,9 @@ class ProfileController extends Controller
             return view('office.profile', compact('user'));
         }
 
-        // Self-registered representative (no office_id)
-        if ($user->account_type === 'representative') {
-            return view('representative.profile', compact('user'));
-        }
-
-        // Default: individual / admin
+        // Self-registered representative (no office_id) uses the same profile
+        // layout as regular users, with representative-specific labels handled
+        // inside the shared view.
         return view('dashboard.profile', compact('user'));
     }
 

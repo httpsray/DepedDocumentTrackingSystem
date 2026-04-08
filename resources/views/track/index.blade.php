@@ -66,9 +66,9 @@
         .meta-value{font-size:13px;color:var(--text-dark);font-weight:500}
         .timeline-section{padding:22px 24px}
         .timeline-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:18px;display:flex;align-items:center;gap:6px}
-        .timeline{position:relative}
-        .timeline::before{content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:var(--border);z-index:-1}
-        .tl-item{position:relative;margin-bottom:22px;padding-left:24px}
+        .tl{position:relative;z-index:0}
+        .tl::before{content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:var(--border);z-index:0;pointer-events:none}
+        .tl-item{position:relative;z-index:1;margin-bottom:22px;padding-left:24px}
         .tl-item:last-child{margin-bottom:0}
         .tl-dot{width:16px;height:16px;border-radius:50%;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
         .tl-dot.active{background:#22c55e;box-shadow:0 0 0 2px #22c55e}
@@ -79,7 +79,7 @@
         .tl-action{font-size:12px;font-weight:700;color:#1b263b}
         .tl-meta{font-size:12px;color:#64748b;margin:2px 0}
         .tl-remarks{font-size:12px;color:#64748b;background:#f8fafc;border-left:3px solid var(--border);padding:5px 9px;border-radius:4px;margin-top:5px}
-        .tl-office-hdr{display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--text-dark);text-transform:none;letter-spacing:0;margin:18px 0 8px -7px;padding-left:7px;padding-bottom:6px;position:relative}
+        .tl-office-hdr{display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--text-dark);text-transform:none;letter-spacing:0;margin:18px 0 8px -7px;padding-left:7px;padding-bottom:6px;position:relative;z-index:1}
         .tl-office-hdr::after{content:'';position:absolute;left:21px;right:0;bottom:0;height:1.5px;background:var(--border)}
         .tl-office-hdr:first-child{margin-top:0}
         .msg-box{text-align:center;padding:40px 20px}
@@ -237,7 +237,7 @@
 
         <div class="timeline-section">
             <div class="timeline-title"><i class="fas fa-history"></i> Routing History</div>
-            <div class="timeline" id="rTimeline"></div>
+            <div class="tl" id="rTimeline"></div>
         </div>
     </div>
 </div>
@@ -251,6 +251,19 @@
     var stateTitle=stateCard ? stateCard.querySelector('h3') : null;
     var stateBody=stateCard ? stateCard.querySelector('p') : null;
     var defaultStateBody='The tracking number you entered does not match any document in our records.<br>Please double-check and try again.';
+    var TRACK_AUTO_LOOKUP_DELAY = 350;
+    var TRACK_LOOKUP_COOLDOWN_MS = 1200;
+    var _trackLookupTimer = null;
+    var _trackLookupInFlight = false;
+    var _lastTrackedLookup = '';
+    var _lastTrackedAt = 0;
+
+    function queueTrackLookup(prefilledLookup){
+        clearTimeout(_trackLookupTimer);
+        _trackLookupTimer = setTimeout(function(){
+            window.trackDoc(prefilledLookup);
+        }, TRACK_AUTO_LOOKUP_DELAY);
+    }
 
     /* ── ref-box logic (type, paste, backspace, arrow keys) ── */
     boxes.forEach(function(box,i){
@@ -259,7 +272,7 @@
             box.value=v.toUpperCase();
             if(v) box.classList.add('filled'); else box.classList.remove('filled');
             if(v&&i<boxes.length-1) boxes[i+1].focus();
-            if(getRef().length===8) setTimeout(function(){ trackDoc(); },100);
+            if(getRef().length===8) queueTrackLookup();
         });
         box.addEventListener('keydown',function(e){
             if(e.key==='Backspace'&&!box.value&&i>0){e.preventDefault();boxes[i-1].focus();boxes[i-1].value='';boxes[i-1].classList.remove('filled');}
@@ -274,7 +287,7 @@
                 boxes[j].value=txt[j]||'';
                 if(boxes[j].value) boxes[j].classList.add('filled'); else boxes[j].classList.remove('filled');
             }
-            if(txt.length>=8){boxes[boxes.length-1].focus();setTimeout(function(){ trackDoc(); },100);}
+            if(txt.length>=8){boxes[boxes.length-1].focus();queueTrackLookup();}
             else if(txt.length>0) boxes[Math.min(txt.length,boxes.length-1)].focus();
         });
         box.addEventListener('focus',function(){box.select();});
@@ -336,15 +349,22 @@
             .replace(/'/g,'&#39;');
     }
     window.trackDoc=async function(prefilledLookup){
+        clearTimeout(_trackLookupTimer);
         alertEl.classList.remove('show');
         var hasPrefilled = typeof prefilledLookup === 'string' && prefilledLookup.trim() !== '';
         var ref = hasPrefilled ? prefilledLookup.trim().toUpperCase() : getRef();
         if(!hasPrefilled && ref.length<8){showAlert('Please enter the full 8-character tracking number.');return;}
         if(ref === ''){showAlert('Please enter a tracking or reference number.');return;}
+        var now = Date.now();
+        if (_trackLookupInFlight && ref === _lastTrackedLookup) return;
+        if (ref === _lastTrackedLookup && (now - _lastTrackedAt) < TRACK_LOOKUP_COOLDOWN_MS) return;
         var btn=document.getElementById('trackBtn');
         btn.disabled = true;
         if (stateCard) stateCard.classList.remove('show');
         document.getElementById('resultCard').classList.remove('show');
+        _trackLookupInFlight = true;
+        _lastTrackedLookup = ref;
+        _lastTrackedAt = now;
         try{
             var data=await window.docTraxFetchJson('/api/track-document',{
                 method:'POST',
@@ -358,7 +378,10 @@
             if(!data.success||!data.document){showResultState('not_found');}
             else{renderResult(data.document);}
         }catch(e){showResultState('error', window.describeRequestError(e, 'Could not load tracking details. Please try again.'));}
-        finally{btn.disabled = false;}
+        finally{
+            _trackLookupInFlight = false;
+            btn.disabled = false;
+        }
     };
     function renderResult(doc){
         document.getElementById('rDocTitle').textContent=doc.subject;
@@ -382,7 +405,7 @@
                 var groupKey = (log.action === 'submitted') ? '__pending__' :
                                (log.action === 'forwarded' ? (log.from_office || 'Unknown') :
                                (log.to_office || log.from_office || 'Unknown'));
-                var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Acceptance' : groupKey;
+                var groupLabel = (groupKey === '__pending__') ? 'Submitted — Pending Physical Submission' : groupKey;
                 if (groupKey !== prevGroupKey) {
                     prevGroupKey = groupKey;
                     var hdr = document.createElement('div');
@@ -405,7 +428,7 @@
     window.quickTrack=function(ref){
         setRef(ref);
         document.getElementById('refBoxes').scrollIntoView({behavior:'smooth',block:'center'});
-        setTimeout(function(){window.trackDoc();},250);
+        queueTrackLookup();
     };
 
     // Bind my-doc-row clicks via data-tracking attribute (avoids inline onclick quote issues)

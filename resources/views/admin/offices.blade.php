@@ -313,7 +313,7 @@
 
         <div class="panel list-panel{{ $accounts->count() ? ' has-list' : '' }}">
             <div class="panel-head">
-                <div class="panel-title">Office Accounts ({{ $accounts->count() }})</div>
+                <div class="panel-title">Office Accounts ({{ $accounts->total() }})</div>
             </div>
 
             @if($accounts->count() > 0)
@@ -430,6 +430,10 @@
                 </div>
                 @endforeach
             </div>
+            @include('partials.shared-pagination', [
+                'paginator' => $accounts,
+                'itemLabel' => 'office accounts',
+            ])
             @else
             <div class="empty-state">
                 <i class="fas fa-building"></i>

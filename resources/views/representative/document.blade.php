@@ -134,10 +134,10 @@
 @php
     $user = auth()->user();
     $isRep = $user->account_type === 'representative';
-    $navOfficeName = $isRep ? ($user->office?->name ?? 'Representative') : null;
-    $navRepName = $user->name;
-    $navDisplayName = $navOfficeName ?? $user->name;
-    $initials = collect(explode(' ', trim($user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
+    $navOfficeName = $isRep ? ($user->representativeOfficeName() ?? 'Representative') : null;
+    $navRepName = $isRep ? $user->representativeDisplayName() : $user->name;
+    $navDisplayName = $navOfficeName ?? $navRepName;
+    $initials = collect(explode(' ', trim($navRepName ?: $user->name)))->filter()->map(fn($w)=>strtoupper(substr($w,0,1)))->take(2)->implode('');
     $canAct = $document->current_office_id === $user->office_id;
     $canAccept = $canAct && in_array($document->status, ['submitted','forwarded']);
 @endphp
@@ -237,7 +237,7 @@
                             $tlPrevKey = null;
                             foreach ($document->routingLogs->sortBy('created_at') as $tlLog) {
                                 if ($tlLog->action === 'submitted') {
-                                    $tlKey = '__pending__'; $tlLabel = 'Submitted — Pending Acceptance';
+                                    $tlKey = '__pending__'; $tlLabel = 'Submitted — Pending Physical Submission';
                                 } elseif ($tlLog->action === 'forwarded') {
                                     $tlKey = 'from_' . ($tlLog->from_office_id ?? '0');
                                     $tlLabel = $tlLog->fromOffice?->name ?? 'Office';
@@ -284,7 +284,12 @@
                                     @endif
                                     <div class="tl-meta"><i class="fas fa-clock" style="margin-right:3px;font-size:10px"></i>{{ $tlLog->created_at->setTimezone('Asia/Manila')->format('M d, Y h:i A') }}</div>
                                     <div class="tl-meta"><i class="fas fa-tasks" style="margin-right:3px;font-size:10px"></i>{{ $tlLog->actionLabel() }}</div>
-                                    @if($tlLog->remarks)<div class="tl-remarks">{{ $tlLog->remarks }}</div>@endif
+                                    @php
+                                        $tlRemarks = $tlLog->action === 'submitted'
+                                            ? 'Document submitted online. Awaiting physical submission to Records Section.'
+                                            : $tlLog->remarks;
+                                    @endphp
+                                    @if($tlRemarks)<div class="tl-remarks">{{ $tlRemarks }}</div>@endif
                                 </div>
                             @endforeach
                         @endforeach
